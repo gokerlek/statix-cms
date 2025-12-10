@@ -1,0 +1,35 @@
+{
+  "name": "create-statix-cms",
+  "version": "1.0.0",
+  "description": "Create a new Statix CMS project - A modern Git-based headless CMS built with Next.js 15",
+  "bin": {
+    "create-statix-cms": "./bin/index.js"
+  },
+  "files": [
+    "bin",
+    "template"
+  ],
+  "keywords": [
+    "cms",
+    "nextjs",
+    "github",
+    "headless-cms",
+    "content-management",
+    "git-cms",
+    "statix",
+    "create-app"
+  ],
+  "author": "gokerlek",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/gokerlek/statix-cms.git"
+  },
+  "homepage": "https://github.com/gokerlek/statix-cms#readme",
+  "bugs": {
+    "url": "https://github.com/gokerlek/statix-cms/issues"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

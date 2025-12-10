@@ -1,0 +1,301 @@
+{
+  "common": {
+    "loading": "Loading...",
+    "save": "Save",
+    "saving": "Saving...",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "create": "Create",
+    "createNew": "Create New",
+    "discard": "Discard",
+    "discardConfirmation": "Changes discarded",
+    "restoredMessage": "Restored unsaved changes from your browser.",
+    "areYouSure": "Are you sure?",
+    "deleteConfirmation": "This action cannot be undone. This will permanently delete this item.",
+    "sharedFields": "Shared Fields",
+    "localizedContent": "Localized Content",
+    "actions": "Actions",
+    "name": "Name",
+    "path": "Path",
+    "viewOnGithub": "View on GitHub",
+    "goToAdmin": "Go to Admin Panel",
+    "collectionNotFound": "Collection not found",
+    "backTo": "Back to {page}",
+    "viewAll": "View All",
+    "confirm": "Confirm"
+  },
+  "sidebar": {
+    "dashboard": "Dashboard",
+    "collections": "Collections",
+    "singletons": "Singletons",
+    "mediaLibrary": "Media Library",
+    "assets": "Assets",
+    "trash": "Trash",
+    "signOut": "Sign Out",
+    "menu": "Menu"
+  },
+  "home": {
+    "title": "STATIX",
+    "subtitle": "A modern, Git-based headless CMS powered by GitHub",
+    "getStarted": "Get Started",
+    "features": {
+      "secureAuth": {
+        "title": "Secure Auth",
+        "description": "GitHub OAuth with email whitelist protection"
+      },
+      "blockEditor": {
+        "title": "Block Editor",
+        "description": "Drag-and-drop content blocks for flexible layouts"
+      },
+      "gitStorage": {
+        "title": "Git Storage",
+        "description": "All content stored as JSON in your GitHub repo"
+      },
+      "imageUploads": {
+        "title": "Image Uploads",
+        "description": "Direct image uploads to GitHub with preview"
+      }
+    },
+    "quickStart": {
+      "title": "Quick Start",
+      "step1": "Set up your GitHub OAuth App and Personal Access Token",
+      "step2": "Configure environment variables in .env.local",
+      "step3": "Add your email to the admin whitelist",
+      "step4": "Sign in and start creating content!"
+    }
+  },
+  "auth": {
+    "signInTitle": "Sign in to access the admin panel",
+    "signInWithGithub": "Sign in with GitHub",
+    "whitelistWarning": "Only whitelisted emails can access the CMS",
+    "error": {
+      "title": "Authentication Error",
+      "default": "An error occurred during authentication.",
+      "accessDenied": "Access denied. Your email is not in the admin whitelist.",
+      "tryAgain": "Try Again"
+    }
+  },
+  "dashboard": {
+    "stats": {
+      "totalCollections": "Total Collections",
+      "totalMedia": "Total Media Files",
+      "recentActivity": "Recent Activity",
+      "noEntries": "No entries yet",
+      "entry": "entry",
+      "entries": "entries",
+      "configured": "Configured",
+      "notConfigured": "Not Configured"
+    },
+    "activity": {
+      "created": "Created",
+      "updated": "Updated",
+      "deleted": "Deleted",
+      "unknown": "Modified",
+      "author": "Author",
+      "message": "Message",
+      "date": "Date",
+      "link": "Link"
+    },
+    "localization": {
+      "title": "Localization Status",
+      "locale": "Locale / Collection",
+      "coverage": "Coverage",
+      "missing": "Missing Translations",
+      "total": "Total",
+      "translated": "Translated",
+      "status": "Status",
+      "complete": "Complete",
+      "inProgress": "In Progress",
+      "missingLabel": "Missing"
+    },
+    "quickStart": {
+      "title": "Quick Start",
+      "description": "Start creating content by selecting a collection above or create a new entry directly.",
+      "noCollections": "No collections defined in configuration."
+    },
+    "alert": {
+      "title": "Unsaved Changes Detected",
+      "subtitle": "{count} files",
+      "description": "You have content with local unsaved changes. These changes are saved in your browser but not on the server.",
+      "viewList": "View List",
+      "dialogTitle": "Unsaved Local Changes",
+      "lastUpdated": "Last updated:",
+      "dismiss": "Dismiss"
+    }
+  },
+  "mediaPage": {
+    "title": "Media Library",
+    "description": "Manage your images and assets."
+  },
+  "mediaOverview": {
+    "title": "Media Overview",
+    "totalStorage": "Total Storage",
+    "orphaned": "Orphaned",
+    "fileTypes": "File Types",
+    "recentActivity": "Recent Media Activity",
+    "files": "files",
+    "activityStatus": {
+      "live": "Live",
+      "inTrash": "In Trash",
+      "restored": "Restored",
+      "deleted": "Deleted",
+      "permanentlyDeleted": "Permanently Deleted"
+    }
+  },
+  "uploadSection": {
+    "title": "Upload New Media",
+    "fileNameLabel": "File Name",
+    "fileNamePlaceholder": "Enter file name",
+    "collectionLabel": "Collection (Folder)",
+    "selectFolderPlaceholder": "Select folder",
+    "defaultFolder": "Default (Root)",
+    "uploadButton": "Upload Media",
+    "uploadingButton": "Uploading...",
+    "clickToUpload": "Click to upload",
+    "dragAndDrop": "or drag and drop"
+  },
+  "mediaLibrary": {
+    "empty": "No media found",
+    "loadingMedia": "Loading media...",
+    "emptyTab": "No images in {tab}",
+    "noResults": "No images found for \"{query}\"",
+    "clearFilters": "Clear filters",
+    "deleteDialogTitle": "Delete Media?",
+    "deleteDialogDescription": "This will permanently delete <strong>{name}</strong>. This action cannot be undone.",
+    "searchPlaceholder": "Search media...",
+    "orphaned": "Orphaned",
+    "uncategorized": "Uncategorized",
+    "all": "All",
+    "select": "Select",
+    "selectAll": "Select All",
+    "deselectAll": "Deselect All",
+    "cancel": "Cancel",
+    "deleteSelected": "Delete ({count})",
+    "deleting": "Deleting...",
+    "bulkDeleteConfirm": "Are you sure you want to delete {count} files? This action cannot be undone."
+  },
+  "mediaDrawer": {
+    "selectMedia": "Select Media",
+    "selectFromGallery": "Select from Gallery",
+    "addNew": "Add New",
+    "uploadTab": "Upload",
+    "libraryTab": "Library"
+  },
+  "collectionList": {
+    "noEntriesTitle": "No entries yet",
+    "noEntriesDescription": "Get started by creating your first {label} entry.",
+    "createFirstEntry": "Create First Entry",
+    "searchPlaceholder": "Search...",
+    "searchActivity": "Search activity...",
+    "tableHeaders": {
+      "name": "Name",
+      "path": "Path",
+      "actions": "Actions",
+      "status": "Status"
+    }
+  },
+  "collectionPage": {
+    "sharedFields": "Shared Fields",
+    "localizedContent": "Localized Content",
+    "collectionLabel": "Collection",
+    "entriesLabel": "Entries",
+    "noEntries": "No entries yet",
+    "newEntryHint": "Add a new entry by clicking the button below"
+  },
+  "toasts": {
+    "success": {
+      "upload": "File uploaded successfully",
+      "delete": "File deleted successfully",
+      "collectionItemDeleted": "Item deleted successfully",
+      "movedToTrash": "Item moved to trash",
+      "restored": "Item restored successfully",
+      "trashEmptied": "Trash emptied successfully",
+      "saved": "Saved successfully",
+      "created": "Created successfully"
+    },
+    "error": {
+      "upload": "Upload failed",
+      "delete": "Delete failed",
+      "collectionItemDelete": "Failed to delete item",
+      "globalQuery": "An error occurred",
+      "globalMutation": "Operation failed",
+      "unsavedChangesTitle": "Unsaved Changes",
+      "unsavedChangesDescription": "You have unsaved changes. keys are saved locally but not to the server. What would you like to do?",
+      "exitWithoutSaving": "Exit without Saving",
+      "saveAndExit": "Save & Exit"
+    }
+  },
+  "blockEditor": {
+    "noBlocks": "No blocks yet. Add your first block below.",
+    "add": "Add"
+  },
+  "listEditor": {
+    "addItem": "Add Item",
+    "noItems": "No items yet. Click \"Add Item\" to get started."
+  },
+  "mediaPicker": {
+    "selectMedia": "Select Media"
+  },
+  "status": {
+    "all": "All",
+    "published": "Published",
+    "draft": "Draft",
+    "archived": "Archived"
+  },
+  "trash": {
+    "title": "Trash",
+    "description": "Manage deleted items. Items are automatically removed after 10 days.",
+    "empty": "Trash is empty",
+    "restore": "Restore",
+    "deletePermanently": "Delete Permanently",
+    "emptyTrash": "Empty Trash",
+    "deletedAt": "Deleted At",
+    "originalPath": "Original Path",
+    "type": "Type",
+    "itemsSelected": "{count} items selected",
+    "restoreSelected": "Restore Selected",
+    "deleteSelected": "Delete Selected",
+    "confirmEmpty": "Are you sure you want to empty the trash? This cannot be undone.",
+    "confirmDelete": "Are you sure you want to permanently delete these items? This cannot be undone."
+  },
+  "imageField": {
+    "change": "Change",
+    "selectFromGallery": "Select from Gallery",
+    "or": "or",
+    "addNew": "Add New",
+    "preview": "Preview"
+  },
+  "fileField": {
+    "selectFromLibrary": "Select from Library",
+    "or": "or",
+    "uploadNew": "Upload New",
+    "maxSize": "Max size",
+    "acceptedTypes": "Accepted types",
+    "change": "Change",
+    "uploading": "Uploading...",
+    "clickToUpload": "Click to upload file"
+  },
+  "mediaMove": {
+    "dialogTitle": "Change Folder",
+    "dialogDescription": "Move the image to a different folder.",
+    "currentLocation": "Current Location",
+    "newFolder": "New Folder",
+    "selectFolder": "Select folder",
+    "currentSuffix": "(Current)",
+    "moving": "Moving image...",
+    "copyingImage": "Copying image",
+    "updatingReferences": "Updating references...",
+    "usedInContent": "This image is used in {count} content files:",
+    "moreItems": "+{count} more...",
+    "referencesWillUpdate": "References will be updated automatically.",
+    "move": "Move",
+    "success": "Image moved",
+    "successWithUpdates": "Image moved, {count} content files updated"
+  },
+  "errorBoundary": {
+    "title": "Something went wrong",
+    "description": "An unexpected error occurred. Please try again.",
+    "retry": "Try Again"
+  }
+}
