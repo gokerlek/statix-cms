@@ -1,6 +1,6 @@
 {
   "name": "create-statix-cms",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Create a new Statix CMS project - A modern Git-based headless CMS built with Next.js 15",
   "bin": {
     "create-statix-cms": "./bin/index.js"
