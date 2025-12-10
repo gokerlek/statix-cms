@@ -24,47 +24,104 @@ cd my-project
 
 ## 📋 Setup
 
-### 1. Create GitHub OAuth App
+### Step 1: Create a GitHub Repository
 
-1. Go to GitHub Settings → Developer settings → OAuth Apps
-2. Click "New OAuth App"
-3. Fill in the details:
-   - **Application name**: Statix CMS
-   - **Homepage URL**: `http://localhost:3000`
-   - **Authorization callback URL**: `http://localhost:3000/api/auth/callback/github`
-4. Copy the **Client ID** and generate a **Client Secret**
+1. Go to [github.com/new](https://github.com/new)
+2. Create a new **public** or **private** repository
+3. You can leave it empty - Statix CMS will create the folder structure automatically
+4. Note your **username** and **repository name** for later
 
-### 2. Create GitHub Personal Access Token
+---
 
-1. Go to GitHub Settings → Developer settings → Personal access tokens → Tokens (classic)
-2. Click "Generate new token (classic)"
-3. Select scopes: ✅ `repo` (Full control of private repositories)
-4. Copy the token
+### Step 2: Create GitHub Personal Access Token (Classic)
 
-### 3. Configure Environment Variables
+> ⚠️ **Important**: Use **Tokens (classic)**, NOT "Fine-grained tokens". Fine-grained tokens may cause permission issues.
 
-Edit `.env` file with your values:
+1. Go to: **GitHub** → **Settings** → **Developer settings** → **Personal access tokens** → **Tokens (classic)**
+
+   - Direct link: [github.com/settings/tokens](https://github.com/settings/tokens)
+
+2. Click **"Generate new token"** → **"Generate new token (classic)"**
+
+3. Configure the token:
+   - **Note**: `Statix CMS` (or any name you prefer)
+   - **Expiration**: Choose based on your needs (No expiration for convenience, or set a date)
+   - **Scopes**: Check ✅ **`repo`** (this gives full control of repositories)
+4. Click **"Generate token"**
+
+5. **⚠️ Copy the token immediately!** It starts with `ghp_` and won't be shown again.
+
+---
+
+### Step 3: Create GitHub OAuth App
+
+This enables login with GitHub for the admin panel.
+
+1. Go to: **GitHub** → **Settings** → **Developer settings** → **OAuth Apps**
+
+   - Direct link: [github.com/settings/developers](https://github.com/settings/developers)
+
+2. Click **"New OAuth App"**
+
+3. Fill in the form:
+   | Field | Value |
+   |-------|-------|
+   | **Application name** | `Statix CMS` (or any name) |
+   | **Homepage URL** | `http://localhost:3000` |
+   | **Authorization callback URL** | `http://localhost:3000/api/auth/callback/github` |
+
+4. Click **"Register application"**
+
+5. On the next page:
+   - Copy the **Client ID** (looks like: `Ov23liXXXXXXXXXX`)
+   - Click **"Generate a new client secret"**
+   - Copy the **Client Secret** (looks like: `abc123def456...`)
+
+---
+
+### Step 4: Configure Environment Variables
+
+Edit the `.env` file in your project root:
 
 ```env
+# ═══════════════════════════════════════════════════════════
 # GitHub Configuration
-GITHUB_TOKEN=ghp_your_token_here
-GITHUB_OWNER=your_github_username
-GITHUB_REPO=your_repo_name
+# ═══════════════════════════════════════════════════════════
+# Your Personal Access Token (Classic) - starts with ghp_
+GITHUB_TOKEN=ghp_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+
+# Your GitHub username
+GITHUB_OWNER=YourUsername
+
+# Your repository name (case-sensitive!)
+GITHUB_REPO=your-repo-name
+
+# Branch to use (usually 'main')
 GITHUB_BRANCH=main
 
+# ═══════════════════════════════════════════════════════════
 # NextAuth Configuration
-AUTH_SECRET=your_random_secret_here
-AUTH_GITHUB_ID=your_oauth_app_client_id
-AUTH_GITHUB_SECRET=your_oauth_app_client_secret
+# ═══════════════════════════════════════════════════════════
+# Generate with: openssl rand -base64 32
+AUTH_SECRET=your_generated_secret_here
 
-# Admin Access Control (comma-separated)
-ADMIN_EMAILS=admin@example.com,editor@example.com
+# From your OAuth App
+AUTH_GITHUB_ID=Ov23liXXXXXXXXXX
+AUTH_GITHUB_SECRET=your_client_secret_here
 
-# Next.js
+# ═══════════════════════════════════════════════════════════
+# Access Control
+# ═══════════════════════════════════════════════════════════
+# Comma-separated list of emails allowed to access admin
+ADMIN_EMAILS=your@email.com
+
+# ═══════════════════════════════════════════════════════════
+# URLs
+# ═══════════════════════════════════════════════════════════
 NEXTAUTH_URL=http://localhost:3000
 
-# GitHub Media Base URL
-NEXT_PUBLIC_MEDIA_BASE_URL=https://raw.githubusercontent.com/username/repo/main
+# For serving images from GitHub (replace with your info)
+NEXT_PUBLIC_MEDIA_BASE_URL=https://raw.githubusercontent.com/YourUsername/your-repo-name/main
 ```
 
 **Generate AUTH_SECRET:**
@@ -73,7 +130,7 @@ NEXT_PUBLIC_MEDIA_BASE_URL=https://raw.githubusercontent.com/username/repo/main
 openssl rand -base64 32
 ```
 
-### 4. Run Development Server
+### Step 5: Run Development Server
 
 ```bash
 npm run dev
@@ -84,6 +141,56 @@ bun run dev
 Open [http://localhost:3000](http://localhost:3000) in your browser.
 
 ---
+
+## ❓ Troubleshooting
+
+### "Failed to save content" or 500 Error
+
+**Most common cause:** GitHub token issue
+
+1. **Are you using a Classic token?**
+
+   - ❌ Fine-grained tokens may not work properly
+   - ✅ Use **Tokens (classic)** with `repo` scope
+
+2. **Is the token valid?**
+
+   ```bash
+   curl -H "Authorization: Bearer YOUR_TOKEN" https://api.github.com/user
+   ```
+
+   If you get an error, generate a new token.
+
+3. **Did you restart the dev server?**
+
+   - After changing `.env`, you must restart: `Ctrl+C` then `npm run dev`
+
+4. **Is the repository name correct?**
+   - Repository names are case-sensitive
+   - Double-check `GITHUB_OWNER` and `GITHUB_REPO`
+
+### "Unauthorized" or Login Issues
+
+1. **Check OAuth App settings:**
+
+   - Callback URL must be exactly: `http://localhost:3000/api/auth/callback/github`
+
+2. **Is your email in ADMIN_EMAILS?**
+
+   - The email must match your GitHub account's primary email
+
+3. **Did you set AUTH_SECRET?**
+   - Generate with: `openssl rand -base64 32`
+
+### Images Not Loading
+
+1. **Check NEXT_PUBLIC_MEDIA_BASE_URL:**
+
+   - ❌ Wrong: `https://github.com/user/repo/...`
+   - ✅ Correct: `https://raw.githubusercontent.com/user/repo/main`
+
+2. **Is the repository public?**
+   - Private repos require authentication for raw content
 
 ## ⚙️ Configuration
 
