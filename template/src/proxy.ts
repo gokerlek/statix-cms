@@ -12,7 +12,7 @@ const PUBLIC_API_ROUTES = ["/api/auth"];
 // Rate limit config: 100 requests per minute
 const RATE_LIMIT_CONFIG = { limit: 100, windowSeconds: 60 };
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   const path = request.nextUrl.pathname;
 
   // Apply rate limiting to API routes (except auth)
