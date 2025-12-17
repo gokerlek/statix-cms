@@ -13,8 +13,9 @@ import { BlockHeader } from "./blocks/BlockHeader";
 interface SortableBlockProps {
   block: Block;
   blockType: BlockType;
-  onRemove: () => void;
+  onRemove?: () => void;
   onUpdate: (field: string, value: unknown) => void;
+  locked?: boolean;
 }
 
 export function SortableBlock({
@@ -22,6 +23,7 @@ export function SortableBlock({
   blockType,
   onRemove,
   onUpdate,
+  locked,
 }: SortableBlockProps) {
   const {
     attributes,
@@ -32,6 +34,7 @@ export function SortableBlock({
     isDragging,
   } = useSortable({
     id: block.id,
+    disabled: locked,
   });
 
   const style = {
@@ -47,6 +50,7 @@ export function SortableBlock({
           onRemove={onRemove}
           dragAttributes={attributes}
           dragListeners={listeners}
+          locked={locked}
         />
 
         <div className="pl-8">

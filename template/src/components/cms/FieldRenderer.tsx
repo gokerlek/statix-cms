@@ -22,9 +22,15 @@ interface FieldRendererProps {
   field: Field;
   control: Control<ContentFormValues>;
   name?: string; // Allow overriding the field name (e.g., for localized fields)
+  structureLocked?: boolean;
 }
 
-export function FieldRenderer({ field, control, name }: FieldRendererProps) {
+export function FieldRenderer({
+  field,
+  control,
+  name,
+  structureLocked,
+}: FieldRendererProps) {
   const fieldName = name || field.name;
 
   switch (field.type) {
@@ -35,6 +41,7 @@ export function FieldRenderer({ field, control, name }: FieldRendererProps) {
           control={control}
           fields={field.fields}
           label={field.label}
+          locked={structureLocked}
         />
       );
 
@@ -51,6 +58,7 @@ export function FieldRenderer({ field, control, name }: FieldRendererProps) {
             name={fieldName}
             control={control}
             blockTypes={field.blocks}
+            locked={structureLocked}
           />
         </div>
       );

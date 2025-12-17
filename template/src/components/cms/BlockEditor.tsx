@@ -1,6 +1,5 @@
 "use client";
 
-import { useRef } from "react";
 import { Control, useFieldArray, useWatch } from "react-hook-form";
 
 import {
@@ -30,10 +29,15 @@ interface BlockEditorProps {
   name: string;
   control: Control<ContentFormValues>;
   blockTypes: BlockType[];
+  locked?: boolean;
 }
 
-export function BlockEditor({ name, control, blockTypes }: BlockEditorProps) {
-  const blockIdCounter = useRef(0);
+export function BlockEditor({
+  name,
+  control,
+  blockTypes,
+  locked,
+}: BlockEditorProps) {
   const { fields, append, remove, move, update } = useFieldArray({
     control,
     name: name as never,
@@ -52,7 +56,7 @@ export function BlockEditor({ name, control, blockTypes }: BlockEditorProps) {
     }),
     useSensor(KeyboardSensor, {
       coordinateGetter: sortableKeyboardCoordinates,
-    }),
+    })
   );
 
   const handleDragEnd = (event: DragEndEvent) => {
@@ -67,9 +71,8 @@ export function BlockEditor({ name, control, blockTypes }: BlockEditorProps) {
   };
 
   const addBlock = (blockType: BlockType) => {
-    blockIdCounter.current += 1;
     const newBlock: Block = {
-      id: `block-${blockIdCounter.current}`,
+      id: crypto.randomUUID(),
       type: blockType.type,
     };
 
@@ -102,7 +105,7 @@ export function BlockEditor({ name, control, blockTypes }: BlockEditorProps) {
                 } as unknown as Block;
 
                 const blockType = blockTypes.find(
-                  (bt) => bt.type === blockData.type,
+                  (bt) => bt.type === blockData.type
                 );
 
                 if (!blockType) return null;
@@ -112,10 +115,11 @@ export function BlockEditor({ name, control, blockTypes }: BlockEditorProps) {
                     key={block.id}
                     block={blockData}
                     blockType={blockType}
-                    onRemove={() => remove(index)}
+                    onRemove={locked ? undefined : () => remove(index)}
                     onUpdate={(fieldName, value) => {
                       update(index, { ...blockData, [fieldName]: value });
                     }}
+                    locked={locked}
                   />
                 );
               })}
@@ -132,19 +136,21 @@ export function BlockEditor({ name, control, blockTypes }: BlockEditorProps) {
         )}
       </div>
 
-      <div className="flex flex-wrap gap-2">
-        {blockTypes.map((blockType) => (
-          <Button
-            key={blockType.type}
-            type="button"
-            onClick={() => addBlock(blockType)}
-            className="flex items-center gap-2"
-          >
-            <Plus className="w-4 h-4" />
-            {ui.blockEditor.add} {blockType.label}
-          </Button>
-        ))}
-      </div>
+      {!locked && (
+        <div className="flex flex-wrap gap-2">
+          {blockTypes.map((blockType) => (
+            <Button
+              key={blockType.type}
+              type="button"
+              onClick={() => addBlock(blockType)}
+              className="flex items-center gap-2"
+            >
+              <Plus className="w-4 h-4" />
+              {ui.blockEditor.add} {blockType.label}
+            </Button>
+          ))}
+        </div>
+      )}
     </div>
   );
 }

@@ -30,9 +30,16 @@ interface ListEditorProps {
   control: Control<Record<string, unknown>>;
   fields: Field[];
   label: string;
+  locked?: boolean;
 }
 
-export function ListEditor({ name, control, fields, label }: ListEditorProps) {
+export function ListEditor({
+  name,
+  control,
+  fields,
+  label,
+  locked,
+}: ListEditorProps) {
   const {
     fields: items,
     append,
@@ -52,7 +59,7 @@ export function ListEditor({ name, control, fields, label }: ListEditorProps) {
     }),
     useSensor(KeyboardSensor, {
       coordinateGetter: sortableKeyboardCoordinates,
-    }),
+    })
   );
 
   const handleDragEnd = (event: DragEndEvent) => {
@@ -67,7 +74,9 @@ export function ListEditor({ name, control, fields, label }: ListEditorProps) {
   };
 
   const addItem = () => {
-    const newItem: Record<string, unknown> = {};
+    const newItem: Record<string, unknown> = {
+      id: crypto.randomUUID(),
+    };
 
     fields.forEach((field) => {
       newItem[field.name] = "";
@@ -80,11 +89,13 @@ export function ListEditor({ name, control, fields, label }: ListEditorProps) {
       <div className="flex items-center justify-between">
         <Label className="text-base">{label}</Label>
 
-        <Button type="button" onClick={addItem} size="sm" className="gap-1">
-          <Plus className="w-4 h-4" />
+        {!locked && (
+          <Button type="button" onClick={addItem} size="sm" className="gap-1">
+            <Plus className="w-4 h-4" />
 
-          {ui.listEditor.addItem}
-        </Button>
+            {ui.listEditor.addItem}
+          </Button>
+        )}
       </div>
 
       {items.length === 0 ? (
@@ -111,13 +122,14 @@ export function ListEditor({ name, control, fields, label }: ListEditorProps) {
                   index={index}
                   item={item as Record<string, unknown>}
                   fields={fields}
-                  onRemove={() => remove(index)}
+                  onRemove={locked ? undefined : () => remove(index)}
                   onUpdate={(fieldName, value) => {
                     update(index, {
                       ...(item as Record<string, unknown>),
                       [fieldName]: value,
                     });
                   }}
+                  locked={locked}
                 />
               ))}
             </div>

@@ -25,7 +25,7 @@ export const statixConfig: StatixConfig = {
         {
           name: "title",
           label: "Page Title",
-          type: "text",
+          type: "textarea",
           required: true,
           placeholder: "Welcome to our website",
           localized: true,
@@ -43,8 +43,33 @@ export const statixConfig: StatixConfig = {
           type: "image",
         },
         {
+          name: "ctaText",
+          label: "Button Text",
+          type: "text",
+          placeholder: "Get Started",
+        },
+        {
+          name: "ctaLink",
+          label: "Button Link",
+          type: "text",
+          placeholder: "/about",
+        },
+        {
+          name: "metaTitle",
+          label: "Meta Title",
+          type: "text",
+          placeholder: "Title for search engines",
+        },
+        {
+          name: "metaDescription",
+          label: "Meta Description",
+          type: "textarea",
+          rows: 2,
+          placeholder: "Description for search results",
+        },
+        {
           name: "content",
-          label: "Content",
+          label: "Content Blocks",
           type: "blocks",
           localized: true,
           blocks: [

@@ -16,8 +16,9 @@ interface SortableListItemProps {
   index: number;
   item: Record<string, unknown>;
   fields: Field[];
-  onRemove: () => void;
+  onRemove?: () => void;
   onUpdate: (field: string, value: unknown) => void;
+  locked?: boolean;
 }
 
 export function SortableListItem({
@@ -26,6 +27,7 @@ export function SortableListItem({
   fields,
   onUpdate,
   onRemove,
+  locked,
 }: SortableListItemProps) {
   const {
     attributes,
@@ -36,6 +38,7 @@ export function SortableListItem({
     isDragging,
   } = useSortable({
     id: id,
+    disabled: locked,
   });
 
   const style = {
@@ -48,19 +51,21 @@ export function SortableListItem({
       <Card
         className={cn(
           "p-4",
-          isDragging && "opacity-50 shadow-2xl relative z-50",
+          isDragging && "opacity-50 shadow-2xl relative z-50"
         )}
       >
         <div className="flex items-start gap-3">
-          <button
-            type="button"
-            className="mt-2 cursor-grab active:cursor-grabbing text-muted-foreground hover:text-foreground outline-none"
-            aria-label="Drag to reorder"
-            {...attributes}
-            {...listeners}
-          >
-            <GripVertical className="w-5 h-5" />
-          </button>
+          {!locked && (
+            <button
+              type="button"
+              className="mt-2 cursor-grab active:cursor-grabbing text-muted-foreground hover:text-foreground outline-none"
+              aria-label="Drag to reorder"
+              {...attributes}
+              {...listeners}
+            >
+              <GripVertical className="w-5 h-5" />
+            </button>
+          )}
 
           <ListItemFieldRenderer
             item={item}
@@ -68,15 +73,17 @@ export function SortableListItem({
             onUpdate={onUpdate}
           />
 
-          <Button
-            type="button"
-            variant="destructive_ghost"
-            size="icon"
-            onClick={onRemove}
-            aria-label="Remove item"
-          >
-            <Trash2 className="w-4 h-4" />
-          </Button>
+          {!locked && onRemove && (
+            <Button
+              type="button"
+              variant="destructive_ghost"
+              size="icon"
+              onClick={onRemove}
+              aria-label="Remove item"
+            >
+              <Trash2 className="w-4 h-4" />
+            </Button>
+          )}
         </div>
       </Card>
     </div>

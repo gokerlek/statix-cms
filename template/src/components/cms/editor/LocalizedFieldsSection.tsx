@@ -43,13 +43,19 @@ export function LocalizedFieldsSection({
           </TabsList>
 
           {locales.map((locale) => (
-            <TabsContent key={locale} value={locale} className="space-y-6 mt-0">
+            <TabsContent
+              key={locale}
+              value={locale}
+              forceMount={true}
+              className="space-y-6 mt-0 data-[state=inactive]:hidden"
+            >
               {fields.map((field) => (
                 <FieldRenderer
                   key={`${locale}.${field.name}`}
                   field={field}
                   control={control}
                   name={`translations.${locale}.${field.name}`}
+                  structureLocked={locale !== defaultLocale}
                 />
               ))}
             </TabsContent>

@@ -51,12 +51,19 @@ export function useEditorForm({
   content,
   isNew,
 }: UseEditorFormOptions) {
-  const { control, handleSubmit, reset, formState, watch } =
-    useForm<ContentFormValues>({
-      defaultValues: {
-        status: "draft",
-      },
-    });
+  const {
+    control,
+    handleSubmit,
+    reset,
+    formState,
+    watch,
+    setValue,
+    getValues,
+  } = useForm<ContentFormValues>({
+    defaultValues: {
+      status: "draft",
+    },
+  });
 
   const addChange = useUnsavedStore((state) => state.addChange);
   const removeChange = useUnsavedStore((state) => state.removeChange);
@@ -65,18 +72,18 @@ export function useEditorForm({
   const sharedFields = useMemo(
     () =>
       collection?.fields.filter(
-        (f) => !f.localized && f.name !== "status", // Exclude status from shared fields
+        (f) => !f.localized && f.name !== "status" // Exclude status from shared fields
       ) || [],
-    [collection],
+    [collection]
   );
   const localizedFields = useMemo(
     () => collection?.fields.filter((f) => f.localized) || [],
-    [collection],
+    [collection]
   );
   const locales = useMemo(() => statixConfig.i18n?.locales || ["en"], []);
   const defaultLocale = useMemo(
     () => statixConfig.i18n?.defaultLocale || "en",
-    [],
+    []
   );
 
   // Helper to generate default values from content or skeleton
@@ -166,6 +173,17 @@ export function useEditorForm({
                 data.translations![locale][field.name] = [];
               } else {
                 data.translations![locale][field.name] = "";
+              }
+            } else if (field.type === "list") {
+              // Ensure legacy list items have IDs
+              const list = data.translations![locale][field.name] as any[];
+
+              if (Array.isArray(list)) {
+                list.forEach((item) => {
+                  if (!item.id) {
+                    item.id = crypto.randomUUID();
+                  }
+                });
               }
             }
           });
@@ -312,6 +330,75 @@ export function useEditorForm({
 
     return () => subscription.unsubscribe();
   }, [watch, collection, id, addChange, getDefaultValues, clearLocalData]);
+
+  // Sync validation and structure across locales
+  useEffect(() => {
+    const subscription = watch((value, { name }) => {
+      // Logic to sync structure from default locale to others
+      if (!name || !name.startsWith(`translations.${defaultLocale}`)) return;
+
+      const currentValues = getValues();
+      const defaultTranslations = currentValues.translations?.[defaultLocale];
+
+      if (!defaultTranslations) return;
+
+      localizedFields.forEach((field) => {
+        if (field.type !== "blocks" && field.type !== "list") return;
+
+        const defaultArray = defaultTranslations[field.name];
+
+        if (!Array.isArray(defaultArray)) return;
+
+        locales.forEach((locale) => {
+          if (locale === defaultLocale) return;
+
+          const targetPath: any = `translations.${locale}.${field.name}`;
+          const targetArray =
+            (currentValues.translations?.[locale]?.[field.name] as any[]) || [];
+
+          // Reconstruct target array based on default array structure (matching by ID)
+          const newTargetArray = defaultArray.map((defaultItem: any) => {
+            // If item has no ID, we can't reliably sync.
+            // Blocks always have IDs. Lists should have IDs (we'll ensure this).
+            if (!defaultItem.id) return defaultItem;
+
+            const existingItem = targetArray.find(
+              (t) => t.id === defaultItem.id
+            );
+
+            if (existingItem) return existingItem;
+
+            // Create new item
+            const newItem: any = { id: defaultItem.id };
+
+            if (field.type === "blocks") {
+              newItem.type = defaultItem.type;
+              const blockType = field.blocks?.find(
+                (b) => b.type === defaultItem.type
+              );
+
+              blockType?.fields?.forEach((f) => {
+                newItem[f.name] = "";
+              });
+            } else {
+              field.fields?.forEach((f) => {
+                newItem[f.name] = "";
+              });
+            }
+
+            return newItem;
+          });
+
+          // Deep compare to avoid unnecessary updates
+          if (JSON.stringify(newTargetArray) !== JSON.stringify(targetArray)) {
+            setValue(targetPath, newTargetArray);
+          }
+        });
+      });
+    });
+
+    return () => subscription.unsubscribe();
+  }, [watch, defaultLocale, localizedFields, locales, setValue, getValues]);
 
   const discardChanges = useCallback(() => {
     const serverValues = getDefaultValues();
