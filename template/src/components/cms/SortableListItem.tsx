@@ -51,7 +51,7 @@ export function SortableListItem({
       <Card
         className={cn(
           "p-4",
-          isDragging && "opacity-50 shadow-2xl relative z-50"
+          isDragging && "opacity-50 shadow-2xl relative z-50",
         )}
       >
         <div className="flex items-start gap-3">

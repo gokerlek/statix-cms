@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo } from "react";
-import { useForm } from "react-hook-form";
+import { Path, useForm } from "react-hook-form";
 
 import { toast } from "sonner";
 
@@ -45,6 +45,10 @@ interface UseEditorFormOptions {
   isNew: boolean;
 }
 
+interface IdentifiableItem extends Record<string, unknown> {
+  id: string;
+}
+
 export function useEditorForm({
   collection,
   id,
@@ -72,18 +76,18 @@ export function useEditorForm({
   const sharedFields = useMemo(
     () =>
       collection?.fields.filter(
-        (f) => !f.localized && f.name !== "status" // Exclude status from shared fields
+        (f) => !f.localized && f.name !== "status", // Exclude status from shared fields
       ) || [],
-    [collection]
+    [collection],
   );
   const localizedFields = useMemo(
     () => collection?.fields.filter((f) => f.localized) || [],
-    [collection]
+    [collection],
   );
   const locales = useMemo(() => statixConfig.i18n?.locales || ["en"], []);
   const defaultLocale = useMemo(
     () => statixConfig.i18n?.defaultLocale || "en",
-    []
+    [],
   );
 
   // Helper to generate default values from content or skeleton
@@ -176,7 +180,9 @@ export function useEditorForm({
               }
             } else if (field.type === "list") {
               // Ensure legacy list items have IDs
-              const list = data.translations![locale][field.name] as any[];
+              const list = data.translations![locale][field.name] as
+                | IdentifiableItem[]
+                | undefined;
 
               if (Array.isArray(list)) {
                 list.forEach((item) => {
@@ -352,42 +358,47 @@ export function useEditorForm({
         locales.forEach((locale) => {
           if (locale === defaultLocale) return;
 
-          const targetPath: any = `translations.${locale}.${field.name}`;
+          const targetPath =
+            `translations.${locale}.${field.name}` as Path<ContentFormValues>;
           const targetArray =
-            (currentValues.translations?.[locale]?.[field.name] as any[]) || [];
+            (currentValues.translations?.[locale]?.[
+              field.name
+            ] as IdentifiableItem[]) || [];
 
           // Reconstruct target array based on default array structure (matching by ID)
-          const newTargetArray = defaultArray.map((defaultItem: any) => {
-            // If item has no ID, we can't reliably sync.
-            // Blocks always have IDs. Lists should have IDs (we'll ensure this).
-            if (!defaultItem.id) return defaultItem;
+          const newTargetArray = defaultArray.map(
+            (defaultItem: IdentifiableItem) => {
+              // If item has no ID, we can't reliably sync.
+              // Blocks always have IDs. Lists should have IDs (we'll ensure this).
+              if (!defaultItem.id) return defaultItem;
 
-            const existingItem = targetArray.find(
-              (t) => t.id === defaultItem.id
-            );
-
-            if (existingItem) return existingItem;
-
-            // Create new item
-            const newItem: any = { id: defaultItem.id };
-
-            if (field.type === "blocks") {
-              newItem.type = defaultItem.type;
-              const blockType = field.blocks?.find(
-                (b) => b.type === defaultItem.type
+              const existingItem = targetArray.find(
+                (t) => t.id === defaultItem.id,
               );
 
-              blockType?.fields?.forEach((f) => {
-                newItem[f.name] = "";
-              });
-            } else {
-              field.fields?.forEach((f) => {
-                newItem[f.name] = "";
-              });
-            }
+              if (existingItem) return existingItem;
 
-            return newItem;
-          });
+              // Create new item
+              const newItem: Record<string, unknown> = { id: defaultItem.id };
+
+              if (field.type === "blocks") {
+                newItem.type = defaultItem.type;
+                const blockType = field.blocks?.find(
+                  (b) => b.type === defaultItem.type,
+                );
+
+                blockType?.fields?.forEach((f) => {
+                  newItem[f.name] = "";
+                });
+              } else {
+                field.fields?.forEach((f) => {
+                  newItem[f.name] = "";
+                });
+              }
+
+              return newItem;
+            },
+          );
 
           // Deep compare to avoid unnecessary updates
           if (JSON.stringify(newTargetArray) !== JSON.stringify(targetArray)) {

@@ -56,7 +56,7 @@ export function BlockEditor({
     }),
     useSensor(KeyboardSensor, {
       coordinateGetter: sortableKeyboardCoordinates,
-    })
+    }),
   );
 
   const handleDragEnd = (event: DragEndEvent) => {
@@ -105,7 +105,7 @@ export function BlockEditor({
                 } as unknown as Block;
 
                 const blockType = blockTypes.find(
-                  (bt) => bt.type === blockData.type
+                  (bt) => bt.type === blockData.type,
                 );
 
                 if (!blockType) return null;
