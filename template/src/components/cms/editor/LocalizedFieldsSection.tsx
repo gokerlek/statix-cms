@@ -56,6 +56,7 @@ export function LocalizedFieldsSection({
                   control={control}
                   name={`translations.${locale}.${field.name}`}
                   structureLocked={locale !== defaultLocale}
+                  ignoreRequired={locale !== defaultLocale}
                 />
               ))}
             </TabsContent>

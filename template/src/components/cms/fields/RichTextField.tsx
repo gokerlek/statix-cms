@@ -111,6 +111,7 @@ function RichTextEditor({
 
   const editor = useEditor({
     extensions: getEditorExtensions(),
+    immediatelyRender: false,
     content: value || "",
     onUpdate: ({ editor }) => {
       onChange(editor.getHTML());

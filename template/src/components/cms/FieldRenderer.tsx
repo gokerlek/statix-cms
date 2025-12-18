@@ -24,6 +24,7 @@ interface FieldRendererProps {
   control: Control<ContentFormValues>;
   name?: string; // Allow overriding the field name (e.g., for localized fields)
   structureLocked?: boolean;
+  ignoreRequired?: boolean;
 }
 
 export function FieldRenderer({
@@ -31,8 +32,15 @@ export function FieldRenderer({
   control,
   name,
   structureLocked,
+  ignoreRequired,
 }: FieldRendererProps) {
   const fieldName = name || field.name;
+
+  function getEffectiveField<T extends Field>(f: T): T {
+    if (!ignoreRequired) return f;
+
+    return { ...f, required: false };
+  }
 
   switch (field.type) {
     case "list":
@@ -46,13 +54,17 @@ export function FieldRenderer({
         />
       );
 
-    case "blocks":
+    case "blocks": {
+      const effectiveField = getEffectiveField(field);
+
       return (
         <div className="space-y-2">
           <Label>
             {field.label}
 
-            {field.required && <span className="text-destructive ml-1">*</span>}
+            {effectiveField.required && (
+              <span className="text-destructive ml-1">*</span>
+            )}
           </Label>
 
           <BlockEditor
@@ -63,36 +75,97 @@ export function FieldRenderer({
           />
         </div>
       );
+    }
 
     case "textarea":
-      return <TextareaField field={field} control={control} name={fieldName} />;
+      return (
+        <TextareaField
+          field={getEffectiveField(field)}
+          control={control}
+          name={fieldName}
+        />
+      );
 
     case "richtext":
-      return <RichTextField field={field} control={control} name={fieldName} />;
+      return (
+        <RichTextField
+          field={getEffectiveField(field)}
+          control={control}
+          name={fieldName}
+        />
+      );
 
     case "image":
-      return <ImageField field={field} control={control} name={fieldName} />;
+      return (
+        <ImageField
+          field={getEffectiveField(field)}
+          control={control}
+          name={fieldName}
+        />
+      );
 
     case "file":
-      return <FileField field={field} control={control} name={fieldName} />;
+      return (
+        <FileField
+          field={getEffectiveField(field)}
+          control={control}
+          name={fieldName}
+        />
+      );
 
     case "select":
-      return <SelectField field={field} control={control} name={fieldName} />;
+      return (
+        <SelectField
+          field={getEffectiveField(field)}
+          control={control}
+          name={fieldName}
+        />
+      );
 
     case "number":
-      return <NumberField field={field} control={control} name={fieldName} />;
+      return (
+        <NumberField
+          field={getEffectiveField(field)}
+          control={control}
+          name={fieldName}
+        />
+      );
 
     case "date":
-      return <DateField field={field} control={control} name={fieldName} />;
+      return (
+        <DateField
+          field={getEffectiveField(field)}
+          control={control}
+          name={fieldName}
+        />
+      );
 
     case "checkbox":
-      return <CheckboxField field={field} control={control} name={fieldName} />;
+      return (
+        <CheckboxField
+          field={getEffectiveField(field)}
+          control={control}
+          name={fieldName}
+        />
+      );
 
     case "switch":
-      return <SwitchField field={field} control={control} name={fieldName} />;
+      return (
+        <SwitchField
+          field={getEffectiveField(field)}
+          control={control}
+          name={fieldName}
+        />
+      );
 
     case "text":
-      return <TextField field={field} control={control} name={fieldName} />;
+      return (
+        <TextField
+          field={getEffectiveField(field)}
+          control={control}
+          name={fieldName}
+        />
+      );
 
     default:
       return null;

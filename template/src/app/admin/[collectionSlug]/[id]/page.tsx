@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { FieldErrors } from "react-hook-form";
 import { useRouter } from "next/navigation";
 
 import { toast } from "sonner";
@@ -86,6 +87,13 @@ export default function EditorPage({ params }: EditorPageProps) {
     }
   };
 
+  const onInvalid = (errors: FieldErrors<ContentFormValues>) => {
+    console.error("Form validation errors:", errors);
+    toast.error(
+      "Form submission blocked by validation errors. Check console details.",
+    );
+  };
+
   // Show loading while params are being resolved or content is loading
   if (!collectionSlug || (isLoading && !isNew)) {
     return (
@@ -118,7 +126,7 @@ export default function EditorPage({ params }: EditorPageProps) {
         collectionLabel={collection.label}
         isNew={isNew}
         isSaving={isSaving}
-        onSave={handleSubmit(onSubmit)}
+        onSave={handleSubmit(onSubmit, onInvalid)}
         onDiscard={discardChanges}
         control={control}
         isSingleton={collection.type === "singleton"}

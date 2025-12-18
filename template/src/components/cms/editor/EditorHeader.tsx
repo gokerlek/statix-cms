@@ -62,6 +62,7 @@ export function EditorHeader({
         )}
 
         <Button
+          type="button"
           onClick={onSave}
           disabled={isSaving || (!isDirty && !hasChange(collectionSlug, id))}
         >
