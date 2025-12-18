@@ -18,7 +18,6 @@ import {
   Trash2,
   Type,
   Underline as UnderlineIcon,
-  X,
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -179,37 +178,24 @@ export function RichTextToolbar({
                     }
                   }}
                 />
-                <Button
-                  type="button"
-                  size={variant === "compact" ? undefined : "sm"}
-                  onClick={handleLinkSubmit}
-                >
+                <Button type="button" size="icon" onClick={handleLinkSubmit}>
                   <Check className={getIconSize()} />
                 </Button>
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size={variant === "compact" ? undefined : "sm"}
-                  onClick={handleLinkCancel}
-                >
-                  <X className={getIconSize()} />
-                </Button>
+
+                {editor.isActive("link") && (
+                  <Button
+                    type="button"
+                    variant="destructive"
+                    size="icon"
+                    onClick={() => {
+                      editor.chain().focus().unsetLink().run();
+                      setIsLinkPopoverOpen(false);
+                    }}
+                  >
+                    <Trash2 className={`${getIconSize()}`} />
+                  </Button>
+                )}
               </div>
-              {editor.isActive("link") && (
-                <Button
-                  type="button"
-                  variant="destructive"
-                  size={variant === "compact" ? undefined : "sm"}
-                  className="w-full"
-                  onClick={() => {
-                    editor.chain().focus().unsetLink().run();
-                    setIsLinkPopoverOpen(false);
-                  }}
-                >
-                  <Trash2 className={`${getIconSize()} mr-2`} />
-                  Linki Kaldır
-                </Button>
-              )}
             </div>
           </PopoverContent>
         </Popover>
