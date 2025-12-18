@@ -1,4 +1,4 @@
-const ADMIN_ROOT = "/main";
+const ADMIN_ROOT = "/admin";
 
 export const ROUTES = {
   ADMIN: {
