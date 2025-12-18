@@ -226,7 +226,7 @@ export function useEditorForm({
           // Compare local data with the server values we just generated
           if (
             currentServerValues &&
-            JSON.stringify(currentServerValues) === JSON.stringify(localData)
+            deepEqual(currentServerValues, localData)
           ) {
             // Identical to server, so it's not really unsaved
             localStorage.removeItem(localKey);
