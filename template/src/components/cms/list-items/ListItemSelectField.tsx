@@ -32,7 +32,9 @@ export function ListItemSelectField({
       </Label>
 
       <Select value={value} onValueChange={onUpdate}>
-        <SelectTrigger className={`w-full ${error ? "border-destructive" : ""}`}>
+        <SelectTrigger
+          className={`w-full ${error ? "border-destructive" : ""}`}
+        >
           <SelectValue placeholder="Select..." />
         </SelectTrigger>
 
