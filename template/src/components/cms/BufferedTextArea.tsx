@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 
 import { Textarea } from "@/components/ui/textarea";
+import { cn } from "@/lib/utils";
 
 interface BufferedTextAreaProps {
   value: string;
@@ -10,6 +11,7 @@ interface BufferedTextAreaProps {
   placeholder?: string;
   rows?: number;
   className?: string;
+  error?: boolean;
 }
 
 export function BufferedTextArea({
@@ -18,6 +20,7 @@ export function BufferedTextArea({
   placeholder,
   rows,
   className,
+  error,
 }: BufferedTextAreaProps) {
   const [localValue, setLocalValue] = useState(value);
 
@@ -32,7 +35,7 @@ export function BufferedTextArea({
       onBlur={() => onChange(localValue)}
       placeholder={placeholder}
       rows={rows}
-      className={className}
+      className={cn(className, error && "border-destructive")}
     />
   );
 }

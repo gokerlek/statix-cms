@@ -38,7 +38,7 @@ export function BlockEditor({
   blockTypes,
   locked,
 }: BlockEditorProps) {
-  const { fields, append, remove, move, update } = useFieldArray({
+  const { fields, append, remove, move } = useFieldArray({
     control,
     name: name as never,
   });
@@ -116,9 +116,9 @@ export function BlockEditor({
                     block={blockData}
                     blockType={blockType}
                     onRemove={locked ? undefined : () => remove(index)}
-                    onUpdate={(fieldName, value) => {
-                      update(index, { ...blockData, [fieldName]: value });
-                    }}
+                    control={control}
+                    blockIndex={index}
+                    blockFieldName={name}
                     locked={locked}
                   />
                 );

@@ -1,5 +1,7 @@
 "use client";
 
+import { Control } from "react-hook-form";
+
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { GripVertical, Trash2 } from "lucide-react";
@@ -8,25 +10,28 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 import { Field } from "@/types/cms";
+import { ContentFormValues } from "@/types/content";
 
 import { ListItemFieldRenderer } from "./list-items/ListItemFieldRenderer";
 
 interface SortableListItemProps {
   id: string;
   index: number;
-  item: Record<string, unknown>;
   fields: Field[];
   onRemove?: () => void;
-  onUpdate: (field: string, value: unknown) => void;
+  control: Control<ContentFormValues>;
+  itemIndex: number;
+  listFieldName: string;
   locked?: boolean;
 }
 
 export function SortableListItem({
   id,
-  item,
   fields,
-  onUpdate,
   onRemove,
+  control,
+  itemIndex,
+  listFieldName,
   locked,
 }: SortableListItemProps) {
   const {
@@ -68,9 +73,10 @@ export function SortableListItem({
           )}
 
           <ListItemFieldRenderer
-            item={item}
             fields={fields}
-            onUpdate={onUpdate}
+            control={control}
+            itemIndex={itemIndex}
+            listFieldName={listFieldName}
           />
 
           {!locked && onRemove && (

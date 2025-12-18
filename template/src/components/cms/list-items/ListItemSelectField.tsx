@@ -14,12 +14,14 @@ interface ListItemSelectFieldProps {
   field: SelectField;
   value: string;
   onUpdate: (value: string) => void;
+  error?: boolean;
 }
 
 export function ListItemSelectField({
   field,
   value,
   onUpdate,
+  error,
 }: ListItemSelectFieldProps) {
   return (
     <div>
@@ -30,7 +32,7 @@ export function ListItemSelectField({
       </Label>
 
       <Select value={value} onValueChange={onUpdate}>
-        <SelectTrigger className="w-full">
+        <SelectTrigger className={`w-full ${error ? "border-destructive" : ""}`}>
           <SelectValue placeholder="Select..." />
         </SelectTrigger>
 

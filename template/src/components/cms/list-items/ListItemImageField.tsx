@@ -15,12 +15,14 @@ interface ListItemImageFieldProps {
   field: Field;
   value: string;
   onUpdate: (value: string) => void;
+  error?: boolean;
 }
 
 export function ListItemImageField({
   field,
   value,
   onUpdate,
+  error,
 }: ListItemImageFieldProps) {
   const { openDrawer } = useMediaStore();
 
@@ -109,7 +111,7 @@ export function ListItemImageField({
             value={value || ""}
             onChange={(e) => onUpdate(e.target.value)}
             placeholder="Image URL or select..."
-            className="font-mono text-sm"
+            className={`font-mono text-sm ${error ? "border-destructive" : ""}`}
           />
         </div>
       </div>

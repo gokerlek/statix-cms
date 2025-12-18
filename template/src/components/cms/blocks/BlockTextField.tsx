@@ -9,12 +9,14 @@ interface BlockTextFieldProps {
   field: Field;
   value: string;
   onUpdate: (value: string) => void;
+  error?: boolean;
 }
 
 export function BlockTextField({
   field,
   value,
   onUpdate,
+  error,
 }: BlockTextFieldProps) {
   return (
     <div>
@@ -28,6 +30,7 @@ export function BlockTextField({
         value={value}
         onChange={onUpdate}
         placeholder={"placeholder" in field ? field.placeholder : ""}
+        error={error}
       />
     </div>
   );

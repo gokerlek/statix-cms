@@ -12,6 +12,7 @@ import { DateField } from "./fields/DateField";
 import { FileField } from "./fields/FileField";
 import { ImageField } from "./fields/ImageField";
 import { NumberField } from "./fields/NumberField";
+import { RichTextField } from "./fields/RichTextField";
 import { SelectField } from "./fields/SelectField";
 import { SwitchField } from "./fields/SwitchField";
 import { TextareaField } from "./fields/TextareaField";
@@ -65,6 +66,9 @@ export function FieldRenderer({
 
     case "textarea":
       return <TextareaField field={field} control={control} name={fieldName} />;
+
+    case "richtext":
+      return <RichTextField field={field} control={control} name={fieldName} />;
 
     case "image":
       return <ImageField field={field} control={control} name={fieldName} />;

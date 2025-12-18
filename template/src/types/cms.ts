@@ -1,6 +1,7 @@
 export type FieldType =
   | "text"
   | "textarea"
+  | "richtext"
   | "image"
   | "file"
   | "number"
@@ -27,6 +28,22 @@ export interface TextareaField extends BaseField {
   type: "textarea";
   placeholder?: string;
   rows?: number;
+}
+
+export interface RichTextField extends BaseField {
+  type: "richtext";
+  placeholder?: string;
+  toolbar?: (
+    | "bold"
+    | "italic"
+    | "underline"
+    | "link"
+    | "fontSize"
+    | "textAlign"
+    | "bulletList"
+    | "orderedList"
+    | "blockquote"
+  )[];
 }
 
 export interface ImageField extends BaseField {
@@ -83,6 +100,7 @@ export interface SwitchField extends BaseField {
 export type Field =
   | TextField
   | TextareaField
+  | RichTextField
   | ImageField
   | FileField
   | NumberField

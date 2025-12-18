@@ -9,12 +9,14 @@ interface BlockTextareaFieldProps {
   field: Field;
   value: string;
   onUpdate: (value: string) => void;
+  error?: boolean;
 }
 
 export function BlockTextareaField({
   field,
   value,
   onUpdate,
+  error,
 }: BlockTextareaFieldProps) {
   return (
     <div>
@@ -30,6 +32,7 @@ export function BlockTextareaField({
         placeholder={"placeholder" in field ? field.placeholder : ""}
         rows={"rows" in field ? field.rows : 4}
         className="font-mono text-sm"
+        error={error}
       />
     </div>
   );

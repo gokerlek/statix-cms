@@ -9,12 +9,14 @@ interface ListItemTextFieldProps {
   field: Field;
   value: string;
   onUpdate: (value: string) => void;
+  error?: boolean;
 }
 
 export function ListItemTextField({
   field,
   value,
   onUpdate,
+  error,
 }: ListItemTextFieldProps) {
   return (
     <div>
@@ -28,6 +30,7 @@ export function ListItemTextField({
         value={value}
         onChange={onUpdate}
         placeholder={"placeholder" in field ? field.placeholder : ""}
+        error={error}
       />
     </div>
   );

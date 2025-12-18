@@ -9,12 +9,14 @@ interface ListItemTextareaFieldProps {
   field: Field;
   value: string;
   onUpdate: (value: string) => void;
+  error?: boolean;
 }
 
 export function ListItemTextareaField({
   field,
   value,
   onUpdate,
+  error,
 }: ListItemTextareaFieldProps) {
   return (
     <div>
@@ -30,6 +32,7 @@ export function ListItemTextareaField({
         placeholder={"placeholder" in field ? field.placeholder : ""}
         rows={"rows" in field ? field.rows : 3}
         className="font-mono text-sm"
+        error={error}
       />
     </div>
   );

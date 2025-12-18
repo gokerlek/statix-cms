@@ -14,12 +14,14 @@ interface BlockImageFieldProps {
   field: Field;
   value: string;
   onUpdate: (value: string) => void;
+  error?: boolean;
 }
 
 export function BlockImageField({
   field,
   value,
   onUpdate,
+  error,
 }: BlockImageFieldProps) {
   const { openDrawer } = useMediaStore();
 
@@ -32,7 +34,9 @@ export function BlockImageField({
       </Label>
 
       {value ? (
-        <div className="relative w-full h-48 bg-muted rounded-md overflow-hidden border border-border group">
+        <div
+          className={`relative w-full h-48 bg-muted rounded-md overflow-hidden border ${error ? "border-destructive" : "border-border"} group`}
+        >
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src={resolveImageUrl(value)}
@@ -62,7 +66,9 @@ export function BlockImageField({
           </Button>
         </div>
       ) : (
-        <div className="flex flex-col items-center gap-4 p-8 border-2 border-dashed border-muted-foreground/25 rounded-lg justify-center bg-muted/50">
+        <div
+          className={`flex flex-col items-center gap-4 p-8 border-2 border-dashed ${error ? "border-destructive/50" : "border-muted-foreground/25"} rounded-lg justify-center bg-muted/50`}
+        >
           <div className="flex items-center gap-4">
             <MediaPicker
               onSelect={onUpdate}

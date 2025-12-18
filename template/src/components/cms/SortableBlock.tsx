@@ -1,11 +1,15 @@
 "use client";
 
+import { memo } from "react";
+import { Control } from "react-hook-form";
+
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 
 import { Card } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 import { Block, BlockType } from "@/types/cms";
+import { ContentFormValues } from "@/types/content";
 
 import { BlockFieldRenderer } from "./blocks/BlockFieldRenderer";
 import { BlockHeader } from "./blocks/BlockHeader";
@@ -14,15 +18,19 @@ interface SortableBlockProps {
   block: Block;
   blockType: BlockType;
   onRemove?: () => void;
-  onUpdate: (field: string, value: unknown) => void;
+  control: Control<ContentFormValues>;
+  blockIndex: number;
+  blockFieldName: string;
   locked?: boolean;
 }
 
-export function SortableBlock({
+export const SortableBlock = memo(function SortableBlock({
   block,
   blockType,
   onRemove,
-  onUpdate,
+  control,
+  blockIndex,
+  blockFieldName,
   locked,
 }: SortableBlockProps) {
   const {
@@ -57,10 +65,12 @@ export function SortableBlock({
           <BlockFieldRenderer
             block={block}
             blockType={blockType}
-            onUpdate={onUpdate}
+            control={control}
+            blockIndex={blockIndex}
+            blockFieldName={blockFieldName}
           />
         </div>
       </Card>
     </div>
   );
-}
+});

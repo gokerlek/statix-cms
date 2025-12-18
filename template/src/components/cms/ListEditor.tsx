@@ -45,7 +45,6 @@ export function ListEditor({
     append,
     remove,
     move,
-    update,
   } = useFieldArray({
     control,
     name: name as never,
@@ -59,7 +58,7 @@ export function ListEditor({
     }),
     useSensor(KeyboardSensor, {
       coordinateGetter: sortableKeyboardCoordinates,
-    }),
+    })
   );
 
   const handleDragEnd = (event: DragEndEvent) => {
@@ -120,15 +119,11 @@ export function ListEditor({
                   key={item.id}
                   id={item.id}
                   index={index}
-                  item={item as Record<string, unknown>}
                   fields={fields}
                   onRemove={locked ? undefined : () => remove(index)}
-                  onUpdate={(fieldName, value) => {
-                    update(index, {
-                      ...(item as Record<string, unknown>),
-                      [fieldName]: value,
-                    });
-                  }}
+                  control={control}
+                  itemIndex={index}
+                  listFieldName={name}
                   locked={locked}
                 />
               ))}
