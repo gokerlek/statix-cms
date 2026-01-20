@@ -116,3 +116,5 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 ## 📄 License
 
 MIT © [gokerlek](https://github.com/gokerlek)
+
+[Buy me a coffee](https://buymeacoffee.com/gokerlek)
