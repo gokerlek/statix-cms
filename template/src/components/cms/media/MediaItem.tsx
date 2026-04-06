@@ -3,19 +3,19 @@
 import { AlertCircle, CheckCircle2, FolderOpen, Trash2 } from "lucide-react";
 
 import ui from "@/content/ui.json";
-import { GitHubFile } from "@/lib/github-cms";
+import type { MediaFile } from "@/hooks/use-media";
 import { cn, getGitHubRawUrl } from "@/lib/utils";
 
 interface MediaItemProps {
-  file: GitHubFile & { isOrphaned?: boolean };
+  file: MediaFile & { isOrphaned?: boolean };
   isSelected: boolean;
   onSelect?: (url: string) => void;
-  onDelete: (file: GitHubFile) => void;
-  onMove?: (file: GitHubFile) => void;
+  onDelete: (file: MediaFile) => void;
+  onMove?: (file: MediaFile) => void;
   isDeleting?: boolean;
   isSelectMode?: boolean;
   isSelectedForAction?: boolean;
-  onToggleSelect?: (file: GitHubFile) => void;
+  onToggleSelect?: (file: MediaFile) => void;
 }
 
 export function MediaItem({
@@ -29,16 +29,17 @@ export function MediaItem({
   isSelectedForAction,
   onToggleSelect,
 }: MediaItemProps) {
-  const url = `/${file.path.replace(/^public\//, "")}`;
-  // Use the URL from API if available, otherwise fallback to GitHub raw URL
+  // R2 public URL veya fallback
   const imageUrl = file.url || getGitHubRawUrl(file.path);
+  // onSelect'e R2 public URL gönder
+  const selectUrl = file.url || `/${file.path.replace(/^public\//, "")}`;
 
   const handleClick = (e: React.MouseEvent) => {
     if (isSelectMode) {
       e.preventDefault();
       onToggleSelect?.(file);
     } else {
-      onSelect?.(url);
+      onSelect?.(selectUrl);
     }
   };
 

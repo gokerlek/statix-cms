@@ -1,7 +1,7 @@
 import { ReactNode } from "react";
 import { redirect } from "next/navigation";
 
-import { auth } from "@/auth";
+import { getSession } from "@/lib/session";
 import { AdminBreadcrumb } from "@/components/cms/AdminBreadcrumb";
 import { BreadcrumbProvider } from "@/components/cms/BreadcrumbContext";
 import { MediaDrawer } from "@/components/cms/MediaDrawer";
@@ -11,10 +11,10 @@ export default async function AdminLayout({
 }: {
   children: ReactNode;
 }) {
-  const session = await auth();
+  const session = await getSession();
 
   if (!session) {
-    redirect("/api/auth/signin");
+    redirect("/auth/signin");
   }
 
   return (

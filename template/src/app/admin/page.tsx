@@ -1,6 +1,5 @@
 import { redirect } from "next/navigation";
 
-import { auth, signOut } from "@/auth";
 import { DashboardCard } from "@/components/cms/DashboardCard";
 import { DashboardUnsavedAlert } from "@/components/cms/DashboardUnsavedAlert";
 import { LocalizationStats } from "@/components/cms/LocalizationStats";
@@ -16,21 +15,17 @@ import {
   getRecentActivity,
   getSystemStats,
 } from "@/lib/dashboard-data";
+import { getSession } from "@/lib/session";
 
 export default async function AdminDashboard() {
-  const session = await auth();
+  const session = await getSession();
 
   if (!session) {
-    redirect("/api/auth/signin");
+    redirect("/auth/signin");
   }
 
   const user = session.user;
 
-  async function handleSignOut() {
-    "use server";
-
-    await signOut();
-  }
 
   const [collectionStats, recentCommits, localizationStats, systemStats] =
     await Promise.all([
@@ -54,7 +49,7 @@ export default async function AdminDashboard() {
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
         <div className="flex flex-col gap-4">
-          <UserCard user={user} onSignOut={handleSignOut} />
+          <UserCard user={user} />
 
           <TrashCard />
         </div>

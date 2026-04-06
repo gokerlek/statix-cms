@@ -119,39 +119,45 @@ export async function getMediaReferences(
     return undefined;
   };
 
-  // Get all content files from all collections
-  for (const collection of statixConfig.collections) {
-    try {
+  // Get all content files from all collections in parallel
+  const collectionResults = await Promise.allSettled(
+    statixConfig.collections.map(async (collection) => {
       const collectionFiles = await github.getCollection(collection.path);
+      const fileResults = await Promise.allSettled(
+        collectionFiles.map((file) => github.getFile(file.path).then((fileData) => ({ file, fileData }))),
+      );
+      return { collection, fileResults };
+    }),
+  );
 
-      for (const file of collectionFiles) {
-        const fileData = await github.getFile(file.path);
+  for (const collResult of collectionResults) {
+    if (collResult.status !== "fulfilled") continue;
+    const { collection, fileResults } = collResult.value;
 
-        if (!fileData || !fileData.content) continue;
+    for (const fileResult of fileResults) {
+      if (fileResult.status !== "fulfilled") continue;
+      const { file, fileData } = fileResult.value;
 
-        const contentStr = JSON.stringify(fileData.content);
+      if (!fileData?.content) continue;
 
-        // Check if this content references the media file
-        if (contentStr.includes(mediaFilename)) {
-          // Try to extract title from content
-          const content = fileData.content as Record<string, unknown>;
-          const titleField = collection.titleField || "title";
+      const contentStr = JSON.stringify(fileData.content);
 
-          const title =
-            extractValue(content, titleField) ||
-            extractValue(content, "title") ||
-            extractValue(content, "name") ||
-            file.name.replace(".json", "");
+      if (contentStr.includes(mediaFilename)) {
+        const content = fileData.content as Record<string, unknown>;
+        const titleField = collection.titleField || "title";
 
-          references.push({
-            path: file.path,
-            title,
-            collection: collection.label,
-          });
-        }
+        const title =
+          extractValue(content, titleField) ||
+          extractValue(content, "title") ||
+          extractValue(content, "name") ||
+          file.name.replace(".json", "");
+
+        references.push({
+          path: file.path,
+          title,
+          collection: collection.label,
+        });
       }
-    } catch {
-      // Collection might not exist
     }
   }
 

@@ -33,20 +33,23 @@ export function useRestoreTrash() {
   const { t } = useTranslation();
 
   return useMutation({
-    mutationFn: async (paths: string[]) => {
+    mutationFn: async (selectedItems: TrashItem[]) => {
       const response = await fetch("/api/trash/restore", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ paths }),
+        body: JSON.stringify({
+          items: selectedItems.map((i) => ({ type: i.type, path: i.path })),
+        }),
       });
 
       if (!response.ok) throw new Error("Failed to restore items");
 
       return response.json();
     },
-    onMutate: async (paths) => {
+    onMutate: async (selectedItems) => {
       await queryClient.cancelQueries({ queryKey: ["trash"] });
       const previousTrash = queryClient.getQueryData<TrashItem[]>(["trash"]);
+      const paths = selectedItems.map((i) => i.path);
 
       if (previousTrash) {
         queryClient.setQueryData<TrashItem[]>(
@@ -57,7 +60,7 @@ export function useRestoreTrash() {
 
       return { previousTrash };
     },
-    onError: (err, newTodo, context) => {
+    onError: (_err, _vars, context) => {
       if (context?.previousTrash) {
         queryClient.setQueryData(["trash"], context.previousTrash);
       }
@@ -80,20 +83,23 @@ export function useDeleteTrash() {
   const { t } = useTranslation();
 
   return useMutation({
-    mutationFn: async (paths: string[]) => {
+    mutationFn: async (selectedItems: TrashItem[]) => {
       const response = await fetch("/api/trash/delete", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ paths }),
+        body: JSON.stringify({
+          items: selectedItems.map((i) => ({ type: i.type, path: i.path })),
+        }),
       });
 
       if (!response.ok) throw new Error("Failed to delete items");
 
       return response.json();
     },
-    onMutate: async (paths) => {
+    onMutate: async (selectedItems) => {
       await queryClient.cancelQueries({ queryKey: ["trash"] });
       const previousTrash = queryClient.getQueryData<TrashItem[]>(["trash"]);
+      const paths = selectedItems.map((i) => i.path);
 
       if (previousTrash) {
         queryClient.setQueryData<TrashItem[]>(
@@ -104,7 +110,7 @@ export function useDeleteTrash() {
 
       return { previousTrash };
     },
-    onError: (err, newTodo, context) => {
+    onError: (_err, _vars, context) => {
       if (context?.previousTrash) {
         queryClient.setQueryData(["trash"], context.previousTrash);
       }

@@ -1,7 +1,7 @@
 import { revalidatePath } from "next/cache";
 import { NextRequest, NextResponse } from "next/server";
 
-import { auth } from "@/auth";
+import { requireAdmin } from "@/lib/session";
 import { ROUTES } from "@/lib/constants";
 import { getGitHubCMS } from "@/lib/github-cms";
 import { statixConfig } from "@/statix.config";
@@ -12,10 +12,11 @@ interface RouteContext {
 
 export async function POST(request: NextRequest, context: RouteContext) {
   try {
-    const session = await auth();
-
-    if (!session) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    try {
+      await requireAdmin();
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : "Forbidden";
+      return NextResponse.json({ error: msg }, { status: msg === "Unauthorized" ? 401 : 403 });
     }
 
     const { collectionSlug, id } = await context.params;

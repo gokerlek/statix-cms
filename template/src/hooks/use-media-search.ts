@@ -1,8 +1,8 @@
 import { useMemo } from "react";
 
 import ui from "@/content/ui.json";
-import { GitHubFile } from "@/lib/github-cms";
 import { statixConfig } from "@/statix.config";
+import type { MediaFile } from "./use-media";
 
 import { useMedia } from "./use-media";
 
@@ -31,16 +31,16 @@ export function useMediaSearch({
       {
         id: "uncategorized",
         label: ui.mediaLibrary.uncategorized,
-        count: images.filter((img) => img.path.split("/").length <= 3).length,
+        // uploads/filename.jpg → 2 parça = root (uncategorized)
+        count: images.filter((img) => img.path.split("/").length === 2).length,
       },
     ];
 
     // Add collection tabs
     statixConfig.collections.forEach((collection) => {
-      const count = images.filter(
-        (img) =>
-          img.path.includes(`/media/${collection.slug}/`) ||
-          img.path.includes(`/${collection.slug}/`),
+      // R2 path: uploads/{collection.slug}/filename.jpg
+      const count = images.filter((img) =>
+        img.path.startsWith(`uploads/${collection.slug}/`),
       ).length;
 
       if (count > 0) {
@@ -61,15 +61,13 @@ export function useMediaSearch({
 
     // Filter by tab
     if (activeTab === "uncategorized") {
-      tabFiltered = images.filter((img) => img.path.split("/").length <= 3);
+      tabFiltered = images.filter((img) => img.path.split("/").length === 2);
     } else if (activeTab === "orphaned") {
       tabFiltered = images.filter((img) => img.isOrphaned);
     } else if (activeTab !== "all") {
-      // Collection tab
-      tabFiltered = images.filter(
-        (img) =>
-          img.path.includes(`/media/${activeTab}/`) ||
-          img.path.includes(`/${activeTab}/`),
+      // Collection tab: uploads/{activeTab}/filename
+      tabFiltered = images.filter((img) =>
+        img.path.startsWith(`uploads/${activeTab}/`),
       );
     }
 
@@ -84,14 +82,17 @@ export function useMediaSearch({
   }, [images, activeTab, searchQuery]);
 
   // Group filtered images by folder
+  // R2 key: uploads/filename.jpg veya uploads/folder/filename.jpg
   const groupedImages = useMemo(() => {
     return filteredImages.reduce(
       (acc, img) => {
         const parts = img.path.split("/");
+        // parts[0] = "uploads", parts[1] = folder veya filename
         let folder = "Default";
 
-        if (parts.length > 3) {
-          folder = parts[2];
+        if (parts.length > 2) {
+          // uploads/folder/filename → folder = parts[1]
+          folder = parts[1];
         }
 
         if (!acc[folder]) acc[folder] = [];
@@ -100,7 +101,7 @@ export function useMediaSearch({
 
         return acc;
       },
-      {} as Record<string, GitHubFile[]>,
+      {} as Record<string, MediaFile[]>,
     );
   }, [filteredImages]);
 

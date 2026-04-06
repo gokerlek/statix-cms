@@ -1,13 +1,13 @@
 import { NextResponse } from "next/server";
 
-import { auth } from "@/auth";
+import { auth } from "@/lib/auth";
 import { ROUTES } from "@/lib/constants";
 import { checkRateLimit, getClientIp } from "@/lib/rate-limit";
 
 import type { NextRequest } from "next/server";
 
 // Public API routes that don't require authentication
-const PUBLIC_API_ROUTES = ["/api/auth"];
+const PUBLIC_API_ROUTES = ["/api/auth", "/api/media/serve"];
 
 // Rate limit config: 100 requests per minute
 const RATE_LIMIT_CONFIG = { limit: 100, windowSeconds: 60 };
@@ -38,7 +38,7 @@ export async function proxy(request: NextRequest) {
     }
   }
 
-  const session = await auth();
+  const session = await auth.api.getSession({ headers: request.headers });
 
   // Check if this is a public API route
   const isPublicApiRoute = PUBLIC_API_ROUTES.some((route) =>

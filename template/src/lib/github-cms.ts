@@ -110,62 +110,6 @@ export class GitHubCMS {
   }
 
   /**
-   * Upload image to GitHub
-   */
-  /**
-   * Upload image to GitHub
-   */
-  async uploadImage(
-    file: File,
-    folder?: string,
-    customFilename?: string,
-  ): Promise<string> {
-    const buffer = await file.arrayBuffer();
-    const base64 = Buffer.from(buffer).toString("base64");
-
-    // Determine filename
-    let filename: string;
-
-    if (customFilename) {
-      const extension = file.name.split(".").pop();
-      const sanitizedCustomName = customFilename.replace(
-        /[^a-zA-Z0-9.-]/g,
-        "_",
-      );
-
-      // Ensure extension is present
-      filename = sanitizedCustomName.endsWith(`.${extension}`)
-        ? sanitizedCustomName
-        : `${sanitizedCustomName}.${extension}`;
-    } else {
-      const timestamp = Date.now();
-      const sanitizedName = file.name.replace(/[^a-zA-Z0-9.-]/g, "_");
-
-      filename = `${timestamp}-${sanitizedName}`;
-    }
-
-    // Determine path
-    const folderPath = folder ? `public/uploads/${folder}` : "public/uploads";
-    const path = `${folderPath}/${filename}`;
-
-    await this.octokit.rest.repos.createOrUpdateFileContents({
-      owner: this.owner,
-      repo: this.repo,
-      path,
-      message: `Upload image: ${filename}`,
-      content: base64,
-      branch: this.branch,
-    });
-
-    // Return public URL
-    const urlPath = folder
-      ? `/uploads/${folder}/${filename}`
-      : `/uploads/${filename}`;
-
-    return urlPath;
-  }
-
-  /**
    * Get all files in a collection folder
    */
   async getCollection(folderPath: string): Promise<GitHubFile[]> {
@@ -405,115 +349,19 @@ export class GitHubCMS {
   }
 
   /**
-   * Move media file to different folder and update references in content
+   * Update media URL references across all content JSON files
    */
-  async moveMedia(
-    currentPath: string,
-    newFolder: string,
-    onProgress?: (step: string, current: number, total: number) => void,
+  async updateMediaReferences(
+    oldUrl: string,
+    newUrl: string,
   ): Promise<{ updatedFiles: string[] }> {
-    const filename = currentPath.split("/").pop();
-
-    if (!filename) throw new Error("Invalid path");
-
-    // Calculate new path
-    const newPath =
-      newFolder === "default"
-        ? `public/uploads/${filename}`
-        : `public/uploads/${newFolder}/${filename}`;
-
-    if (currentPath === newPath) {
-      throw new Error("Source and destination are the same");
-    }
-
     const updatedFiles: string[] = [];
-    // Progress steps (backend - English only, not user-facing)
-    const steps = [
-      "Copying image",
-      "Scanning references",
-      "Updating content files",
-      "Deleting original file",
-    ];
-
-    // Step 1: Get original file content and SHA
-    onProgress?.(steps[0], 0, steps.length);
-
-    const response = await this.octokit.rest.repos.getContent({
-      owner: this.owner,
-      repo: this.repo,
-      path: currentPath,
-      ref: this.branch,
-    });
-
-    if (!("sha" in response.data) || response.data.type !== "file") {
-      throw new Error("File not found");
-    }
-
-    const originalSha = response.data.sha;
-
-    // Get binary content using blob API for large files
-    let content: string;
-
-    if ("content" in response.data && response.data.content) {
-      content = response.data.content;
-    } else {
-      const blobResponse = await this.octokit.rest.git.getBlob({
-        owner: this.owner,
-        repo: this.repo,
-        file_sha: originalSha,
-      });
-
-      content = blobResponse.data.content;
-    }
-
-    // Step 2: Copy to new path
-    onProgress?.(steps[0], 1, steps.length);
-
-    // Check if target exists and get SHA if so
-    let targetSha: string | undefined;
-
-    try {
-      const targetResponse = await this.octokit.rest.repos.getContent({
-        owner: this.owner,
-        repo: this.repo,
-        path: newPath,
-        ref: this.branch,
-      });
-
-      if ("sha" in targetResponse.data) {
-        targetSha = targetResponse.data.sha;
-      }
-    } catch {
-      // Target doesn't exist, that's fine
-    }
-
-    await this.octokit.rest.repos.createOrUpdateFileContents({
-      owner: this.owner,
-      repo: this.repo,
-      path: newPath,
-      message: `Move ${filename} to ${newFolder}`,
-      content,
-      branch: this.branch,
-      ...(targetSha && { sha: targetSha }),
-    });
-
-    // Step 3: Find and update references
-    onProgress?.(steps[1], 2, steps.length);
-
-    // Calculate old and new URL paths for content
-    const oldUrlPath = currentPath.replace("public", "");
-    const newUrlPath = newPath.replace("public", "");
-
-    // Get all content files from statixConfig collections
-    const allContentFiles: Array<{ path: string; sha: string }> = [];
-
-    // Import statixConfig dynamically or use the collections directly
     const { statixConfig } = await import("@/statix.config");
+    const allContentFiles: Array<{ path: string; sha: string }> = [];
 
     for (const collection of statixConfig.collections) {
       try {
         const files = await this.listFiles(collection.path, true);
-
         allContentFiles.push(
           ...files
             .filter((f) => f.name.endsWith(".json"))
@@ -524,36 +372,20 @@ export class GitHubCMS {
       }
     }
 
-    // Step 4: Update content files
-    onProgress?.(steps[2], 2, steps.length);
-
     for (const file of allContentFiles) {
       try {
         const fileData = await this.getFile(file.path);
-
         if (!fileData) continue;
-
         const contentStr = JSON.stringify(fileData.content);
-
-        // Check if this file contains the old path
-        if (contentStr.includes(oldUrlPath)) {
-          const newContentStr = contentStr.split(oldUrlPath).join(newUrlPath);
-          const newContent = JSON.parse(newContentStr);
-
-          await this.saveFile(file.path, newContent, fileData.sha);
+        if (contentStr.includes(oldUrl)) {
+          const newContentStr = contentStr.split(oldUrl).join(newUrl);
+          await this.saveFile(file.path, JSON.parse(newContentStr), fileData.sha);
           updatedFiles.push(file.path);
         }
       } catch (error) {
-        console.error(`Failed to update ${file.path}:`, error);
+        console.error(`Failed to update references in ${file.path}:`, error);
       }
     }
-
-    // Step 5: Delete original file
-    onProgress?.(steps[3], 3, steps.length);
-
-    await this.deleteFile(currentPath, originalSha);
-
-    onProgress?.("Completed", 4, steps.length);
 
     return { updatedFiles };
   }
@@ -583,86 +415,6 @@ export class GitHubCMS {
     const trashPath = `content/trash/${filename}`;
 
     await this.saveFile(trashPath, trashItem);
-    await this.deleteFile(path, sha);
-  }
-
-  /**
-   * Soft delete media file
-   */
-  async softDeleteMedia(path: string, sha: string): Promise<void> {
-    // For media, we move the binary file and create a metadata file
-    const filename = path.split("/").pop();
-
-    if (!filename) throw new Error("Invalid path");
-
-    // 1. Get the file content (binary)
-    const response = await this.octokit.rest.repos.getContent({
-      owner: this.owner,
-      repo: this.repo,
-      path,
-      ref: this.branch,
-    });
-
-    if (!("content" in response.data)) {
-      throw new Error("Failed to get file content");
-    }
-
-    // 2. Save binary to trash/media (check if already exists to get SHA)
-    const trashMediaPath = `content/trash/media/${filename}`;
-    let existingTrashSha: string | undefined;
-
-    try {
-      const existingFile = await this.octokit.rest.repos.getContent({
-        owner: this.owner,
-        repo: this.repo,
-        path: trashMediaPath,
-        ref: this.branch,
-      });
-
-      if ("sha" in existingFile.data) {
-        existingTrashSha = existingFile.data.sha;
-      }
-    } catch {
-      // File doesn't exist in trash, which is fine
-    }
-
-    await this.octokit.rest.repos.createOrUpdateFileContents({
-      owner: this.owner,
-      repo: this.repo,
-      path: trashMediaPath,
-      message: `Move ${filename} to trash`,
-      content: response.data.content,
-      branch: this.branch,
-      ...(existingTrashSha && { sha: existingTrashSha }),
-    });
-
-    // 3. Save metadata (check if already exists to get SHA)
-    const metadata = {
-      originalPath: path,
-      deletedAt: new Date().toISOString(),
-      type: "media",
-    };
-    const metadataPath = `content/trash/media/${filename}.meta.json`;
-    let existingMetaSha: string | undefined;
-
-    try {
-      const existingMeta = await this.octokit.rest.repos.getContent({
-        owner: this.owner,
-        repo: this.repo,
-        path: metadataPath,
-        ref: this.branch,
-      });
-
-      if ("sha" in existingMeta.data) {
-        existingMetaSha = existingMeta.data.sha;
-      }
-    } catch {
-      // Metadata file doesn't exist, which is fine
-    }
-
-    await this.saveFile(metadataPath, metadata, existingMetaSha);
-
-    // 4. Delete original
     await this.deleteFile(path, sha);
   }
 

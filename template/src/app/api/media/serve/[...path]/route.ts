@@ -1,79 +1,38 @@
+import { GetObjectCommand } from "@aws-sdk/client-s3";
 import { NextRequest, NextResponse } from "next/server";
 
-import { getGitHubCMS } from "@/lib/github-cms";
+import { getR2Client } from "@/lib/r2";
+import { env } from "@/lib/env";
 
+// R2'den S3 API ile proxy — public URL engellendiğinde çalışır
 export async function GET(
-  request: NextRequest,
+  _request: NextRequest,
   { params }: { params: Promise<{ path: string[] }> },
 ) {
-  let path = "";
-  let fullPath = "";
+  const { path: pathArray } = await params;
+  const key = pathArray.join("/");
+
+  if (!env.R2_BUCKET_NAME) {
+    return new NextResponse("R2 not configured", { status: 500 });
+  }
 
   try {
-    const { path: pathArray } = await params;
+    const r2 = getR2Client();
+    const obj = await r2.send(
+      new GetObjectCommand({ Bucket: env.R2_BUCKET_NAME, Key: key }),
+    );
 
-    path = pathArray.join("/");
-    fullPath = `public/uploads/${path}`;
-
-    const github = getGitHubCMS();
-    const response = await github.octokit.rest.repos.getContent({
-      owner: process.env.GITHUB_OWNER!,
-      repo: process.env.GITHUB_REPO!,
-      path: fullPath,
-      ref: process.env.GITHUB_BRANCH || "main",
-    });
-
-    let content: Buffer;
-
-    if ("content" in response.data && response.data.content) {
-      // Small files: content is directly available
-      content = Buffer.from(response.data.content, "base64");
-    } else if ("sha" in response.data && response.data.type === "file") {
-      // Large files (>1MB): need to use blob API
-      const blobResponse = await github.octokit.rest.git.getBlob({
-        owner: process.env.GITHUB_OWNER!,
-        repo: process.env.GITHUB_REPO!,
-        file_sha: response.data.sha,
-      });
-
-      content = Buffer.from(blobResponse.data.content, "base64");
-    } else {
-      return new NextResponse("File not found", { status: 404 });
-    }
-
-    // Determine content type based on file extension
-    const ext = path.split(".").pop()?.toLowerCase();
-    const contentTypeMap: Record<string, string> = {
-      jpg: "image/jpeg",
-      jpeg: "image/jpeg",
-      png: "image/png",
-      gif: "image/gif",
-      webp: "image/webp",
-      svg: "image/svg+xml",
-    };
-
-    const contentType = contentTypeMap[ext || ""] || "application/octet-stream";
-
-    return new NextResponse(new Uint8Array(content), {
+    const body = obj.Body as ReadableStream;
+    return new NextResponse(body, {
       headers: {
-        "Content-Type": contentType,
-        "Cache-Control": "public, max-age=31536000",
+        "Content-Type": obj.ContentType ?? "application/octet-stream",
+        "Cache-Control": "public, max-age=31536000, immutable",
+        ...(obj.ContentLength
+          ? { "Content-Length": String(obj.ContentLength) }
+          : {}),
       },
     });
-  } catch (error: unknown) {
-    if (
-      error &&
-      typeof error === "object" &&
-      "status" in error &&
-      error.status === 404
-    ) {
-      console.log(`File not found in repository: ${fullPath}`);
-
-      return new NextResponse("File not found in repository", { status: 404 });
-    }
-
-    console.error("Failed to serve media:", error);
-
-    return new NextResponse("Internal server error", { status: 500 });
+  } catch {
+    return new NextResponse("Not found", { status: 404 });
   }
 }

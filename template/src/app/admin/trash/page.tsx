@@ -6,47 +6,48 @@ import { TrashList } from "@/components/cms/TrashList";
 import { TrashToolbar } from "@/components/cms/TrashToolbar";
 import { PageLoading } from "@/components/ui/loading";
 import { useTranslation } from "@/hooks/use-translation";
-import { useDeleteTrash, useRestoreTrash, useTrash } from "@/hooks/use-trash";
+import { TrashItem, useDeleteTrash, useRestoreTrash, useTrash } from "@/hooks/use-trash";
 
 export default function TrashPage() {
   const { t } = useTranslation();
   const { data: items, isLoading } = useTrash();
   const restoreMutation = useRestoreTrash();
   const deleteMutation = useDeleteTrash();
-  const [selectedItems, setSelectedItems] = useState<string[]>([]);
+  const [selectedPaths, setSelectedPaths] = useState<string[]>([]);
+
+  const selectedItems = (): TrashItem[] =>
+    (items ?? []).filter((item) => selectedPaths.includes(item.path));
 
   const handleToggleSelect = (path: string) => {
-    setSelectedItems((prev) =>
+    setSelectedPaths((prev) =>
       prev.includes(path) ? prev.filter((p) => p !== path) : [...prev, path],
     );
   };
 
   const handleSelectAll = (checked: boolean) => {
     if (checked && items) {
-      setSelectedItems(items.map((item) => item.path));
+      setSelectedPaths(items.map((item) => item.path));
     } else {
-      setSelectedItems([]);
+      setSelectedPaths([]);
     }
   };
 
   const handleRestore = () => {
-    restoreMutation.mutate(selectedItems, {
-      onSuccess: () => setSelectedItems([]),
+    restoreMutation.mutate(selectedItems(), {
+      onSuccess: () => setSelectedPaths([]),
     });
   };
 
   const handleDelete = () => {
-    deleteMutation.mutate(selectedItems, {
-      onSuccess: () => setSelectedItems([]),
+    deleteMutation.mutate(selectedItems(), {
+      onSuccess: () => setSelectedPaths([]),
     });
   };
 
   const handleEmptyTrash = () => {
     if (items) {
-      const allPaths = items.map((item) => item.path);
-
-      deleteMutation.mutate(allPaths, {
-        onSuccess: () => setSelectedItems([]),
+      deleteMutation.mutate(items, {
+        onSuccess: () => setSelectedPaths([]),
       });
     }
   };
@@ -70,7 +71,7 @@ export default function TrashPage() {
       </div>
 
       <TrashToolbar
-        selectedCount={selectedItems.length}
+        selectedCount={selectedPaths.length}
         onRestore={handleRestore}
         onDelete={handleDelete}
         onEmptyTrash={handleEmptyTrash}
@@ -80,7 +81,7 @@ export default function TrashPage() {
 
       <TrashList
         items={items || []}
-        selectedItems={selectedItems}
+        selectedItems={selectedPaths}
         onToggleSelect={handleToggleSelect}
         onSelectAll={handleSelectAll}
       />

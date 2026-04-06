@@ -1,16 +1,20 @@
 import Image from "next/image";
-import { User } from "next-auth";
 
 import { SignOutButton } from "@/components/cms/SignOutButton";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 
-interface UserCardProps {
-  user?: User;
-  onSignOut: () => Promise<void>;
+interface CMSUser {
+  name?: string | null;
+  email?: string | null;
+  image?: string | null;
 }
 
-export function UserCard({ user, onSignOut }: UserCardProps) {
+interface UserCardProps {
+  user?: CMSUser;
+}
+
+export function UserCard({ user }: UserCardProps) {
   return (
     <Card>
       <CardHeader className="flex items-center justify-between gap-2">
@@ -22,7 +26,7 @@ export function UserCard({ user, onSignOut }: UserCardProps) {
           priority
         />
 
-        <SignOutButton onSignOut={onSignOut} />
+        <SignOutButton />
       </CardHeader>
 
       <CardContent className="flex items-center gap-4">

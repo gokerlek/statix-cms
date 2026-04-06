@@ -2,11 +2,16 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 
 import ui from "@/content/ui.json";
-import { GitHubFile } from "@/lib/github-cms";
-
-interface MediaFile extends GitHubFile {
+export interface MediaFile {
+  [key: string]: unknown;
+  name: string;
+  path: string;
+  sha: string;
+  size: number;
+  type: string;
   url: string;
   isOrphaned?: boolean;
+  lastModified?: string;
 }
 
 export function useMedia() {
@@ -19,7 +24,13 @@ export function useMedia() {
         throw new Error("Failed to fetch media");
       }
 
-      return response.json();
+      const data = await response.json();
+      // R2'den gelen nesnelere sha ve type ekle (GitHubFile uyumluluğu için)
+      return data.map((f: MediaFile) => ({
+        ...f,
+        sha: f.sha ?? f.path,
+        type: f.type ?? "file",
+      }));
     },
     staleTime: 1000 * 60, // 1 minute
     refetchOnWindowFocus: false,
@@ -71,13 +82,11 @@ export function useDeleteMedia() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async ({ path, sha }: { path: string; sha: string }) => {
+    mutationFn: async ({ path, url }: { path: string; url?: string; sha?: string }) => {
       const response = await fetch("/api/media/delete", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ path, sha }),
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ key: path, url }),
       });
 
       if (!response.ok) {

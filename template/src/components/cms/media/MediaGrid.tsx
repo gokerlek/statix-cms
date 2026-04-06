@@ -1,6 +1,6 @@
 "use client";
 
-import { GitHubFile } from "@/lib/github-cms";
+import type { MediaFile as GitHubFile } from "@/hooks/use-media";
 
 import { MediaGridSkeleton } from "../skeletons";
 import { MediaItem } from "./MediaItem";

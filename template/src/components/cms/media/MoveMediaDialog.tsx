@@ -126,7 +126,7 @@ export function MoveMediaDialog({
               </label>
 
               <div className="rounded-md bg-muted p-2 text-sm text-muted-foreground">
-                {media.path.replace("public", "")}
+                {media.path}
               </div>
             </div>
 

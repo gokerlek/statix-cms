@@ -6,6 +6,7 @@ export const ROUTES = {
     MEDIA: `${ADMIN_ROOT}/media`,
     TRASH: `${ADMIN_ROOT}/trash`,
     ACTIVITY: `${ADMIN_ROOT}/activity`,
+    USERS: `${ADMIN_ROOT}/users`,
     COLLECTION: (slug: string) => `${ADMIN_ROOT}/${slug}`,
     COLLECTION_NEW: (slug: string) => `${ADMIN_ROOT}/${slug}/new`,
     COLLECTION_ITEM: (slug: string, id: string) =>

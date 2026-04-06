@@ -1,13 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 
-import { auth } from "@/auth";
 import { sanitizeFilename, validateFileUpload } from "@/lib/file-validation";
-import { getGitHubCMS } from "@/lib/github-cms";
+import { uploadToR2 } from "@/lib/r2";
+import { getSession } from "@/lib/session";
 
 export async function POST(request: NextRequest) {
   try {
-    // Check authentication
-    const session = await auth();
+    const session = await getSession();
 
     if (!session) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -15,36 +14,44 @@ export async function POST(request: NextRequest) {
 
     const formData = await request.formData();
     const file = formData.get("file") as File;
-    const folder = formData.get("folder") as string;
+    const folder = formData.get("folder") as string | null;
     const filename = formData.get("filename") as string;
 
-    // Validate file upload
     const validation = validateFileUpload(file);
 
     if (!validation.valid) {
       return NextResponse.json({ error: validation.error }, { status: 400 });
     }
 
-    // Sanitize filename
-    const safeFilename = filename ? sanitizeFilename(filename) : undefined;
+    const rawFilename = filename || file.name;
+    let safeFilename = sanitizeFilename(rawFilename);
 
-    console.log(
-      `Upload request: file=${file?.name}, folder=${folder || "default"}, filename=${safeFilename}`,
-    );
+    // Uzantı yoksa mime type'dan ekle
+    if (!safeFilename.includes(".")) {
+      const mimeToExt: Record<string, string> = {
+        "image/jpeg": ".jpg",
+        "image/png": ".png",
+        "image/gif": ".gif",
+        "image/webp": ".webp",
+        "image/svg+xml": ".svg",
+        "image/avif": ".avif",
+      };
+      const ext = mimeToExt[file.type] ?? "";
+      safeFilename = safeFilename + ext;
+    }
 
-    const github = getGitHubCMS();
+    const key = folder
+      ? `uploads/${folder}/${safeFilename}`
+      : `uploads/${safeFilename}`;
 
-    // Pass folder and sanitized filename to uploadImage
-    const url = await github.uploadImage(file, folder, safeFilename);
-
-    console.log(`Upload completed successfully: ${url}`);
+    const buffer = Buffer.from(await file.arrayBuffer());
+    const url = await uploadToR2(buffer, key, file.type);
 
     return NextResponse.json({ url });
   } catch (error) {
     console.error("Upload error:", error);
-
     return NextResponse.json(
-      { error: "Failed to upload image" },
+      { error: "Failed to upload file" },
       { status: 500 },
     );
   }

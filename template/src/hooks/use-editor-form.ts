@@ -313,7 +313,7 @@ export function useEditorForm({
         // Try default locale first, then any available locale
         const defaultLoc = statixConfig.i18n?.defaultLocale || "en";
 
-        title = translations[defaultLoc]?.[titleField];
+        title = translations[defaultLoc]?.[titleField] as string | undefined;
 
         if (!title) {
           // Try any available locale

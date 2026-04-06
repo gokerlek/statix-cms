@@ -1,39 +1,41 @@
 import { NextRequest, NextResponse } from "next/server";
 
-import { auth } from "@/auth";
-import { getGitHubCMS } from "@/lib/github-cms";
+import { extractR2Key, softDeleteR2 } from "@/lib/r2";
+import { requireAdmin } from "@/lib/session";
 
 export async function POST(request: NextRequest) {
   try {
-    // Check authentication
-    const session = await auth();
-
-    if (!session) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
+    await requireAdmin();
 
     const body = await request.json();
-    const { path, sha } = body;
+    const { url, key } = body;
 
-    if (!path || !sha) {
+    // key doğrudan veya URL'den çıkarılabilir
+    const r2Key = key || (url ? extractR2Key(url) : null);
+
+    if (!r2Key) {
       return NextResponse.json(
-        { error: "Path and SHA are required" },
+        { error: "Media key or URL is required" },
         { status: 400 },
       );
     }
 
-    const github = getGitHubCMS();
+    const trashKey = await softDeleteR2(r2Key);
 
-    await github.softDeleteMedia(path, sha);
-
-    return NextResponse.json({ success: true });
+    return NextResponse.json({ success: true, trashKey });
   } catch (error) {
-    console.error("Delete error:", error);
-    const errorMessage =
-      error instanceof Error ? error.message : "Unknown error";
-
+    if (
+      error instanceof Error &&
+      (error.message === "Unauthorized" || error.message === "Forbidden")
+    ) {
+      return NextResponse.json(
+        { error: error.message },
+        { status: error.message === "Unauthorized" ? 401 : 403 },
+      );
+    }
+    console.error("Media delete error:", error);
     return NextResponse.json(
-      { error: `Failed to delete file: ${errorMessage}` },
+      { error: "Failed to delete media" },
       { status: 500 },
     );
   }

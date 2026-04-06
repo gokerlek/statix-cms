@@ -25,7 +25,6 @@ interface SidebarProps {
     email?: string | null;
     image?: string | null;
   };
-  onSignOut: () => Promise<void>;
 }
 
 const navItems = [
@@ -36,7 +35,7 @@ const navItems = [
   },
 ];
 
-export function Sidebar({ user, onSignOut }: SidebarProps) {
+export function Sidebar({ user }: SidebarProps) {
   const pathname = usePathname();
 
   return (
@@ -188,7 +187,7 @@ export function Sidebar({ user, onSignOut }: SidebarProps) {
           </div>
         </div>
 
-        <SignOutButton onSignOut={onSignOut} />
+        <SignOutButton />
       </div>
     </div>
   );

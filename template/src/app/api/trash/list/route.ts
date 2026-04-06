@@ -1,11 +1,12 @@
 import { NextResponse } from "next/server";
 
-import { auth } from "@/auth";
 import { getGitHubCMS } from "@/lib/github-cms";
+import { listR2Trash } from "@/lib/r2";
+import { getSession } from "@/lib/session";
 
 export async function GET() {
   try {
-    const session = await auth();
+    const session = await getSession();
 
     if (!session) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -13,19 +14,26 @@ export async function GET() {
 
     const github = getGitHubCMS();
 
-    // Lazy cleanup: Check for old items and delete them
-    // We do this in the background so we don't block the response too much
-    // But for simplicity in serverless, we'll await it or fire and forget if possible.
-    // Since Vercel functions can die early, we should await it to be safe,
-    // or use a separate cron job. For this requirement, "Lazy cleanup" implies doing it on access.
-    await github.cleanupTrash(10); // 10 days retention
+    // Content trash (GitHub JSON) + Medya trash (R2) — ikisini birleştir
+    const [contentItems, r2Items] = await Promise.all([
+      github.getTrashItems().catch(() => []),
+      listR2Trash().catch(() => []),
+    ]);
 
-    const items = await github.getTrashItems();
+    // R2 alanlarını TrashItem şekline dönüştür
+    const mediaItems = r2Items.map((item) => ({
+      name: item.originalKey.split("/").pop() ?? item.originalKey,
+      path: item.trashKey,
+      originalPath: item.originalKey,
+      deletedAt: item.deletedAt ?? new Date(0).toISOString(),
+      type: "media" as const,
+    }));
 
-    return NextResponse.json(items);
+    const allItems = [...contentItems, ...mediaItems];
+
+    return NextResponse.json(allItems);
   } catch (error) {
     console.error("Trash list error:", error);
-
     return NextResponse.json(
       { error: "Failed to fetch trash items" },
       { status: 500 },

@@ -6,7 +6,7 @@ export const statixConfig: StatixConfig = {
     repo: process.env.GITHUB_REPO || "",
     branch: process.env.GITHUB_BRANCH || "main",
   },
-  mediaFolder: "public/uploads",
+  mediaFolder: "uploads",
   i18n: {
     locales: ["en", "tr"],
     defaultLocale: "en",

@@ -7,7 +7,7 @@ import ui from "@/content/ui.json";
 import { useDeleteMedia } from "@/hooks/use-media";
 import { MediaTab, useMediaSearch } from "@/hooks/use-media-search";
 import { useMediaSelection } from "@/hooks/use-media-selection";
-import { GitHubFile } from "@/lib/github-cms";
+import type { MediaFile as GitHubFile } from "@/hooks/use-media";
 
 import { MediaGrid } from "./media/MediaGrid";
 import { MediaToolbar } from "./media/MediaToolbar";
@@ -22,9 +22,7 @@ export function MediaLibrary({ onSelect, selectedUrl }: MediaLibraryProps) {
   const [searchQuery, setSearchQuery] = useState("");
   const [activeTab, setActiveTab] = useState<MediaTab>("all");
   const [fileToDelete, setFileToDelete] = useState<GitHubFile | null>(null);
-  const [fileToMove, setFileToMove] = useState<
-    (GitHubFile & { isOrphaned?: boolean }) | null
-  >(null);
+  const [fileToMove, setFileToMove] = useState<(GitHubFile & { isOrphaned?: boolean }) | null>(null);
   const [isBulkDeleting, setIsBulkDeleting] = useState(false);
 
   const {
@@ -47,19 +45,15 @@ export function MediaLibrary({ onSelect, selectedUrl }: MediaLibraryProps) {
 
   const { mutate: deleteMedia, isPending: isDeleting } = useDeleteMedia();
 
-  const handleDeleteClick = (file: GitHubFile) => {
-    setFileToDelete(file);
-  };
-
-  const handleMoveClick = (file: GitHubFile & { isOrphaned?: boolean }) => {
-    setFileToMove(file);
-  };
+  const handleDeleteClick = (file: GitHubFile) => setFileToDelete(file);
+  const handleMoveClick = (file: GitHubFile & { isOrphaned?: boolean }) => setFileToMove(file);
 
   // Extract current folder from file path
   const getCurrentFolder = (path: string) => {
-    const parts = path.replace("public/uploads/", "").split("/");
-
-    return parts.length > 1 ? parts[0] : "default";
+    // path = "uploads/folder/filename.jpg" veya "uploads/filename.jpg"
+    const parts = path.split("/");
+    // parts[0] = "uploads", parts[1] = folder veya filename
+    return parts.length > 2 ? parts[1] : "default";
   };
 
   const confirmDelete = () => {

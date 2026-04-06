@@ -75,9 +75,9 @@ export function TrashList({
             </div>
 
             <div className="text-sm text-muted-foreground">
-              {formatDistanceToNow(new Date(item.deletedAt), {
-                addSuffix: true,
-              })}
+              {item.deletedAt
+                ? formatDistanceToNow(new Date(item.deletedAt), { addSuffix: true })
+                : "—"}
             </div>
 
             <div className="text-xs uppercase px-2 py-1 bg-secondary rounded-full w-fit">

@@ -1,5 +1,5 @@
 import { getGitHubCMS } from "@/lib/github-cms";
-import { getOrphanedMediaPaths } from "@/lib/media-utils";
+import { listR2Media, listR2Trash } from "@/lib/r2";
 import { statixConfig } from "@/statix.config";
 import { GitHubCommit } from "@/types/github";
 
@@ -242,127 +242,80 @@ export async function getSystemStats() {
 }
 
 export async function getMediaStats() {
-  const github = getGitHubCMS();
-  const files = await github.listFiles(statixConfig.mediaFolder, true);
+  // R2'den dosya listesi ve trash
+  const [r2Files, r2Trash] = await Promise.all([
+    listR2Media("uploads/").catch(() => []),
+    listR2Trash().catch(() => []),
+  ]);
 
-  // Filter for images/media
-  const mediaFiles = files.filter((file) =>
-    /\.(jpg|jpeg|png|gif|webp|svg|pdf|mp4)$/i.test(file.name),
-  );
+  // Uzantısı olmayan dosyaları da dahil et (WhatsApp gibi)
+  const mediaFiles = r2Files.filter((f) => !f.key.endsWith("/"));
 
-  const totalSize = mediaFiles.reduce((acc, file) => acc + file.size, 0);
+  const totalSize = mediaFiles.reduce((acc, f) => acc + (f.size ?? 0), 0);
 
+  // Dosya tipi dağılımı — bilinmeyen/uzantısız dosyalar "other"
+  const KNOWN_EXTS = new Set(["jpg","jpeg","png","gif","webp","svg","pdf","mp4","mov","avi","zip","doc","docx"]);
   const typeDistribution: Record<string, number> = {};
-
-  mediaFiles.forEach((file) => {
-    const ext = file.name.split(".").pop()?.toLowerCase() || "unknown";
-
-    typeDistribution[ext] = (typeDistribution[ext] || 0) + 1;
+  mediaFiles.forEach((f) => {
+    const name = f.key.split("/").pop() ?? "";
+    const dotIdx = name.lastIndexOf(".");
+    const candidate = dotIdx > 0 ? name.slice(dotIdx + 1).toLowerCase() : "";
+    const ext = KNOWN_EXTS.has(candidate) ? candidate : "other";
+    typeDistribution[ext] = (typeDistribution[ext] ?? 0) + 1;
   });
 
-  // Get recent uploads/activity
-  const recentCommits = await github.getRecentCommits(
-    10,
-    statixConfig.mediaFolder,
-  );
-  const trashItems = await github.getTrashItems();
+  // Son aktivite: canlı dosyalar + trash — lastModified'a göre sırala
+  const liveActivity = mediaFiles.map((f) => ({
+    sha: f.key,
+    filename: f.key.split("/").pop() ?? f.key,
+    status: "live" as const,
+    url: `/api/media/serve/${f.key}`,
+    _ts: new Date(f.lastModified ?? 0).getTime(),
+  }));
 
-  // Enrich commits with status
-  const latestActivity = (recentCommits as GitHubCommit[])
-    .map((commit: GitHubCommit) => {
-      // Try to extract filename from commit message
-      // Patterns: "Upload image: filename.ext", "Delete public/uploads/filename.ext", "Move filename.ext to trash"
-      let filename = "";
-      let action: "upload" | "delete" | "trash" | "restore" | "unknown" =
-        "unknown";
+  const trashWithTs = r2Trash.map((t) => ({
+    sha: t.trashKey,
+    filename: t.originalKey.split("/").pop() ?? t.originalKey,
+    status: "trash" as const,
+    url: `/api/media/serve/${t.trashKey}`,
+    _ts: new Date(t.deletedAt ?? 0).getTime(),
+  }));
 
-      if (commit.message.startsWith("Upload image:")) {
-        filename = commit.message.replace("Upload image:", "").trim();
-        action = "upload";
-      } else if (commit.message.startsWith("Delete public/uploads/")) {
-        filename = commit.message.replace("Delete public/uploads/", "").trim();
-        action = "delete";
-      } else if (
-        commit.message.startsWith("Move ") &&
-        commit.message.includes(" to trash")
-      ) {
-        filename = commit.message
-          .replace("Move ", "")
-          .split(" to trash")[0]
-          .trim();
-        action = "trash";
-      } else if (commit.message.startsWith("Restore ")) {
-        filename = commit.message.replace("Restore ", "").trim();
-        action = "restore";
-      }
+  const latestUploads = [...liveActivity, ...trashWithTs]
+    .sort((a, b) => b._ts - a._ts)
+    .slice(0, 6)
+    .map(({ _ts: _, ...rest }) => rest);
 
-      // Determine status based on ACTION primarily to preserve history accuracy
-      let status: "live" | "trash" | "deleted" | "restored" = "deleted";
+  // Orphaned: içerik taraması başarılıysa gerçek sayı, yoksa null (UI "-" gösterir)
+  let orphanedCount: number | null = null;
+  try {
+    const github = getGitHubCMS();
+    const collectionResults = await Promise.allSettled(
+      statixConfig.collections.map(async (col) => {
+        const files = await github.getCollection(col.path);
+        return Promise.all(files.map((f) => github.getFile(f.path)));
+      }),
+    );
+    const contentItems = collectionResults
+      .filter((r) => r.status === "fulfilled")
+      .flatMap((r) => (r as PromiseFulfilledResult<{ content: unknown }[]>).value)
+      .filter(Boolean);
 
-      if (action === "upload") status = "live";
-      else if (action === "trash") status = "trash";
-      else if (action === "restore") status = "restored";
-      else if (action === "delete") status = "deleted";
-
-      let url = null;
-
-      if (filename) {
-        // Robust matching for Live files
-        // We match if the basename is equal OR if the full path ends with the filename (handles subdirectories)
-        const liveFile = mediaFiles.find(
-          (f) => f.name === filename || f.path.endsWith(filename),
-        );
-        const isLive = !!liveFile;
-
-        // Robust matching for Trash files
-        // We match if the trash name (basename) is equal OR if the original path ends with the filename
-        const isTrash = trashItems.some(
-          (t) =>
-            t.type === "media" &&
-            (t.name === filename ||
-              (t.originalPath && t.originalPath.endsWith(filename))),
-        );
-
-        if (isLive) {
-          // Use the actual path from the file object, removing the media folder prefix
-          // This handles nested files correctly (e.g. team/logo.svg)
-          // Ensure we don't end up with undefined or partial paths
-          const relativePath = liveFile?.path.replace(
-            `${statixConfig.mediaFolder}/`,
-            "",
-          );
-
-          url = `/api/media/serve/${relativePath}`;
-        } else if (isTrash) {
-          url = `/api/trash/media/${filename}`;
-
-          // If the action was "delete" (permanently delete from original location),
-          // but the file is found in trash, it means it was a soft delete (move to trash).
-          // So we should show it as "trash", not "deleted".
-          if (action === "delete") {
-            status = "trash";
-          }
-        }
-      }
-
-      return {
-        ...commit,
-        filename,
-        action,
-        status,
-        url,
-      };
-    })
-    .filter((item) => item.filename); // Only show items where we identified a file
-
-  // Calculate orphaned files
-  const orphanedPaths = await getOrphanedMediaPaths(mediaFiles);
+    // Fetch başarılı — içerik yoksa da 0 değil, gerçek sayıyı ver
+    const contentIndex = contentItems.map((f) => JSON.stringify(f.content)).join(" ");
+    orphanedCount = mediaFiles.filter(
+      (f) => !contentIndex.includes(f.key.split("/").pop() ?? ""),
+    ).length;
+  } catch {
+    orphanedCount = null; // Fetch başarısız → bilinmiyor
+  }
 
   return {
     count: mediaFiles.length,
     totalSize,
     typeDistribution,
-    latestUploads: latestActivity.slice(0, 6), // Return top 6
-    orphanedCount: orphanedPaths.size,
+    latestUploads,
+    orphanedCount,
+    trashCount: r2Trash.length,
   };
 }
