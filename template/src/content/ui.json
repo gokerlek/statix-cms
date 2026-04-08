@@ -297,5 +297,91 @@
     "title": "Something went wrong",
     "description": "An unexpected error occurred. Please try again.",
     "retry": "Try Again"
+  },
+  "users": {
+    "title": "Users",
+    "description": "Manage CMS users",
+    "inviteButton": "Send Invite",
+    "inviteDialog": {
+      "title": "Send Invite",
+      "emailLabel": "Email address",
+      "emailPlaceholder": "user@company.com",
+      "roleLabel": "Role",
+      "submitButton": "Send Invite",
+      "submitting": "Sending..."
+    },
+    "roles": {
+      "admin": "Admin",
+      "user": "Editor"
+    },
+    "status": {
+      "active": "Active",
+      "banned": "Banned",
+      "self": "You",
+      "bannedUntil": "until {date}"
+    },
+    "lastLogin": "Last login: {date}",
+    "registeredAt": "Registered",
+    "avatar": {
+      "upload": "Upload",
+      "change": "Change",
+      "remove": "Remove",
+      "hint": "JPEG · PNG · WebP · max 2 MB"
+    },
+    "name": {
+      "validation": "Name must be at least 2 characters"
+    },
+    "role": {
+      "sectionTitle": "Role",
+      "saveButton": "Save",
+      "demoteWarning": "{name} will lose admin privileges.",
+      "demoteConfirm": "Confirm",
+      "demoteCancel": "Cancel"
+    },
+    "ban": {
+      "sectionTitle": "Status",
+      "banButton": "Ban User",
+      "reasonLabel": "Reason",
+      "reasonPlaceholder": "Ban reason...",
+      "reasonOptional": "(optional)",
+      "durationLabel": "Duration",
+      "durations": {
+        "1": "1 Day",
+        "7": "7 Days",
+        "30": "30 Days",
+        "permanent": "Permanent"
+      },
+      "confirmButton": "Ban",
+      "cancelButton": "Cancel",
+      "reasonValidation": "Reason cannot exceed 500 characters",
+      "unbanButton": "Remove Ban",
+      "banReason": "Reason: {reason}"
+    },
+    "dangerZone": {
+      "sectionTitle": "Danger Zone",
+      "deleteButton": "Delete User",
+      "deleteConfirmTitle": "Delete User",
+      "deleteConfirmButton": "Delete",
+      "deleteDescription": "This action cannot be undone.",
+      "ariaLabel": "Manage user: {name}"
+    },
+    "toasts": {
+      "nameUpdated": "Name updated",
+      "nameUpdateFailed": "Failed to update name",
+      "avatarUploaded": "Avatar uploaded",
+      "avatarUploadFailed": "Failed to upload avatar",
+      "avatarRemoved": "Avatar removed",
+      "avatarRemoveFailed": "Failed to remove avatar",
+      "roleUpdated": "Role updated",
+      "roleUpdateFailed": "Failed to update role",
+      "banned": "User banned",
+      "banFailed": "Failed to ban user",
+      "unbanned": "Ban removed",
+      "unbanFailed": "Failed to remove ban",
+      "deleted": "User deleted",
+      "deleteFailed": "Failed to delete user",
+      "inviteSent": "Invite sent",
+      "inviteFailed": "Failed to send invite"
+    }
   }
 }

@@ -1,12 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 
+import { writeAudit, getIp, cleanupOldAuditLogs } from "@/lib/audit";
 import { getGitHubCMS } from "@/lib/github-cms";
 import { deleteFromR2 } from "@/lib/r2";
 import { requireAdmin } from "@/lib/session";
 
 export async function POST(request: NextRequest) {
   try {
-    await requireAdmin();
+    const session = await requireAdmin();
 
     const body = await request.json();
     const { items } = body; // [{ type: "content" | "media", path: string }]
@@ -26,7 +27,18 @@ export async function POST(request: NextRequest) {
       } else {
         await github.deleteTrashItem(item.path);
       }
+      await writeAudit({
+        userId: session.user.id,
+        userEmail: session.user.email,
+        action: item.type === "media" ? "media.permanent_delete" : "content.permanent_delete",
+        entityType: item.type,
+        entityId: item.path,
+        ipAddress: getIp(request),
+      });
     }
+
+    // 90 günden eski audit logları temizle (fire-and-forget)
+    cleanupOldAuditLogs().catch((e) => console.error("[audit cleanup]", e));
 
     return NextResponse.json({ success: true });
   } catch (error) {

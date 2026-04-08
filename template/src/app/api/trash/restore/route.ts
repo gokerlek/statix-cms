@@ -1,6 +1,7 @@
 import { revalidatePath } from "next/cache";
 import { NextRequest, NextResponse } from "next/server";
 
+import { writeAudit, getIp } from "@/lib/audit";
 import { ROUTES } from "@/lib/constants";
 import { getGitHubCMS } from "@/lib/github-cms";
 import { restoreR2 } from "@/lib/r2";
@@ -33,6 +34,14 @@ export async function POST(request: NextRequest) {
         // type === "content" — GitHub'dan restore
         await github.restoreTrashItem(item.path);
       }
+      await writeAudit({
+        userId: session.user.id,
+        userEmail: session.user.email,
+        action: item.type === "media" ? "media.restore" : "content.restore",
+        entityType: item.type,
+        entityId: item.path,
+        ipAddress: getIp(request),
+      });
     }
 
     revalidatePath(ROUTES.ADMIN.ROOT, "layout");

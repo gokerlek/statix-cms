@@ -14,6 +14,6 @@ export const ROUTES = {
     SINGLETON: (slug: string) => `${ADMIN_ROOT}/${slug}/index`,
   },
   AUTH: {
-    SIGNIN: "/api/auth/signin",
+    SIGNIN: "/auth/signin",
   },
 };

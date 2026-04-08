@@ -1,11 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 
+import { writeAudit, getIp } from "@/lib/audit";
 import { extractR2Key, softDeleteR2 } from "@/lib/r2";
 import { requireAdmin } from "@/lib/session";
 
 export async function POST(request: NextRequest) {
   try {
-    await requireAdmin();
+    const session = await requireAdmin();
 
     const body = await request.json();
     const { url, key } = body;
@@ -21,6 +22,16 @@ export async function POST(request: NextRequest) {
     }
 
     const trashKey = await softDeleteR2(r2Key);
+
+    await writeAudit({
+      userId: session.user.id,
+      userEmail: session.user.email,
+      action: "media.soft_delete",
+      entityType: "media",
+      entityId: r2Key,
+      metadata: { trashKey },
+      ipAddress: getIp(request),
+    });
 
     return NextResponse.json({ success: true, trashKey });
   } catch (error) {

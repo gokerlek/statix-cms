@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 
+import { writeAudit, getIp } from "@/lib/audit";
 import { getGitHubCMS } from "@/lib/github-cms";
 import { extractR2Key, getPublicUrl, moveR2 } from "@/lib/r2";
 import { getSession } from "@/lib/session";
@@ -44,6 +45,16 @@ export async function POST(request: NextRequest) {
     // GitHub content JSON'larında URL referanslarını güncelle
     const github = getGitHubCMS();
     const updatedFiles = await github.updateMediaReferences(oldUrl, newUrl);
+
+    await writeAudit({
+      userId: session.user.id,
+      userEmail: session.user.email,
+      action: "media.move",
+      entityType: "media",
+      entityId: targetKey,
+      metadata: { fromKey: sourceKey, toKey: targetKey },
+      ipAddress: getIp(request),
+    });
 
     return NextResponse.json({
       success: true,

@@ -35,8 +35,9 @@ export function MediaDrawer() {
 
   return (
     <Drawer open={isOpen} onOpenChange={(open) => !open && closeDrawer()}>
-      <DrawerContent>
-        <div className="mx-auto w-full max-w-4xl flex flex-col h-full">
+      <DrawerContent className="fixed inset-x-0 bottom-0 h-[85vh] flex-col rounded-t-[10px]">
+        <div className="mx-auto mt-3 h-2 w-[100px] rounded-full bg-muted shrink-0" />
+        <div className="mx-auto w-full max-w-4xl flex flex-col flex-1 min-h-0">
           <DrawerHeader className="flex justify-between items-center px-6 py-4 border-b">
             <DrawerTitle>
               {mode === "upload"

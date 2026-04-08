@@ -5,11 +5,38 @@ import { Resend } from "resend";
 import { db } from "./db";
 import * as schema from "@/db/schema";
 import { env } from "./env";
+import { writeAudit } from "./audit";
 
 const resend = new Resend(env.RESEND_API_KEY);
 
 export const auth = betterAuth({
   database: drizzleAdapter(db, { provider: "sqlite", schema }),
+
+  databaseHooks: {
+    session: {
+      create: {
+        after: async (session) => {
+          await writeAudit({
+            userId: session.userId,
+            action: "auth.login",
+            entityType: "auth",
+            entityId: session.userId,
+            ipAddress: (session as { ipAddress?: string | null }).ipAddress ?? null,
+          });
+        },
+      },
+      delete: {
+        after: async (session) => {
+          await writeAudit({
+            userId: session.userId,
+            action: "auth.logout",
+            entityType: "auth",
+            entityId: session.userId,
+          });
+        },
+      },
+    },
+  },
 
   plugins: [
     emailOTP({

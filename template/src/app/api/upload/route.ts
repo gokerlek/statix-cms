@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 
 import { sanitizeFilename, validateFileUpload } from "@/lib/file-validation";
+import { writeAudit, getIp } from "@/lib/audit";
 import { uploadToR2 } from "@/lib/r2";
 import { getSession } from "@/lib/session";
 
@@ -46,6 +47,16 @@ export async function POST(request: NextRequest) {
 
     const buffer = Buffer.from(await file.arrayBuffer());
     const url = await uploadToR2(buffer, key, file.type);
+
+    await writeAudit({
+      userId: session.user.id,
+      userEmail: session.user.email,
+      action: "media.upload",
+      entityType: "media",
+      entityId: key,
+      metadata: { size: file.size, folder: folder ?? "default", contentType: file.type },
+      ipAddress: getIp(request),
+    });
 
     return NextResponse.json({ url });
   } catch (error) {

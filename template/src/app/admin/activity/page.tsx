@@ -1,10 +1,15 @@
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { AuditLogTab } from "@/components/cms/AuditLogTab";
 import { DetailedRecentActivity } from "@/components/cms/DetailedRecentActivity";
 import ui from "@/content/ui.json";
 import { getAllRecentActivity } from "@/lib/dashboard-data";
+import { requireAdminOrRedirect } from "@/lib/session";
 
 export const dynamic = "force-dynamic";
 
 export default async function ActivityPage() {
+  await requireAdminOrRedirect();
+
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const activities = (await getAllRecentActivity(100)) as any[];
 
@@ -20,7 +25,20 @@ export default async function ActivityPage() {
         </p>
       </div>
 
-      <DetailedRecentActivity activities={activities} />
+      <Tabs defaultValue="content">
+        <TabsList>
+          <TabsTrigger value="content">İçerik Aktivitesi</TabsTrigger>
+          <TabsTrigger value="audit">Medya &amp; Kullanıcı</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="content" className="mt-4">
+          <DetailedRecentActivity activities={activities} />
+        </TabsContent>
+
+        <TabsContent value="audit" className="mt-4">
+          <AuditLogTab />
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }
