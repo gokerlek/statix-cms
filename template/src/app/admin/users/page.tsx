@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import { and, eq, inArray, sql } from "drizzle-orm";
 
 import { db } from "@/lib/db";
@@ -5,6 +6,7 @@ import { auditLog } from "@/db/schema";
 import { requireAdminOrRedirect } from "@/lib/session";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
+import { PageLoading } from "@/components/ui/loading";
 import { UsersClientPage } from "./UsersClientPage";
 
 export const dynamic = "force-dynamic";
@@ -66,10 +68,12 @@ export default async function UsersPage() {
   }
 
   return (
-    <UsersClientPage
-      initialUsers={users}
-      lastLogins={lastLogins}
-      currentUserId={session.user.id}
-    />
+    <Suspense fallback={<PageLoading />}>
+      <UsersClientPage
+        initialUsers={users}
+        lastLogins={lastLogins}
+        currentUserId={session.user.id}
+      />
+    </Suspense>
   );
 }

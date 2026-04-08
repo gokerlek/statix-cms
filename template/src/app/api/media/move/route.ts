@@ -3,15 +3,11 @@ import { NextRequest, NextResponse } from "next/server";
 import { writeAudit, getIp } from "@/lib/audit";
 import { getGitHubCMS } from "@/lib/github-cms";
 import { extractR2Key, getPublicUrl, moveR2 } from "@/lib/r2";
-import { getSession } from "@/lib/session";
+import { requireAdmin } from "@/lib/session";
 
 export async function POST(request: NextRequest) {
   try {
-    const session = await getSession();
-
-    if (!session) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
+    const session = await requireAdmin();
 
     const body = await request.json();
     const { currentUrl, currentPath, newFolder } = body;
@@ -28,6 +24,31 @@ export async function POST(request: NextRequest) {
     if (!sourceKey) {
       return NextResponse.json(
         { error: "Invalid media URL or path" },
+        { status: 400 },
+      );
+    }
+
+    // sourceKey sadece uploads/ veya avatars/ olabilir
+    if (
+      (!sourceKey.startsWith("uploads/") &&
+        !sourceKey.startsWith("avatars/")) ||
+      sourceKey.includes("..") ||
+      sourceKey.includes("//")
+    ) {
+      return NextResponse.json(
+        { error: "Invalid source path" },
+        { status: 400 },
+      );
+    }
+
+    // newFolder sadece alfanümerik + dash/underscore (path traversal imkansız)
+    if (
+      newFolder &&
+      newFolder !== "default" &&
+      !/^[a-zA-Z0-9_-]+$/.test(newFolder)
+    ) {
+      return NextResponse.json(
+        { error: "Invalid folder name" },
         { status: 400 },
       );
     }
@@ -62,11 +83,18 @@ export async function POST(request: NextRequest) {
       updatedFiles: updatedFiles.updatedFiles.length,
     });
   } catch (error) {
+    if (
+      error instanceof Error &&
+      (error.message === "Unauthorized" || error.message === "Forbidden")
+    ) {
+      return NextResponse.json(
+        { error: error.message },
+        { status: error.message === "Unauthorized" ? 401 : 403 },
+      );
+    }
     console.error("Move error:", error);
-    const errorMessage =
-      error instanceof Error ? error.message : "Unknown error";
     return NextResponse.json(
-      { error: `Failed to move file: ${errorMessage}` },
+      { error: "Failed to move file" },
       { status: 500 },
     );
   }

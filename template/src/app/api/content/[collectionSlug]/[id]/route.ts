@@ -1,7 +1,7 @@
 import { revalidatePath } from "next/cache";
 import { NextRequest, NextResponse } from "next/server";
 
-import { getSession } from "@/lib/session";
+import { getSession, requireAdmin } from "@/lib/session";
 import { ROUTES } from "@/lib/constants";
 import { getGitHubCMS } from "@/lib/github-cms";
 import { slugify } from "@/lib/utils";
@@ -83,11 +83,7 @@ export async function GET(request: NextRequest, context: RouteContext) {
 
 export async function POST(request: NextRequest, context: RouteContext) {
   try {
-    const session = await getSession();
-
-    if (!session) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
+    const session = await requireAdmin();
 
     const { collectionSlug, id } = await context.params;
     const collection = statixConfig.collections.find(
@@ -191,6 +187,15 @@ export async function POST(request: NextRequest, context: RouteContext) {
 
     return NextResponse.json({ success: true, id: identifier });
   } catch (error) {
+    if (
+      error instanceof Error &&
+      (error.message === "Unauthorized" || error.message === "Forbidden")
+    ) {
+      return NextResponse.json(
+        { error: error.message },
+        { status: error.message === "Unauthorized" ? 401 : 403 },
+      );
+    }
     console.error("POST error:", error);
 
     return NextResponse.json(

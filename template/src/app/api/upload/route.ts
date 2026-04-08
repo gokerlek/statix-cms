@@ -34,7 +34,6 @@ export async function POST(request: NextRequest) {
         "image/png": ".png",
         "image/gif": ".gif",
         "image/webp": ".webp",
-        "image/svg+xml": ".svg",
         "image/avif": ".avif",
       };
       const ext = mimeToExt[file.type] ?? "";

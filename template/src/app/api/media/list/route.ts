@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 
 import { getGitHubCMS } from "@/lib/github-cms";
 import { listR2Media } from "@/lib/r2";
-import { getSession } from "@/lib/session";
+import { requireAdmin } from "@/lib/session";
 import { statixConfig } from "@/statix.config";
 
 async function buildContentIndex(): Promise<{ index: string; ok: boolean }> {
@@ -37,11 +37,7 @@ async function buildContentIndex(): Promise<{ index: string; ok: boolean }> {
 
 export async function GET() {
   try {
-    const session = await getSession();
-
-    if (!session) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
+    await requireAdmin();
 
     const [files, { index: contentIndex, ok: contentFetched }] = await Promise.all([
       listR2Media("uploads/"),
@@ -66,6 +62,15 @@ export async function GET() {
 
     return NextResponse.json(result);
   } catch (error) {
+    if (
+      error instanceof Error &&
+      (error.message === "Unauthorized" || error.message === "Forbidden")
+    ) {
+      return NextResponse.json(
+        { error: error.message },
+        { status: error.message === "Unauthorized" ? 401 : 403 },
+      );
+    }
     console.error("Failed to list media:", error);
     return NextResponse.json(
       { error: "Failed to list media" },

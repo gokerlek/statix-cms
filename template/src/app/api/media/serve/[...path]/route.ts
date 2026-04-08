@@ -2,15 +2,40 @@ import { GetObjectCommand } from "@aws-sdk/client-s3";
 import { NextRequest, NextResponse } from "next/server";
 
 import { getR2Client } from "@/lib/r2";
+import { getSession } from "@/lib/session";
 import { env } from "@/lib/env";
 
 // R2'den S3 API ile proxy — public URL engellendiğinde çalışır
 export async function GET(
-  _request: NextRequest,
+  request: NextRequest,
   { params }: { params: Promise<{ path: string[] }> },
 ) {
   const { path: pathArray } = await params;
   const key = pathArray.join("/");
+
+  // Block path traversal and double slashes regardless of prefix
+  if (key.includes("..") || key.includes("//")) {
+    return new NextResponse("Not Found", { status: 404 });
+  }
+
+  // Public prefixes — no auth required
+  const PUBLIC_PREFIXES = ["uploads/", "avatars/"];
+  // Auth-gated prefixes — require a valid session
+  const PRIVATE_PREFIXES = ["trash/"];
+
+  const isPublic = PUBLIC_PREFIXES.some((p) => key.startsWith(p));
+  const isPrivate = PRIVATE_PREFIXES.some((p) => key.startsWith(p));
+
+  if (!isPublic && !isPrivate) {
+    return new NextResponse("Not Found", { status: 404 });
+  }
+
+  if (isPrivate) {
+    const session = await getSession();
+    if (!session) {
+      return new NextResponse("Unauthorized", { status: 401 });
+    }
+  }
 
   if (!env.R2_BUCKET_NAME) {
     return new NextResponse("R2 not configured", { status: 500 });

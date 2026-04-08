@@ -1,6 +1,5 @@
 import { NextResponse } from "next/server";
 
-import { auth } from "@/lib/auth";
 import { ROUTES } from "@/lib/constants";
 import { checkRateLimit, getClientIp } from "@/lib/rate-limit";
 
@@ -12,7 +11,10 @@ const PUBLIC_API_ROUTES = ["/api/auth", "/api/media/serve"];
 // Rate limit config: 100 requests per minute
 const RATE_LIMIT_CONFIG = { limit: 100, windowSeconds: 60 };
 
-export async function proxy(request: NextRequest) {
+// Better Auth session cookie name (default, no custom prefix configured)
+const SESSION_COOKIE = "better-auth.session_token";
+
+export async function middleware(request: NextRequest) {
   const path = request.nextUrl.pathname;
 
   // Apply rate limiting to API routes (except auth)
@@ -38,7 +40,10 @@ export async function proxy(request: NextRequest) {
     }
   }
 
-  const session = await auth.api.getSession({ headers: request.headers });
+  // Lightweight session check via cookie presence (no DB access — Edge-safe).
+  // Full DB-backed session validation is enforced inside every route handler
+  // via requireAdmin() / getSession(). Middleware only handles routing.
+  const hasSession = request.cookies.has(SESSION_COOKIE);
 
   // Check if this is a public API route
   const isPublicApiRoute = PUBLIC_API_ROUTES.some((route) =>
@@ -50,7 +55,7 @@ export async function proxy(request: NextRequest) {
     path.startsWith(ROUTES.ADMIN.ROOT) ||
     (path.startsWith("/api") && !isPublicApiRoute);
 
-  if (isProtectedRoute && !session) {
+  if (isProtectedRoute && !hasSession) {
     // For API routes, return 401 JSON response
     if (path.startsWith("/api")) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });

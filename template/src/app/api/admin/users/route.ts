@@ -243,7 +243,7 @@ export async function POST(request: NextRequest) {
 
       case "create": {
         const name = email ? email.split("@")[0] : "user";
-        const password = Math.random().toString(36).slice(-12);
+        const password = randomBytes(24).toString("base64url");
         const newUser = await auth.api.createUser({
           headers: reqHeaders,
           body: { email, name, password, role: role ?? "user" },

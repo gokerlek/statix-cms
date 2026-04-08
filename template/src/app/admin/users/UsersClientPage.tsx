@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { UserPlus } from "lucide-react";
 
@@ -33,6 +33,7 @@ export function UsersClientPage({
   const [inviteOpen, setInviteOpen] = useState(false);
   const [drawerUserId, setDrawerUserId] = useState<string | null>(null);
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const urlHydratedRef = useRef(false);
 
   const drawerUser = drawerUserId
     ? (users.find((u) => u.id === drawerUserId) ?? null)
@@ -46,14 +47,16 @@ export function UsersClientPage({
     }
   }, [drawerUser, drawerOpen, router]);
 
-  // Hydrate ?selected= from URL
+  // Hydrate ?selected= from URL — wait for users to be populated first
   useEffect(() => {
+    if (urlHydratedRef.current || users.length === 0) return;
     const selectedId = searchParams.get("selected");
     if (selectedId && users.some((u) => u.id === selectedId)) {
+      urlHydratedRef.current = true;
       setDrawerUserId(selectedId);
       setDrawerOpen(true);
     }
-  }, [searchParams]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [searchParams, users]);
 
   function openDrawer(u: CMSUser) {
     setDrawerUserId(u.id);

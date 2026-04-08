@@ -21,6 +21,18 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Only allow uploads/ and avatars/ — block traversal
+    if (
+      (!r2Key.startsWith("uploads/") && !r2Key.startsWith("avatars/")) ||
+      r2Key.includes("..") ||
+      r2Key.includes("//")
+    ) {
+      return NextResponse.json(
+        { error: "Invalid media key" },
+        { status: 400 },
+      );
+    }
+
     const trashKey = await softDeleteR2(r2Key);
 
     await writeAudit({

@@ -19,6 +19,26 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Validate paths to prevent traversal and invalid prefixes
+    for (const item of items) {
+      if (
+        !item.path ||
+        item.path.includes("..") ||
+        item.path.includes("//")
+      ) {
+        return NextResponse.json(
+          { error: "Invalid item path" },
+          { status: 400 },
+        );
+      }
+      if (item.type === "media" && !item.path.startsWith("trash/")) {
+        return NextResponse.json(
+          { error: "Invalid media path" },
+          { status: 400 },
+        );
+      }
+    }
+
     const github = getGitHubCMS();
 
     for (const item of items) {

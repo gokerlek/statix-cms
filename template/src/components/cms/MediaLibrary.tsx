@@ -169,14 +169,14 @@ export function MediaLibrary({ onSelect, selectedUrl }: MediaLibraryProps) {
         onOpenChange={(open) => !open && setFileToDelete(null)}
         title={ui.mediaLibrary.deleteDialogTitle}
         description={
-          <span
-            dangerouslySetInnerHTML={{
-              __html: ui.mediaLibrary.deleteDialogDescription.replace(
-                "{name}",
-                fileToDelete?.name || "",
-              ),
-            }}
-          />
+          <span>
+            {ui.mediaLibrary.deleteDialogDescription
+              .split("{name}")[0]
+              .replace(/<\/?strong>/g, "")}
+            <strong>{fileToDelete?.name || ""}</strong>
+            {(ui.mediaLibrary.deleteDialogDescription.split("{name}")[1] ?? "")
+              .replace(/<\/?strong>/g, "")}
+          </span>
         }
         onConfirm={confirmDelete}
         confirmText={ui.common.delete}

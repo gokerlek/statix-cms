@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 
 import { env } from "@/lib/env";
-import { getSession } from "@/lib/session";
+import { requireAdmin } from "@/lib/session";
 
 interface RouteContext {
   params: Promise<{ filename: string }>;
@@ -10,13 +10,17 @@ interface RouteContext {
 // R2 trash'teki medyayı R2 URL'e yönlendir
 export async function GET(_request: NextRequest, context: RouteContext) {
   try {
-    const session = await getSession();
-
-    if (!session) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
+    await requireAdmin();
 
     const { filename } = await context.params;
+
+    // Only allow safe filenames — prevent path traversal
+    if (!/^[a-zA-Z0-9._-]+$/.test(filename)) {
+      return NextResponse.json(
+        { error: "Invalid filename" },
+        { status: 400 },
+      );
+    }
 
     if (!env.NEXT_PUBLIC_MEDIA_BASE_URL) {
       return new NextResponse("Media base URL not configured", { status: 500 });
@@ -27,6 +31,15 @@ export async function GET(_request: NextRequest, context: RouteContext) {
 
     return NextResponse.redirect(r2Url, { status: 302 });
   } catch (error) {
+    if (
+      error instanceof Error &&
+      (error.message === "Unauthorized" || error.message === "Forbidden")
+    ) {
+      return NextResponse.json(
+        { error: error.message },
+        { status: error.message === "Unauthorized" ? 401 : 403 },
+      );
+    }
     console.error("Trash media serve error:", error);
     return NextResponse.json(
       { error: "Internal Server Error" },

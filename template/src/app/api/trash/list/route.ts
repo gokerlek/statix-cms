@@ -2,15 +2,11 @@ import { NextResponse } from "next/server";
 
 import { getGitHubCMS } from "@/lib/github-cms";
 import { listR2Trash } from "@/lib/r2";
-import { getSession } from "@/lib/session";
+import { requireAdmin } from "@/lib/session";
 
 export async function GET() {
   try {
-    const session = await getSession();
-
-    if (!session) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
+    await requireAdmin();
 
     const github = getGitHubCMS();
 
@@ -33,6 +29,15 @@ export async function GET() {
 
     return NextResponse.json(allItems);
   } catch (error) {
+    if (
+      error instanceof Error &&
+      (error.message === "Unauthorized" || error.message === "Forbidden")
+    ) {
+      return NextResponse.json(
+        { error: error.message },
+        { status: error.message === "Unauthorized" ? 401 : 403 },
+      );
+    }
     console.error("Trash list error:", error);
     return NextResponse.json(
       { error: "Failed to fetch trash items" },
