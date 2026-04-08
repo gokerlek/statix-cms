@@ -6,6 +6,7 @@ import { Edit, Plus } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { buttonVariants } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
 import ui from "@/content/ui.json";
 import { useCollectionSearch } from "@/hooks/use-collection-search";
 import { useCollectionItems } from "@/hooks/use-collections";
@@ -42,31 +43,33 @@ export function CollectionList({
 
   if (files.length === 0 && searchQuery === "" && statusFilter === "all") {
     return (
-      <div className="text-center py-16 bg-card rounded-xl border-2 border-dashed border-border">
-        <div className="max-w-md mx-auto">
-          <div className="w-16 h-16 bg-muted rounded-full flex items-center justify-center mx-auto mb-4">
-            <Plus className="w-8 h-8 text-muted-foreground" />
+      <Card className="gap-0 py-0 border-2 border-dashed">
+        <CardContent className="text-center py-16">
+          <div className="max-w-md mx-auto">
+            <div className="w-16 h-16 bg-muted rounded-full flex items-center justify-center mx-auto mb-4">
+              <Plus className="w-8 h-8 text-muted-foreground" />
+            </div>
+
+            <h3 className="mb-2">{ui.collectionList.noEntriesTitle}</h3>
+
+            <p className="text-muted-foreground mb-6">
+              {ui.collectionList.noEntriesDescription.replace(
+                "{label}",
+                collectionLabel.toLowerCase(),
+              )}
+            </p>
+
+            <Link
+              href={ROUTES.ADMIN.COLLECTION_NEW(collectionSlug)}
+              className="inline-flex items-center gap-2 px-6 py-3 bg-primary hover:bg-primary/90 text-primary-foreground rounded-lg transition-colors"
+            >
+              <Plus className="w-5 h-5" />
+
+              {ui.collectionList.createFirstEntry}
+            </Link>
           </div>
-
-          <h3 className="mb-2">{ui.collectionList.noEntriesTitle}</h3>
-
-          <p className="text-muted-foreground mb-6">
-            {ui.collectionList.noEntriesDescription.replace(
-              "{label}",
-              collectionLabel.toLowerCase(),
-            )}
-          </p>
-
-          <Link
-            href={ROUTES.ADMIN.COLLECTION_NEW(collectionSlug)}
-            className="inline-flex items-center gap-2 px-6 py-3 bg-primary hover:bg-primary/90 text-primary-foreground rounded-lg transition-colors"
-          >
-            <Plus className="w-5 h-5" />
-
-            {ui.collectionList.createFirstEntry}
-          </Link>
-        </div>
-      </div>
+        </CardContent>
+      </Card>
     );
   }
 
@@ -95,7 +98,8 @@ export function CollectionList({
         </div>
       </div>
 
-      <div className="bg-card rounded-xl shadow-sm border border-border overflow-hidden">
+      <Card className="gap-0 py-0 overflow-hidden">
+        <CardContent className="p-0">
         <table className="w-full">
           <thead className="bg-muted/50 border-b border-border">
             <tr>
@@ -181,7 +185,8 @@ export function CollectionList({
             )}
           </tbody>
         </table>
-      </div>
+        </CardContent>
+      </Card>
     </div>
   );
 }

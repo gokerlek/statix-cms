@@ -37,7 +37,7 @@ export function RecentActivity({ activities }: RecentActivityProps) {
       <CardContent>
         <div className="flex flex-col gap-4">
           {activities.map((activity) => (
-            <ActivityItem key={activity.sha} activity={activity} isCard />
+            <ActivityItem key={activity.sha} activity={activity} />
           ))}
         </div>
       </CardContent>

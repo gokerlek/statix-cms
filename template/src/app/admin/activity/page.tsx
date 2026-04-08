@@ -1,6 +1,7 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { AuditLogTab } from "@/components/cms/AuditLogTab";
 import { DetailedRecentActivity } from "@/components/cms/DetailedRecentActivity";
+import type { Activity } from "@/components/cms/ActivityItem";
 import ui from "@/content/ui.json";
 import { getAllRecentActivity } from "@/lib/dashboard-data";
 import { requireAdminOrRedirect } from "@/lib/session";
@@ -10,8 +11,7 @@ export const dynamic = "force-dynamic";
 export default async function ActivityPage() {
   await requireAdminOrRedirect();
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const activities = (await getAllRecentActivity(100)) as any[];
+  const activities = (await getAllRecentActivity(100)) as Activity[];
 
   return (
     <div className="space-y-6">

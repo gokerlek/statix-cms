@@ -2,9 +2,10 @@
 
 import { useState } from "react";
 
+import { Card, CardContent } from "@/components/ui/card";
 import ui from "@/content/ui.json";
 
-import { Activity, ActivityItem } from "./ActivityItem";
+import { Activity, ActivityItem, getActivityType } from "./ActivityItem";
 import CMSPagination from "./shared/CMSPagination";
 import { CMSSearch } from "./shared/CMSSearch";
 import { CMSTabs } from "./shared/CMSTabs";
@@ -21,56 +22,17 @@ export function DetailedRecentActivity({
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
 
-  // Filter activities
   const filteredActivities = activities.filter((activity) => {
-    // Note: We don't filter out technical emails here to match the widget behavior
-    // We only hide the email text in the render loop below
-
     const matchesSearch =
       activity.message.toLowerCase().includes(searchQuery.toLowerCase()) ||
       activity.author.name.toLowerCase().includes(searchQuery.toLowerCase());
 
     if (!matchesSearch) return false;
-
     if (statusFilter === "all") return true;
 
-    // We still need getActivityType for filtering logic, even if visualization is handled by ActivityItem
-    const getActivityType = (message: string) => {
-      const lowerMsg = message.toLowerCase();
-
-      if (
-        lowerMsg.includes("create") ||
-        lowerMsg.includes("add") ||
-        lowerMsg.includes("new")
-      ) {
-        return "create";
-      }
-
-      if (
-        lowerMsg.includes("update") ||
-        lowerMsg.includes("edit") ||
-        lowerMsg.includes("change") ||
-        lowerMsg.includes("modify")
-      ) {
-        return "update";
-      }
-
-      if (lowerMsg.includes("delete") || lowerMsg.includes("remove")) {
-        return "delete";
-      }
-
-      return "default";
-    };
-
-    const type = getActivityType(activity.message);
-
-    return type === statusFilter;
+    return getActivityType(activity.message) === statusFilter;
   });
 
-  // Log to debug if needed
-  // console.log("Filtered activities count:", filteredActivities.length);
-
-  // Pagination logic
   const totalPages = Math.ceil(filteredActivities.length / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
   const currentActivities = filteredActivities.slice(
@@ -111,11 +73,13 @@ export function DetailedRecentActivity({
 
       <div className="flex flex-col gap-4">
         {currentActivities.length === 0 ? (
-          <div className="text-center py-12 bg-card rounded-lg border border-dashed">
-            <p className="text-muted-foreground">
-              {ui.collectionList.noEntriesTitle}
-            </p>
-          </div>
+          <Card className="gap-0 py-0 border-dashed">
+            <CardContent className="text-center py-12">
+              <p className="text-muted-foreground">
+                {ui.collectionList.noEntriesTitle}
+              </p>
+            </CardContent>
+          </Card>
         ) : (
           currentActivities.map((activity) => (
             <ActivityItem key={activity.sha} activity={activity} />
