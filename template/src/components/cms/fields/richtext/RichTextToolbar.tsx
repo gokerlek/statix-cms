@@ -2,7 +2,8 @@
 
 import { useCallback, useState } from "react";
 
-import { Editor } from "@tiptap/react";
+import { isMarkActive } from "prosekit/core";
+import { useEditor } from "prosekit/react";
 import {
   AlignCenter,
   AlignJustify,
@@ -30,118 +31,119 @@ import {
 } from "@/components/ui/popover";
 
 export interface RichTextToolbarProps {
-  editor: Editor | null;
   toolbar: readonly string[];
   variant: "normal" | "block" | "compact";
 }
 
-export function RichTextToolbar({
-  editor,
-  toolbar,
-  variant,
-}: RichTextToolbarProps) {
+function getLinkHref(editor: ReturnType<typeof useEditor>): string {
+  try {
+    const { state } = editor.view;
+    const { $from } = state.selection;
+    const linkMark = state.schema.marks["link"];
+    if (!linkMark) return "";
+    const mark = linkMark.isInSet(state.storedMarks || $from.marks());
+    return mark ? (mark.attrs.href as string) ?? "" : "";
+  } catch {
+    return "";
+  }
+}
+
+function getTextAlign(editor: ReturnType<typeof useEditor>): string | null {
+  try {
+    const { $from } = editor.view.state.selection;
+    return ($from.node()?.attrs?.textAlign as string) ?? null;
+  } catch {
+    return null;
+  }
+}
+
+export function RichTextToolbar({ toolbar, variant }: RichTextToolbarProps) {
+  const editor = useEditor({ update: true });
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const cmds = editor.commands as any;
   const [linkUrl, setLinkUrl] = useState("");
   const [isLinkPopoverOpen, setIsLinkPopoverOpen] = useState(false);
 
+  const openLinkPopover = useCallback(() => {
+    const href = getLinkHref(editor);
+    setLinkUrl(href);
+    setIsLinkPopoverOpen(true);
+  }, [editor]);
+
   const handleLinkSubmit = useCallback(() => {
-    if (!editor) return;
-
     if (linkUrl === "") {
-      editor.chain().focus().extendMarkRange("link").unsetLink().run();
+      cmds.removeLink?.();
     } else {
-      editor
-        .chain()
-        .focus()
-        .extendMarkRange("link")
-        .setLink({ href: linkUrl })
-        .run();
+      cmds.addLink?.({ href: linkUrl });
     }
-
     setIsLinkPopoverOpen(false);
     setLinkUrl("");
-  }, [editor, linkUrl]);
+  }, [cmds, linkUrl]);
 
   const handleLinkCancel = useCallback(() => {
     setIsLinkPopoverOpen(false);
     setLinkUrl("");
   }, []);
 
-  const openLinkPopover = useCallback(() => {
-    if (!editor) return;
-
-    const previousUrl = editor.getAttributes("link").href || "";
-
-    setLinkUrl(previousUrl);
-    setIsLinkPopoverOpen(true);
-  }, [editor]);
-
-  const toggleFontSize = () => {
-    if (!editor) return;
-
-    const currentSize = editor.getAttributes("textStyle").fontSize;
-
-    if (currentSize === "18px") {
-      editor.chain().focus().unsetFontSize().run();
+  const toggleFontSize = useCallback(() => {
+    const isActive = isMarkActive(editor.view.state, "fontSize");
+    if (isActive) {
+      cmds.unsetFontSize?.();
     } else {
-      editor.chain().focus().setFontSize("18px").run();
+      cmds.setFontSize?.("18px");
     }
-  };
+  }, [cmds, editor]);
 
-  if (!editor) {
-    return null;
-  }
+  const toolbarClass =
+    variant === "compact"
+      ? "border-b border-border p-1 flex flex-wrap gap-0.5"
+      : "border-b border-border p-2 flex flex-wrap gap-1";
 
-  const getToolbarClass = () => {
-    if (variant === "compact") {
-      return "border-b border-border p-1 flex flex-wrap gap-0.5";
-    }
+  const btnSize = variant === "compact" ? undefined : ("sm" as const);
+  const btnClass = variant === "compact" ? "h-7 w-7 p-0" : "";
+  const iconClass = variant === "compact" ? "h-3 w-3" : "h-4 w-4";
 
-    return "border-b border-border p-2 flex flex-wrap gap-1";
-  };
+  const btnVariant = (on: boolean): "secondary" | "ghost" =>
+    on ? "secondary" : "ghost";
 
-  const getButtonSize = () => {
-    return variant === "compact" ? "h-7 w-7 p-0" : "sm";
-  };
-
-  const getIconSize = () => {
-    return variant === "compact" ? "h-3 w-3" : "h-4 w-4";
-  };
+  const state = editor.view.state;
+  const currentAlign = getTextAlign(editor);
 
   return (
-    <div className={getToolbarClass()}>
+    <div className={toolbarClass}>
       {toolbar.includes("bold") && (
         <Button
           type="button"
-          variant={editor.isActive("bold") ? "secondary" : "ghost"}
-          size={variant === "compact" ? undefined : "sm"}
-          className={variant === "compact" ? getButtonSize() : ""}
-          onClick={() => editor.chain().focus().toggleBold().run()}
+          variant={btnVariant(isMarkActive(state, "bold"))}
+          size={btnSize}
+          className={btnClass}
+          onClick={() => cmds.toggleBold()}
         >
-          <Bold className={getIconSize()} />
+          <Bold className={iconClass} />
         </Button>
       )}
 
       {toolbar.includes("italic") && (
         <Button
           type="button"
-          variant={editor.isActive("italic") ? "secondary" : "ghost"}
-          size={variant === "compact" ? undefined : "sm"}
-          className={variant === "compact" ? getButtonSize() : ""}
-          onClick={() => editor.chain().focus().toggleItalic().run()}
+          variant={btnVariant(isMarkActive(state, "italic"))}
+          size={btnSize}
+          className={btnClass}
+          onClick={() => cmds.toggleItalic()}
         >
-          <Italic className={getIconSize()} />
+          <Italic className={iconClass} />
         </Button>
       )}
 
       {toolbar.includes("underline") && (
         <Button
           type="button"
-          variant={editor.isActive("underline") ? "secondary" : "ghost"}
-          size={variant === "compact" ? undefined : "sm"}
-          className={variant === "compact" ? getButtonSize() : ""}
-          onClick={() => editor.chain().focus().toggleUnderline().run()}
+          variant={btnVariant(isMarkActive(state, "underline"))}
+          size={btnSize}
+          className={btnClass}
+          onClick={() => cmds.toggleUnderline()}
         >
-          <UnderlineIcon className={getIconSize()} />
+          <UnderlineIcon className={iconClass} />
         </Button>
       )}
 
@@ -150,12 +152,12 @@ export function RichTextToolbar({
           <PopoverTrigger asChild>
             <Button
               type="button"
-              variant={editor.isActive("link") ? "secondary" : "ghost"}
-              size={variant === "compact" ? undefined : "sm"}
-              className={variant === "compact" ? getButtonSize() : ""}
+              variant={btnVariant(isMarkActive(state, "link"))}
+              size={btnSize}
+              className={btnClass}
               onClick={openLinkPopover}
             >
-              <LinkIcon className={getIconSize()} />
+              <LinkIcon className={iconClass} />
             </Button>
           </PopoverTrigger>
           <PopoverContent className="w-80">
@@ -172,27 +174,25 @@ export function RichTextToolbar({
                       e.preventDefault();
                       handleLinkSubmit();
                     }
-
                     if (e.key === "Escape") {
                       handleLinkCancel();
                     }
                   }}
                 />
                 <Button type="button" size="icon" onClick={handleLinkSubmit}>
-                  <Check className={getIconSize()} />
+                  <Check className={iconClass} />
                 </Button>
-
-                {editor.isActive("link") && (
+                {isMarkActive(state, "link") && (
                   <Button
                     type="button"
                     variant="destructive"
                     size="icon"
                     onClick={() => {
-                      editor.chain().focus().unsetLink().run();
+                      cmds.removeLink?.();
                       setIsLinkPopoverOpen(false);
                     }}
                   >
-                    <Trash2 className={`${getIconSize()}`} />
+                    <Trash2 className={iconClass} />
                   </Button>
                 )}
               </div>
@@ -204,103 +204,71 @@ export function RichTextToolbar({
       {toolbar.includes("fontSize") && (
         <Button
           type="button"
-          variant={
-            editor.getAttributes("textStyle").fontSize ? "secondary" : "ghost"
-          }
-          size={variant === "compact" ? undefined : "sm"}
-          className={variant === "compact" ? getButtonSize() : ""}
+          variant={btnVariant(isMarkActive(state, "fontSize"))}
+          size={btnSize}
+          className={btnClass}
           onClick={toggleFontSize}
           title="Büyük Yazı"
         >
-          <Type className={getIconSize()} />
+          <Type className={iconClass} />
         </Button>
       )}
 
       {toolbar.includes("textAlign") && (
         <>
-          <Button
-            type="button"
-            variant={
-              editor.isActive({ textAlign: "left" }) ? "secondary" : "ghost"
-            }
-            size={variant === "compact" ? undefined : "sm"}
-            className={variant === "compact" ? getButtonSize() : ""}
-            onClick={() => editor.chain().focus().setTextAlign("left").run()}
-          >
-            <AlignLeft className={getIconSize()} />
-          </Button>
-
-          <Button
-            type="button"
-            variant={
-              editor.isActive({ textAlign: "center" }) ? "secondary" : "ghost"
-            }
-            size={variant === "compact" ? undefined : "sm"}
-            className={variant === "compact" ? getButtonSize() : ""}
-            onClick={() => editor.chain().focus().setTextAlign("center").run()}
-          >
-            <AlignCenter className={getIconSize()} />
-          </Button>
-
-          <Button
-            type="button"
-            variant={
-              editor.isActive({ textAlign: "right" }) ? "secondary" : "ghost"
-            }
-            size={variant === "compact" ? undefined : "sm"}
-            className={variant === "compact" ? getButtonSize() : ""}
-            onClick={() => editor.chain().focus().setTextAlign("right").run()}
-          >
-            <AlignRight className={getIconSize()} />
-          </Button>
-
-          <Button
-            type="button"
-            variant={
-              editor.isActive({ textAlign: "justify" }) ? "secondary" : "ghost"
-            }
-            size={variant === "compact" ? undefined : "sm"}
-            className={variant === "compact" ? getButtonSize() : ""}
-            onClick={() => editor.chain().focus().setTextAlign("justify").run()}
-          >
-            <AlignJustify className={getIconSize()} />
-          </Button>
+          {[
+            { align: "left" as const, Icon: AlignLeft },
+            { align: "center" as const, Icon: AlignCenter },
+            { align: "right" as const, Icon: AlignRight },
+            { align: "justify" as const, Icon: AlignJustify },
+          ].map(({ align, Icon }) => (
+            <Button
+              key={align}
+              type="button"
+              variant={btnVariant(currentAlign === align)}
+              size={btnSize}
+              className={btnClass}
+              onClick={() => cmds.setTextAlign(align)}
+            >
+              <Icon className={iconClass} />
+            </Button>
+          ))}
         </>
       )}
 
       {toolbar.includes("bulletList") && (
         <Button
           type="button"
-          variant={editor.isActive("bulletList") ? "secondary" : "ghost"}
-          size={variant === "compact" ? undefined : "sm"}
-          className={variant === "compact" ? getButtonSize() : ""}
-          onClick={() => editor.chain().focus().toggleBulletList().run()}
+          variant="ghost"
+          size={btnSize}
+          className={btnClass}
+          onClick={() => cmds.toggleList({ kind: "bullet" })}
         >
-          <List className={getIconSize()} />
+          <List className={iconClass} />
         </Button>
       )}
 
       {toolbar.includes("orderedList") && (
         <Button
           type="button"
-          variant={editor.isActive("orderedList") ? "secondary" : "ghost"}
-          size={variant === "compact" ? undefined : "sm"}
-          className={variant === "compact" ? getButtonSize() : ""}
-          onClick={() => editor.chain().focus().toggleOrderedList().run()}
+          variant="ghost"
+          size={btnSize}
+          className={btnClass}
+          onClick={() => cmds.toggleList({ kind: "ordered" })}
         >
-          <ListOrdered className={getIconSize()} />
+          <ListOrdered className={iconClass} />
         </Button>
       )}
 
       {toolbar.includes("blockquote") && (
         <Button
           type="button"
-          variant={editor.isActive("blockquote") ? "secondary" : "ghost"}
-          size={variant === "compact" ? undefined : "sm"}
-          className={variant === "compact" ? getButtonSize() : ""}
-          onClick={() => editor.chain().focus().toggleBlockquote().run()}
+          variant="ghost"
+          size={btnSize}
+          className={btnClass}
+          onClick={() => cmds.toggleBlockquote()}
         >
-          <Quote className={getIconSize()} />
+          <Quote className={iconClass} />
         </Button>
       )}
     </div>

@@ -1,15 +1,17 @@
 "use client";
 
-import { useEffect } from "react";
+import { useCallback, useEffect, useMemo } from "react";
 import { Control, Controller } from "react-hook-form";
 
-import { EditorContent, useEditor } from "@tiptap/react";
+import { createEditor } from "prosekit/core";
+import { ProseKit, useDocChange, useEditor } from "prosekit/react";
+import "prosekit/extensions/list/style.css";
 
 import { Label } from "@/components/ui/label";
 import { RichTextField as RichTextFieldType } from "@/types/cms";
 import { ContentFormValues } from "@/types/content";
 
-import { getEditorExtensions } from "./richtext/editorConfig";
+import { defineEditorExtension } from "./richtext/editorConfig";
 import { RichTextToolbar } from "./richtext/RichTextToolbar";
 
 interface RichTextFieldProps {
@@ -107,44 +109,53 @@ function RichTextEditor({
   error,
 }: RichTextEditorProps) {
   const toolbar = field.toolbar || defaultToolbar;
-  const placeholder = field.placeholder;
 
-  const editor = useEditor({
-    extensions: getEditorExtensions(),
-    immediatelyRender: false,
-    content: value || "",
-    onUpdate: ({ editor }) => {
-      onChange(editor.getHTML());
-    },
-    editorProps: {
-      attributes: {
-        class: `prose max-w-none focus:outline-none ${
-          variant === "compact"
-            ? "min-h-[60px] p-2"
-            : variant === "block"
-              ? "min-h-[80px] p-3"
-              : "min-h-[120px] p-3"
-        } ${error ? "border-destructive" : ""}`,
-      },
-    },
-  });
+  const editor = useMemo(
+    () =>
+      createEditor({
+        extension: defineEditorExtension(),
+        defaultContent: value || "<p></p>",
+      }),
+    // Only create editor once on mount
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [],
+  );
 
+  // Sync external value changes into editor
   useEffect(() => {
-    if (editor && value !== editor.getHTML()) {
-      editor.commands.setContent(value || "", false);
+    if (!editor.mounted) return;
+    try {
+      const current = editor.getDocHTML();
+      if (value !== current) {
+        editor.setContent(value || "");
+      }
+    } catch {
+      // ignore
     }
   }, [value, editor]);
 
-  if (!editor) {
-    return null;
-  }
+  // Callback ref for mounting/unmounting
+  const mountRef = useCallback(
+    (node: HTMLDivElement | null) => {
+      if (node) {
+        editor.mount(node);
+      } else {
+        editor.unmount();
+      }
+    },
+    [editor],
+  );
 
-  const getContainerClass = () => {
-    const baseClass = "border rounded-md";
-    const errorClass = error ? "border-destructive" : "border-border";
+  const containerClass = `border rounded-md ${error ? "border-destructive" : "border-border"}`;
 
-    return `${baseClass} ${errorClass}`;
-  };
+  const editorClass = [
+    "prose max-w-none focus:outline-none",
+    variant === "compact"
+      ? "min-h-[60px] p-2"
+      : variant === "block"
+        ? "min-h-[80px] p-3"
+        : "min-h-[120px] p-3",
+  ].join(" ");
 
   return (
     <div className={variant !== "normal" ? "space-y-2" : ""}>
@@ -157,22 +168,32 @@ function RichTextEditor({
         </Label>
       )}
 
-      <div className={getContainerClass()}>
-        <RichTextToolbar editor={editor} toolbar={toolbar} variant={variant} />
-
-        {/* Editor Content */}
-        <EditorContent
-          editor={editor}
-          placeholder={placeholder}
-          className={
-            variant === "compact"
-              ? "min-h-[60px]"
-              : variant === "block"
-                ? "min-h-[80px]"
-                : "min-h-[120px]"
-          }
-        />
-      </div>
+      <ProseKit editor={editor}>
+        <div className={containerClass}>
+          <RichTextToolbar toolbar={toolbar} variant={variant} />
+          <div ref={mountRef} className={editorClass} />
+          <EditorUpdateHandler onChange={onChange} />
+        </div>
+      </ProseKit>
     </div>
   );
+}
+
+// Listens to doc changes inside ProseKit context and fires onChange
+function EditorUpdateHandler({
+  onChange,
+}: {
+  onChange: (value: string) => void;
+}) {
+  const editor = useEditor();
+
+  useDocChange(() => {
+    try {
+      onChange(editor.getDocHTML());
+    } catch {
+      // ignore
+    }
+  });
+
+  return null;
 }

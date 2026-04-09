@@ -1,69 +1,51 @@
-import { Extension } from "@tiptap/core";
+import { defineCommands, defineMarkSpec, union } from "prosekit/core";
+import type { Mark } from "prosekit/pm/model";
+import type { EditorState, Transaction } from "prosekit/pm/state";
 
-declare module "@tiptap/core" {
-  interface Commands<ReturnType> {
-    fontSize: {
-      setFontSize: (size: string) => ReturnType;
-      unsetFontSize: () => ReturnType;
-    };
-  }
-}
+type Dispatch = (tr: Transaction) => void;
+type Command = (state: EditorState, dispatch?: Dispatch) => boolean;
 
-export const FontSize = Extension.create({
+const fontSizeMarkSpec = defineMarkSpec({
   name: "fontSize",
-
-  addOptions() {
-    return {
-      types: ["textStyle"],
-    };
-  },
-
-  addGlobalAttributes() {
-    return [
+  spec: {
+    attrs: { size: { default: null } },
+    parseDOM: [
       {
-        types: this.options.types,
-        attributes: {
-          fontSize: {
-            default: null,
-            parseHTML: (element) => {
-              const fontSize = element.style.fontSize;
-
-              if (!fontSize) {
-                return null;
-              }
-
-              return fontSize.replace(/['"]+/g, "");
-            },
-            renderHTML: (attributes) => {
-              if (!attributes.fontSize) {
-                return {};
-              }
-
-              return {
-                style: `font-size: ${attributes.fontSize}`,
-              };
-            },
-          },
+        style: "font-size",
+        getAttrs: (value: string | Node) => {
+          return typeof value === "string" && value ? { size: value } : false;
         },
       },
-    ];
-  },
-
-  addCommands() {
-    return {
-      setFontSize:
-        (fontSize) =>
-        ({ chain }) => {
-          return chain().setMark("textStyle", { fontSize }).run();
-        },
-      unsetFontSize:
-        () =>
-        ({ chain }) => {
-          return chain()
-            .setMark("textStyle", { fontSize: null })
-            .removeEmptyTextStyle()
-            .run();
-        },
-    };
+    ],
+    toDOM: (mark: Mark) => {
+      return ["span", { style: `font-size: ${mark.attrs.size}` }, 0];
+    },
   },
 });
+
+const fontSizeCommands = defineCommands({
+  setFontSize:
+    (size: string): Command =>
+    (state, dispatch) => {
+      const markType = state.schema.marks["fontSize"];
+      if (!markType) return false;
+      const { from, to } = state.selection;
+      const tr = state.tr.addMark(from, to, markType.create({ size }));
+      dispatch?.(tr);
+      return true;
+    },
+  unsetFontSize:
+    (): Command =>
+    (state, dispatch) => {
+      const markType = state.schema.marks["fontSize"];
+      if (!markType) return false;
+      const { from, to } = state.selection;
+      const tr = state.tr.removeMark(from, to, markType);
+      dispatch?.(tr);
+      return true;
+    },
+});
+
+export function defineFontSize() {
+  return union(fontSizeMarkSpec, fontSizeCommands);
+}

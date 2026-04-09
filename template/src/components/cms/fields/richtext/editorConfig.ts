@@ -1,34 +1,44 @@
-import Link from "@tiptap/extension-link";
-import TextAlign from "@tiptap/extension-text-align";
-import TextStyle from "@tiptap/extension-text-style";
-import Underline from "@tiptap/extension-underline";
-import StarterKit from "@tiptap/starter-kit";
+import {
+  defineBaseCommands,
+  defineBaseKeymap,
+  defineHistory,
+  union,
+} from "prosekit/core";
+import { defineBlockquote } from "prosekit/extensions/blockquote";
+import { defineBold } from "prosekit/extensions/bold";
+import { defineDoc } from "prosekit/extensions/doc";
+import { defineHardBreak } from "prosekit/extensions/hard-break";
+import { defineItalic } from "prosekit/extensions/italic";
+import { defineLink } from "prosekit/extensions/link";
+import { defineList } from "prosekit/extensions/list";
+import { defineParagraph } from "prosekit/extensions/paragraph";
+import { defineText } from "prosekit/extensions/text";
+import { defineTextAlign } from "prosekit/extensions/text-align";
+import { defineUnderline } from "prosekit/extensions/underline";
 
-import { FontSize } from "../extensions/FontSize";
+import { defineFontSize } from "../extensions/FontSize";
 
-export const getEditorExtensions = () => [
-  StarterKit.configure({
-    orderedList: {
-      HTMLAttributes: {
-        class: "list-decimal pl-6",
-      },
-    },
-    bulletList: {
-      HTMLAttributes: {
-        class: "list-disc pl-6",
-      },
-    },
-  }),
-  TextStyle,
-  Underline,
-  FontSize,
-  TextAlign.configure({
-    types: ["heading", "paragraph"],
-  }),
-  Link.configure({
-    openOnClick: false,
-    HTMLAttributes: {
-      class: "text-blue-500 underline cursor-pointer",
-    },
-  }),
-];
+export function defineEditorExtension() {
+  return union(
+    // Core nodes
+    defineDoc(),
+    defineText(),
+    defineParagraph(),
+    defineHardBreak(),
+    // Marks
+    defineBold(),
+    defineItalic(),
+    defineUnderline(),
+    defineLink(),
+    defineFontSize(),
+    // Block nodes
+    defineList(),
+    defineBlockquote(),
+    // Block attributes
+    defineTextAlign({ types: ["paragraph"] }),
+    // Editor features
+    defineBaseKeymap(),
+    defineBaseCommands(),
+    defineHistory(),
+  );
+}
