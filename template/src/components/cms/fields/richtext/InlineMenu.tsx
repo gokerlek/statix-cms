@@ -6,13 +6,13 @@ import { isMarkActive } from "prosekit/core";
 import { useEditor } from "prosekit/react";
 import { InlinePopover } from "prosekit/react/inline-popover";
 import {
-  Bold,
-  Code,
-  Italic,
-  Link as LinkIcon,
-  Strikethrough,
-  Underline as UnderlineIcon,
-} from "lucide-react";
+  IconBold,
+  IconCode,
+  IconItalic,
+  IconLink,
+  IconStrikethrough,
+  IconUnderline,
+} from "@tabler/icons-react";
 
 export function RichTextInlineMenu() {
   const editor = useEditor({ update: true });
@@ -55,7 +55,7 @@ export function RichTextInlineMenu() {
           className={btnBase}
           title="Kalın"
         >
-          <Bold className="h-4 w-4" />
+          <IconBold size={16} />
         </button>
         <button
           type="button"
@@ -65,7 +65,7 @@ export function RichTextInlineMenu() {
           className={btnBase}
           title="İtalik"
         >
-          <Italic className="h-4 w-4" />
+          <IconItalic size={16} />
         </button>
         <button
           type="button"
@@ -75,7 +75,7 @@ export function RichTextInlineMenu() {
           className={btnBase}
           title="Altı Çizili"
         >
-          <UnderlineIcon className="h-4 w-4" />
+          <IconUnderline size={16} />
         </button>
         <button
           type="button"
@@ -85,7 +85,7 @@ export function RichTextInlineMenu() {
           className={btnBase}
           title="Üstü Çizili"
         >
-          <Strikethrough className="h-4 w-4" />
+          <IconStrikethrough size={16} />
         </button>
         <button
           type="button"
@@ -95,7 +95,7 @@ export function RichTextInlineMenu() {
           className={btnBase}
           title="Kod"
         >
-          <Code className="h-4 w-4" />
+          <IconCode size={16} />
         </button>
         <button
           type="button"
@@ -108,7 +108,7 @@ export function RichTextInlineMenu() {
           className={btnBase}
           title="Link"
         >
-          <LinkIcon className="h-4 w-4" />
+          <IconLink size={16} />
         </button>
       </InlinePopover>
 
@@ -123,9 +123,7 @@ export function RichTextInlineMenu() {
           <form
             onSubmit={(e) => {
               e.preventDefault();
-              const href = (
-                e.target as HTMLFormElement
-              )
+              const href = (e.target as HTMLFormElement)
                 .querySelector("input")
                 ?.value?.trim();
               if (href) {

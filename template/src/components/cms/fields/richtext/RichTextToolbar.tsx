@@ -5,30 +5,30 @@ import { useCallback, useState } from "react";
 import { isMarkActive } from "prosekit/core";
 import { useEditor } from "prosekit/react";
 import {
-  AlignCenter,
-  AlignJustify,
-  AlignLeft,
-  AlignRight,
-  Bold,
-  Check,
-  Code,
-  Code2,
-  Heading1,
-  Heading2,
-  Heading3,
-  Italic,
-  Link as LinkIcon,
-  List,
-  ListOrdered,
-  Minus,
-  Quote,
-  Redo2,
-  Strikethrough,
-  Trash2,
-  Type,
-  Underline as UnderlineIcon,
-  Undo2,
-} from "lucide-react";
+  IconAlignCenter,
+  IconAlignJustified,
+  IconAlignLeft,
+  IconAlignRight,
+  IconArrowBackUp,
+  IconArrowForwardUp,
+  IconBlockquote,
+  IconBold,
+  IconBraces,
+  IconCheck,
+  IconCode,
+  IconH1,
+  IconH2,
+  IconH3,
+  IconItalic,
+  IconLetterT,
+  IconLink,
+  IconList,
+  IconListNumbers,
+  IconMinus,
+  IconStrikethrough,
+  IconTrash,
+  IconUnderline,
+} from "@tabler/icons-react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -132,7 +132,7 @@ export function RichTextToolbar({ toolbar, variant }: RichTextToolbarProps) {
 
   const btnSize = variant === "compact" ? undefined : ("sm" as const);
   const btnClass = variant === "compact" ? "h-7 w-7 p-0" : "";
-  const iconClass = variant === "compact" ? "h-3 w-3" : "h-4 w-4";
+  const iconSize = variant === "compact" ? 14 : 16;
   const btnVariant = (on: boolean): "secondary" | "ghost" =>
     on ? "secondary" : "ghost";
 
@@ -147,7 +147,7 @@ export function RichTextToolbar({ toolbar, variant }: RichTextToolbarProps) {
           onClick={() => cmds.undo?.()}
           title="Geri Al"
         >
-          <Undo2 className={iconClass} />
+          <IconArrowBackUp size={iconSize} />
         </Button>
       )}
 
@@ -160,7 +160,7 @@ export function RichTextToolbar({ toolbar, variant }: RichTextToolbarProps) {
           onClick={() => cmds.redo?.()}
           title="İleri Al"
         >
-          <Redo2 className={iconClass} />
+          <IconArrowForwardUp size={iconSize} />
         </Button>
       )}
 
@@ -173,7 +173,7 @@ export function RichTextToolbar({ toolbar, variant }: RichTextToolbarProps) {
           onClick={() => cmds.toggleHeading?.({ level: 1 })}
           title="Başlık 1"
         >
-          <Heading1 className={iconClass} />
+          <IconH1 size={iconSize} />
         </Button>
       )}
 
@@ -186,7 +186,7 @@ export function RichTextToolbar({ toolbar, variant }: RichTextToolbarProps) {
           onClick={() => cmds.toggleHeading?.({ level: 2 })}
           title="Başlık 2"
         >
-          <Heading2 className={iconClass} />
+          <IconH2 size={iconSize} />
         </Button>
       )}
 
@@ -199,7 +199,7 @@ export function RichTextToolbar({ toolbar, variant }: RichTextToolbarProps) {
           onClick={() => cmds.toggleHeading?.({ level: 3 })}
           title="Başlık 3"
         >
-          <Heading3 className={iconClass} />
+          <IconH3 size={iconSize} />
         </Button>
       )}
 
@@ -210,8 +210,9 @@ export function RichTextToolbar({ toolbar, variant }: RichTextToolbarProps) {
           size={btnSize}
           className={btnClass}
           onClick={() => cmds.toggleBold?.()}
+          title="Kalın"
         >
-          <Bold className={iconClass} />
+          <IconBold size={iconSize} />
         </Button>
       )}
 
@@ -222,8 +223,9 @@ export function RichTextToolbar({ toolbar, variant }: RichTextToolbarProps) {
           size={btnSize}
           className={btnClass}
           onClick={() => cmds.toggleItalic?.()}
+          title="İtalik"
         >
-          <Italic className={iconClass} />
+          <IconItalic size={iconSize} />
         </Button>
       )}
 
@@ -234,8 +236,9 @@ export function RichTextToolbar({ toolbar, variant }: RichTextToolbarProps) {
           size={btnSize}
           className={btnClass}
           onClick={() => cmds.toggleUnderline?.()}
+          title="Altı Çizili"
         >
-          <UnderlineIcon className={iconClass} />
+          <IconUnderline size={iconSize} />
         </Button>
       )}
 
@@ -248,7 +251,7 @@ export function RichTextToolbar({ toolbar, variant }: RichTextToolbarProps) {
           onClick={() => cmds.toggleStrike?.()}
           title="Üstü Çizili"
         >
-          <Strikethrough className={iconClass} />
+          <IconStrikethrough size={iconSize} />
         </Button>
       )}
 
@@ -261,7 +264,7 @@ export function RichTextToolbar({ toolbar, variant }: RichTextToolbarProps) {
           onClick={() => cmds.toggleCode?.()}
           title="Satır İçi Kod"
         >
-          <Code className={iconClass} />
+          <IconCode size={iconSize} />
         </Button>
       )}
 
@@ -274,8 +277,9 @@ export function RichTextToolbar({ toolbar, variant }: RichTextToolbarProps) {
               size={btnSize}
               className={btnClass}
               onClick={openLinkPopover}
+              title="Link"
             >
-              <LinkIcon className={iconClass} />
+              <IconLink size={iconSize} />
             </Button>
           </PopoverTrigger>
           <PopoverContent className="w-80">
@@ -298,7 +302,7 @@ export function RichTextToolbar({ toolbar, variant }: RichTextToolbarProps) {
                   }}
                 />
                 <Button type="button" size="icon" onClick={handleLinkSubmit}>
-                  <Check className={iconClass} />
+                  <IconCheck size={iconSize} />
                 </Button>
                 {markActive("link") && (
                   <Button
@@ -310,7 +314,7 @@ export function RichTextToolbar({ toolbar, variant }: RichTextToolbarProps) {
                       setIsLinkPopoverOpen(false);
                     }}
                   >
-                    <Trash2 className={iconClass} />
+                    <IconTrash size={iconSize} />
                   </Button>
                 )}
               </div>
@@ -334,17 +338,17 @@ export function RichTextToolbar({ toolbar, variant }: RichTextToolbarProps) {
           }}
           title="Büyük Yazı"
         >
-          <Type className={iconClass} />
+          <IconLetterT size={iconSize} />
         </Button>
       )}
 
       {toolbar.includes("textAlign") && (
         <>
           {[
-            { align: "left" as const, Icon: AlignLeft },
-            { align: "center" as const, Icon: AlignCenter },
-            { align: "right" as const, Icon: AlignRight },
-            { align: "justify" as const, Icon: AlignJustify },
+            { align: "left" as const, Icon: IconAlignLeft },
+            { align: "center" as const, Icon: IconAlignCenter },
+            { align: "right" as const, Icon: IconAlignRight },
+            { align: "justify" as const, Icon: IconAlignJustified },
           ].map(({ align, Icon }) => (
             <Button
               key={align}
@@ -354,7 +358,7 @@ export function RichTextToolbar({ toolbar, variant }: RichTextToolbarProps) {
               className={btnClass}
               onClick={() => cmds.setTextAlign?.(align)}
             >
-              <Icon className={iconClass} />
+              <Icon size={iconSize} />
             </Button>
           ))}
         </>
@@ -367,8 +371,9 @@ export function RichTextToolbar({ toolbar, variant }: RichTextToolbarProps) {
           size={btnSize}
           className={btnClass}
           onClick={() => cmds.toggleList?.({ kind: "bullet" })}
+          title="Madde İşaretli Liste"
         >
-          <List className={iconClass} />
+          <IconList size={iconSize} />
         </Button>
       )}
 
@@ -379,8 +384,9 @@ export function RichTextToolbar({ toolbar, variant }: RichTextToolbarProps) {
           size={btnSize}
           className={btnClass}
           onClick={() => cmds.toggleList?.({ kind: "ordered" })}
+          title="Numaralı Liste"
         >
-          <ListOrdered className={iconClass} />
+          <IconListNumbers size={iconSize} />
         </Button>
       )}
 
@@ -391,8 +397,9 @@ export function RichTextToolbar({ toolbar, variant }: RichTextToolbarProps) {
           size={btnSize}
           className={btnClass}
           onClick={() => cmds.toggleBlockquote?.()}
+          title="Alıntı"
         >
-          <Quote className={iconClass} />
+          <IconBlockquote size={iconSize} />
         </Button>
       )}
 
@@ -405,7 +412,7 @@ export function RichTextToolbar({ toolbar, variant }: RichTextToolbarProps) {
           onClick={() => cmds.insertCodeBlock?.({ language: "javascript" })}
           title="Kod Bloğu"
         >
-          <Code2 className={iconClass} />
+          <IconBraces size={iconSize} />
         </Button>
       )}
 
@@ -418,7 +425,7 @@ export function RichTextToolbar({ toolbar, variant }: RichTextToolbarProps) {
           onClick={() => cmds.insertHorizontalRule?.()}
           title="Yatay Çizgi"
         >
-          <Minus className={iconClass} />
+          <IconMinus size={iconSize} />
         </Button>
       )}
     </div>
