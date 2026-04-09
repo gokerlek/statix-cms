@@ -162,14 +162,14 @@ function RichTextEditor({
 
   const containerClass = `border rounded-md ${error ? "border-destructive" : "border-border"}`;
 
-  // pl-10 (40px) block handle için sol alan bırakır
+  // pl-16 (64px) = ProseKit'in önerdiği min 4rem — block handle ~44px genişlik için gerekli
   const editorClass = [
     "prose prose-sm dark:prose-invert max-w-none focus:outline-none",
     variant === "compact"
-      ? "min-h-[60px] pl-10 pr-3 py-2"
+      ? "min-h-[60px] pl-16 pr-3 py-2"
       : variant === "block"
-        ? "min-h-[80px] pl-10 pr-3 py-3"
-        : "min-h-[120px] pl-10 pr-3 py-3",
+        ? "min-h-[80px] pl-16 pr-3 py-3"
+        : "min-h-[120px] pl-16 pr-3 py-3",
   ].join(" ");
 
   return (
