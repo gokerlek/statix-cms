@@ -37,6 +37,7 @@ export interface RichTextToolbarProps {
 
 function getLinkHref(editor: ReturnType<typeof useEditor>): string {
   try {
+    if (!editor.mounted) return "";
     const { state } = editor.view;
     const { $from } = state.selection;
     const linkMark = state.schema.marks["link"];
@@ -86,6 +87,7 @@ export function RichTextToolbar({ toolbar, variant }: RichTextToolbarProps) {
   }, []);
 
   const toggleFontSize = useCallback(() => {
+    if (!editor.mounted) return;
     const isActive = isMarkActive(editor.view.state, "fontSize");
     if (isActive) {
       cmds.unsetFontSize?.();
@@ -106,15 +108,18 @@ export function RichTextToolbar({ toolbar, variant }: RichTextToolbarProps) {
   const btnVariant = (on: boolean): "secondary" | "ghost" =>
     on ? "secondary" : "ghost";
 
-  const state = editor.view.state;
-  const currentAlign = getTextAlign(editor);
+  // Guard: editor may not be mounted on first render
+  const state = editor.mounted ? editor.view.state : null;
+  const markActive = (markName: string) =>
+    state ? isMarkActive(state, markName) : false;
+  const currentAlign = editor.mounted ? getTextAlign(editor) : null;
 
   return (
     <div className={toolbarClass}>
       {toolbar.includes("bold") && (
         <Button
           type="button"
-          variant={btnVariant(isMarkActive(state, "bold"))}
+          variant={btnVariant(markActive("bold"))}
           size={btnSize}
           className={btnClass}
           onClick={() => cmds.toggleBold()}
@@ -126,7 +131,7 @@ export function RichTextToolbar({ toolbar, variant }: RichTextToolbarProps) {
       {toolbar.includes("italic") && (
         <Button
           type="button"
-          variant={btnVariant(isMarkActive(state, "italic"))}
+          variant={btnVariant(markActive("italic"))}
           size={btnSize}
           className={btnClass}
           onClick={() => cmds.toggleItalic()}
@@ -138,7 +143,7 @@ export function RichTextToolbar({ toolbar, variant }: RichTextToolbarProps) {
       {toolbar.includes("underline") && (
         <Button
           type="button"
-          variant={btnVariant(isMarkActive(state, "underline"))}
+          variant={btnVariant(markActive("underline"))}
           size={btnSize}
           className={btnClass}
           onClick={() => cmds.toggleUnderline()}
@@ -152,7 +157,7 @@ export function RichTextToolbar({ toolbar, variant }: RichTextToolbarProps) {
           <PopoverTrigger asChild>
             <Button
               type="button"
-              variant={btnVariant(isMarkActive(state, "link"))}
+              variant={btnVariant(markActive("link"))}
               size={btnSize}
               className={btnClass}
               onClick={openLinkPopover}
@@ -182,7 +187,7 @@ export function RichTextToolbar({ toolbar, variant }: RichTextToolbarProps) {
                 <Button type="button" size="icon" onClick={handleLinkSubmit}>
                   <Check className={iconClass} />
                 </Button>
-                {isMarkActive(state, "link") && (
+                {markActive("link") && (
                   <Button
                     type="button"
                     variant="destructive"
@@ -204,7 +209,7 @@ export function RichTextToolbar({ toolbar, variant }: RichTextToolbarProps) {
       {toolbar.includes("fontSize") && (
         <Button
           type="button"
-          variant={btnVariant(isMarkActive(state, "fontSize"))}
+          variant={btnVariant(markActive("fontSize"))}
           size={btnSize}
           className={btnClass}
           onClick={toggleFontSize}
