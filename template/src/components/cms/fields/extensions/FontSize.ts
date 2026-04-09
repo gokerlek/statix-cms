@@ -7,19 +7,17 @@ type Command = (state: EditorState, dispatch?: Dispatch) => boolean;
 
 const fontSizeMarkSpec = defineMarkSpec({
   name: "fontSize",
-  spec: {
-    attrs: { size: { default: null } },
-    parseDOM: [
-      {
-        style: "font-size",
-        getAttrs: (value: string | Node) => {
-          return typeof value === "string" && value ? { size: value } : false;
-        },
+  attrs: { size: { default: null } },
+  parseDOM: [
+    {
+      style: "font-size",
+      getAttrs: (value: string | Node) => {
+        return typeof value === "string" && value ? { size: value } : false;
       },
-    ],
-    toDOM: (mark: Mark) => {
-      return ["span", { style: `font-size: ${mark.attrs.size}` }, 0];
     },
+  ],
+  toDOM: (mark: Mark) => {
+    return ["span", { style: `font-size: ${mark.attrs.size}` }, 0];
   },
 });
 
