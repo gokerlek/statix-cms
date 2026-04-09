@@ -17,6 +17,7 @@ import { RichTextToolbar } from "./richtext/RichTextToolbar";
 import { RichTextInlineMenu } from "./richtext/InlineMenu";
 import { RichTextSlashMenu } from "./richtext/SlashMenu";
 import { RichTextBlockHandle } from "./richtext/BlockHandle";
+import { DropIndicator } from "prosekit/react/drop-indicator";
 
 interface RichTextFieldProps {
   field: RichTextFieldType;
@@ -161,13 +162,14 @@ function RichTextEditor({
 
   const containerClass = `border rounded-md ${error ? "border-destructive" : "border-border"}`;
 
+  // pl-10 (40px) block handle için sol alan bırakır
   const editorClass = [
     "prose prose-sm dark:prose-invert max-w-none focus:outline-none",
     variant === "compact"
-      ? "min-h-[60px] p-2"
+      ? "min-h-[60px] pl-10 pr-3 py-2"
       : variant === "block"
-        ? "min-h-[80px] p-3"
-        : "min-h-[120px] p-3",
+        ? "min-h-[80px] pl-10 pr-3 py-3"
+        : "min-h-[120px] pl-10 pr-3 py-3",
   ].join(" ");
 
   return (
@@ -189,6 +191,7 @@ function RichTextEditor({
             <RichTextInlineMenu />
             <RichTextSlashMenu />
             <RichTextBlockHandle />
+            <DropIndicator className="z-50 h-0.5 bg-blue-500 transition-all" />
           </div>
           <EditorUpdateHandler onChange={onChange} />
         </div>
