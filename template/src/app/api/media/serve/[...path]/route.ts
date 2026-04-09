@@ -47,11 +47,17 @@ export async function GET(
       new GetObjectCommand({ Bucket: env.R2_BUCKET_NAME, Key: key }),
     );
 
+    const contentType = obj.ContentType ?? "application/octet-stream";
+    const isInlineType = contentType.startsWith("image/") || contentType === "application/pdf";
+
     const body = obj.Body as ReadableStream;
     return new NextResponse(body, {
       headers: {
-        "Content-Type": obj.ContentType ?? "application/octet-stream",
+        "Content-Type": contentType,
         "Cache-Control": "public, max-age=31536000, immutable",
+        "X-Content-Type-Options": "nosniff",
+        // Inline for images/PDF so they display in the admin; attachment for everything else
+        "Content-Disposition": isInlineType ? "inline" : "attachment",
         ...(obj.ContentLength
           ? { "Content-Length": String(obj.ContentLength) }
           : {}),

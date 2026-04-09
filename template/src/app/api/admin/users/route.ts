@@ -1,7 +1,7 @@
 import { createHash, randomBytes } from "node:crypto";
 import { headers } from "next/headers";
 import { NextRequest, NextResponse } from "next/server";
-import { and, count, eq, not, sql } from "drizzle-orm";
+import { and, count, eq, isNull, not, sql } from "drizzle-orm";
 import { z } from "zod";
 import { Resend } from "resend";
 
@@ -144,7 +144,7 @@ export async function POST(request: NextRequest) {
                 userId,
                 ...(banParsed.data.reason ? { banReason: banParsed.data.reason } : {}),
                 ...(banParsed.data.expiresAt
-                  ? { banExpiresAt: new Date(banParsed.data.expiresAt).getTime() / 1000 }
+                  ? { banExpiresAt: new Date(banParsed.data.expiresAt).getTime() }
                   : {}),
               },
             });
@@ -300,7 +300,7 @@ export async function POST(request: NextRequest) {
           .where(
             and(
               eq(userInvites.email, normalizedEmail),
-              // usedAt IS NULL means pending
+              isNull(userInvites.usedAt),
             ),
           );
 

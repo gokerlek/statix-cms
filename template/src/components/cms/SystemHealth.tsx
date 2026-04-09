@@ -37,7 +37,7 @@ export function SystemHealth({ stats }: { stats: SystemStats }) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="text-lg font-medium flex items-center gap-2">
+        <CardTitle className="flex items-center gap-2">
           <Activity className="h-5 w-5" />
           System Health
         </CardTitle>

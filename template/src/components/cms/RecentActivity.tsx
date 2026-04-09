@@ -18,7 +18,7 @@ export function RecentActivity({ activities }: RecentActivityProps) {
   return (
     <Card className="h-full">
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-        <CardTitle className="flex items-center gap-2 text-sm font-medium">
+        <CardTitle className="flex items-center gap-2">
           <Clock className="w-4 h-4 text-muted-foreground" />
 
           {ui.dashboard.stats.recentActivity}

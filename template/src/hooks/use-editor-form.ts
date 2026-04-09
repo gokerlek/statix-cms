@@ -141,9 +141,9 @@ export function useEditorForm({
         }
       });
 
-      // Ensure status has a value
+      // Ensure status has a value — default to draft if never explicitly set
       if (!data.status) {
-        data.status = "published"; // Default for existing content
+        data.status = "draft";
       }
 
       if (!data.translations && localizedFields.length > 0) {

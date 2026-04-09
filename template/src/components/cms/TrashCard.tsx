@@ -4,10 +4,11 @@ import Link from "next/link";
 
 import { Trash2 } from "lucide-react";
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardTitle } from "@/components/ui/card";
 import { useTranslation } from "@/hooks/use-translation";
 import { useTrash } from "@/hooks/use-trash";
 import { ROUTES } from "@/lib/constants";
+import {Badge} from "@/components/ui/badge";
 
 export function TrashCard() {
   const { data: trashItems } = useTrash();
@@ -15,22 +16,16 @@ export function TrashCard() {
   const count = trashItems?.length || 0;
 
   return (
-    <Card className="hover:bg-muted/50 transition-colors cursor-pointer h-full">
+    <Card className="hover:bg-muted/50 transition-colors cursor-pointer h-full items-center justify-center relative">
       <Link href={ROUTES.ADMIN.TRASH}>
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-sm font-medium">
-            {t("trash.title")}
-          </CardTitle>
 
-          <Trash2 className="h-4 w-4 text-muted-foreground" />
-        </CardHeader>
+        <Badge variant='outline' className="absolute top-2 right-2 px-1.5">{count??0}</Badge>
 
-        <CardContent>
-          <div className="text-2xl font-bold">{count}</div>
+        <CardContent className="flex flex-col items-center gap-2">
 
-          <p className="text-xs text-muted-foreground">
-            {count === 0 ? t("trash.empty") : `${count} items`}
-          </p>
+          <Trash2 className="size-8 text-muted-foreground" />
+
+          <CardTitle>{t("trash.title")}</CardTitle>
         </CardContent>
       </Link>
     </Card>

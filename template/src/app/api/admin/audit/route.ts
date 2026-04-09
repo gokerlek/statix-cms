@@ -1,4 +1,4 @@
-import { desc, eq } from "drizzle-orm";
+import { and, desc, eq } from "drizzle-orm";
 import { NextRequest, NextResponse } from "next/server";
 
 import { auditLog } from "@/db/schema";
@@ -14,22 +14,17 @@ export async function GET(request: NextRequest) {
     const entityType = searchParams.get("entityType");
     const userId = searchParams.get("userId");
 
-    let query = db
+    const conditions = [
+      ...(entityType ? [eq(auditLog.entityType, entityType)] : []),
+      ...(userId ? [eq(auditLog.userId, userId)] : []),
+    ];
+
+    const logs = await db
       .select()
       .from(auditLog)
+      .where(conditions.length ? and(...conditions) : undefined)
       .orderBy(desc(auditLog.createdAt))
-      .limit(limit)
-      .$dynamic();
-
-    if (entityType) {
-      query = query.where(eq(auditLog.entityType, entityType));
-    }
-
-    if (userId) {
-      query = query.where(eq(auditLog.userId, userId));
-    }
-
-    const logs = await query;
+      .limit(limit);
 
     return NextResponse.json(logs);
   } catch (error) {

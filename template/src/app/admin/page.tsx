@@ -1,5 +1,7 @@
 import { redirect } from "next/navigation";
 
+import ui from "@/content/ui.json";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { DashboardCard } from "@/components/cms/DashboardCard";
 import { DashboardUnsavedAlert } from "@/components/cms/DashboardUnsavedAlert";
 import { LocalizationStats } from "@/components/cms/LocalizationStats";
@@ -8,6 +10,7 @@ import { RecentActivity } from "@/components/cms/RecentActivity";
 import { SingletonDashboardCard } from "@/components/cms/SingletonDashboardCard";
 import { SystemHealth } from "@/components/cms/SystemHealth";
 import { TrashCard } from "@/components/cms/TrashCard";
+import { UsersCard } from "@/components/cms/UsersCard";
 import { UserProfileCard } from "@/components/cms/UserProfileCard";
 import type { CMSUser } from "@/app/admin/users/page";
 import {
@@ -52,9 +55,9 @@ export default async function AdminDashboard({ searchParams }: AdminDashboardPro
   return (
     <div className="space-y-8">
       {error === "forbidden" && (
-        <div className="p-3 rounded-md bg-destructive/10 border border-destructive/20 text-destructive text-sm">
-          Bu sayfaya erişim yetkiniz yok. Lütfen bir yöneticiye başvurun.
-        </div>
+        <Alert variant="destructive">
+          <AlertDescription>{ui.dashboard.errors.forbidden}</AlertDescription>
+        </Alert>
       )}
 
       <DashboardUnsavedAlert />
@@ -63,7 +66,10 @@ export default async function AdminDashboard({ searchParams }: AdminDashboardPro
         <div className="flex flex-col gap-4">
           <UserProfileCard user={user as CMSUser} />
 
-          <TrashCard />
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-3 h-full">
+                <TrashCard />
+                <UsersCard />
+            </div>
         </div>
 
         <SystemHealth stats={systemStats} />

@@ -3,20 +3,24 @@ import { NextRequest, NextResponse } from "next/server";
 import { sanitizeFilename, validateFileUpload } from "@/lib/file-validation";
 import { writeAudit, getIp } from "@/lib/audit";
 import { uploadToR2 } from "@/lib/r2";
-import { getSession } from "@/lib/session";
+import { requireAdmin } from "@/lib/session";
+
+// Only alphanumeric, hyphens, underscores — no path separators
+const VALID_FOLDER = /^[a-zA-Z0-9_-]+$/;
 
 export async function POST(request: NextRequest) {
   try {
-    const session = await getSession();
-
-    if (!session) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
+    const session = await requireAdmin();
 
     const formData = await request.formData();
     const file = formData.get("file") as File;
     const folder = formData.get("folder") as string | null;
     const filename = formData.get("filename") as string;
+
+    // Validate folder name to prevent path traversal
+    if (folder && !VALID_FOLDER.test(folder)) {
+      return NextResponse.json({ error: "Invalid folder name" }, { status: 400 });
+    }
 
     const validation = validateFileUpload(file);
 
@@ -59,6 +63,15 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ url });
   } catch (error) {
+    if (
+      error instanceof Error &&
+      (error.message === "Unauthorized" || error.message === "Forbidden")
+    ) {
+      return NextResponse.json(
+        { error: error.message },
+        { status: error.message === "Unauthorized" ? 401 : 403 },
+      );
+    }
     console.error("Upload error:", error);
     return NextResponse.json(
       { error: "Failed to upload file" },

@@ -77,6 +77,9 @@
     }
   },
   "dashboard": {
+    "errors": {
+      "forbidden": "You don't have permission to access this page. Please contact an administrator."
+    },
     "stats": {
       "totalCollections": "Total Collections",
       "totalMedia": "Total Media Files",
@@ -212,7 +215,8 @@
       "restored": "Item restored successfully",
       "trashEmptied": "Trash emptied successfully",
       "saved": "Saved successfully",
-      "created": "Created successfully"
+      "created": "Created successfully",
+      "statusChanged": "Status changed to {status}"
     },
     "error": {
       "upload": "Upload failed",
@@ -257,7 +261,8 @@
     "restoreSelected": "Restore Selected",
     "deleteSelected": "Delete Selected",
     "confirmEmpty": "Are you sure you want to empty the trash? This cannot be undone.",
-    "confirmDelete": "Are you sure you want to permanently delete these items? This cannot be undone."
+    "confirmDelete": "Are you sure you want to permanently delete these items? This cannot be undone.",
+    "items": "items"
   },
   "imageField": {
     "change": "Change",

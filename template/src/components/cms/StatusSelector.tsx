@@ -1,4 +1,5 @@
 import { Control, Controller } from "react-hook-form";
+import { toast } from "sonner";
 
 import {
   Select,
@@ -6,6 +7,7 @@ import {
   SelectItem,
   SelectTrigger,
 } from "@/components/ui/select";
+import ui from "@/content/ui.json";
 import { ContentFormValues } from "@/types/content";
 
 import { StatusBadge } from "./StatusBadge";
@@ -21,7 +23,11 @@ export function StatusSelector({ control }: StatusSelectorProps) {
         <Select
           value={value}
           onValueChange={(val) => {
-            if (val) onChange(val);
+            if (val) {
+              onChange(val);
+              const label = val.charAt(0).toUpperCase() + val.slice(1);
+              toast.info(ui.toasts.success.statusChanged.replace("{status}", label));
+            }
           }}
           disabled={disabled}
         >
