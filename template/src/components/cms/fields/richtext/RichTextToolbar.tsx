@@ -35,43 +35,30 @@ export interface RichTextToolbarProps {
   variant: "normal" | "block" | "compact";
 }
 
-function getLinkHref(editor: ReturnType<typeof useEditor>): string {
-  try {
-    if (!editor.mounted) return "";
-    const { state } = editor.view;
-    const { $from } = state.selection;
-    const linkMark = state.schema.marks["link"];
-    if (!linkMark) return "";
-    const mark = linkMark.isInSet(state.storedMarks || $from.marks());
-    return mark ? (mark.attrs.href as string) ?? "" : "";
-  } catch {
-    return "";
-  }
-}
-
-function getTextAlign(editor: ReturnType<typeof useEditor>): string | null {
-  try {
-    const { $from } = editor.view.state.selection;
-    return ($from.node()?.attrs?.textAlign as string) ?? null;
-  } catch {
-    return null;
-  }
-}
-
 export function RichTextToolbar({ toolbar, variant }: RichTextToolbarProps) {
   const editor = useEditor({ update: true });
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const cmds = editor.commands as any;
   const [linkUrl, setLinkUrl] = useState("");
   const [isLinkPopoverOpen, setIsLinkPopoverOpen] = useState(false);
 
+  // All callbacks use editor lazily (access view inside, not at definition time)
   const openLinkPopover = useCallback(() => {
-    const href = getLinkHref(editor);
-    setLinkUrl(href);
+    if (!editor.mounted) return;
+    try {
+      const { state } = editor.view;
+      const { $from } = state.selection;
+      const linkMark = state.schema.marks["link"];
+      const mark = linkMark?.isInSet(state.storedMarks || $from.marks());
+      setLinkUrl(mark ? (mark.attrs.href as string) ?? "" : "");
+    } catch {
+      setLinkUrl("");
+    }
     setIsLinkPopoverOpen(true);
   }, [editor]);
 
   const handleLinkSubmit = useCallback(() => {
+    if (!editor.mounted) return;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const cmds = editor.commands as any;
     if (linkUrl === "") {
       cmds.removeLink?.();
     } else {
@@ -79,22 +66,58 @@ export function RichTextToolbar({ toolbar, variant }: RichTextToolbarProps) {
     }
     setIsLinkPopoverOpen(false);
     setLinkUrl("");
-  }, [cmds, linkUrl]);
+  }, [editor, linkUrl]);
 
   const handleLinkCancel = useCallback(() => {
     setIsLinkPopoverOpen(false);
     setLinkUrl("");
   }, []);
 
+  const handleLinkDelete = useCallback(() => {
+    if (!editor.mounted) return;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (editor.commands as any).removeLink?.();
+    setIsLinkPopoverOpen(false);
+  }, [editor]);
+
   const toggleFontSize = useCallback(() => {
     if (!editor.mounted) return;
-    const isActive = isMarkActive(editor.view.state, "fontSize");
-    if (isActive) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const cmds = editor.commands as any;
+    const active = isMarkActive(editor.view.state, "fontSize");
+    if (active) {
       cmds.unsetFontSize?.();
     } else {
       cmds.setFontSize?.("18px");
     }
-  }, [cmds, editor]);
+  }, [editor]);
+
+  // ---- Early return AFTER all hooks ----
+  // Editor not mounted yet on first render — render placeholder toolbar
+  if (!editor.mounted) {
+    return (
+      <div
+        className={
+          variant === "compact"
+            ? "border-b border-border p-1 h-8"
+            : "border-b border-border p-2 h-10"
+        }
+      />
+    );
+  }
+
+  // Safe to access editor.view from here
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const cmds = editor.commands as any;
+  const state = editor.view.state;
+  const markActive = (markName: string) => isMarkActive(state, markName);
+  const currentAlign = (() => {
+    try {
+      return (state.selection.$from.node()?.attrs?.textAlign as string) ?? null;
+    } catch {
+      return null;
+    }
+  })();
 
   const toolbarClass =
     variant === "compact"
@@ -104,15 +127,8 @@ export function RichTextToolbar({ toolbar, variant }: RichTextToolbarProps) {
   const btnSize = variant === "compact" ? undefined : ("sm" as const);
   const btnClass = variant === "compact" ? "h-7 w-7 p-0" : "";
   const iconClass = variant === "compact" ? "h-3 w-3" : "h-4 w-4";
-
   const btnVariant = (on: boolean): "secondary" | "ghost" =>
     on ? "secondary" : "ghost";
-
-  // Guard: editor may not be mounted on first render
-  const state = editor.mounted ? editor.view.state : null;
-  const markActive = (markName: string) =>
-    state ? isMarkActive(state, markName) : false;
-  const currentAlign = editor.mounted ? getTextAlign(editor) : null;
 
   return (
     <div className={toolbarClass}>
@@ -122,7 +138,7 @@ export function RichTextToolbar({ toolbar, variant }: RichTextToolbarProps) {
           variant={btnVariant(markActive("bold"))}
           size={btnSize}
           className={btnClass}
-          onClick={() => cmds.toggleBold()}
+          onClick={() => cmds.toggleBold?.()}
         >
           <Bold className={iconClass} />
         </Button>
@@ -134,7 +150,7 @@ export function RichTextToolbar({ toolbar, variant }: RichTextToolbarProps) {
           variant={btnVariant(markActive("italic"))}
           size={btnSize}
           className={btnClass}
-          onClick={() => cmds.toggleItalic()}
+          onClick={() => cmds.toggleItalic?.()}
         >
           <Italic className={iconClass} />
         </Button>
@@ -146,7 +162,7 @@ export function RichTextToolbar({ toolbar, variant }: RichTextToolbarProps) {
           variant={btnVariant(markActive("underline"))}
           size={btnSize}
           className={btnClass}
-          onClick={() => cmds.toggleUnderline()}
+          onClick={() => cmds.toggleUnderline?.()}
         >
           <UnderlineIcon className={iconClass} />
         </Button>
@@ -192,10 +208,7 @@ export function RichTextToolbar({ toolbar, variant }: RichTextToolbarProps) {
                     type="button"
                     variant="destructive"
                     size="icon"
-                    onClick={() => {
-                      cmds.removeLink?.();
-                      setIsLinkPopoverOpen(false);
-                    }}
+                    onClick={handleLinkDelete}
                   >
                     <Trash2 className={iconClass} />
                   </Button>
@@ -233,7 +246,7 @@ export function RichTextToolbar({ toolbar, variant }: RichTextToolbarProps) {
               variant={btnVariant(currentAlign === align)}
               size={btnSize}
               className={btnClass}
-              onClick={() => cmds.setTextAlign(align)}
+              onClick={() => cmds.setTextAlign?.(align)}
             >
               <Icon className={iconClass} />
             </Button>
@@ -247,7 +260,7 @@ export function RichTextToolbar({ toolbar, variant }: RichTextToolbarProps) {
           variant="ghost"
           size={btnSize}
           className={btnClass}
-          onClick={() => cmds.toggleList({ kind: "bullet" })}
+          onClick={() => cmds.toggleList?.({ kind: "bullet" })}
         >
           <List className={iconClass} />
         </Button>
@@ -259,7 +272,7 @@ export function RichTextToolbar({ toolbar, variant }: RichTextToolbarProps) {
           variant="ghost"
           size={btnSize}
           className={btnClass}
-          onClick={() => cmds.toggleList({ kind: "ordered" })}
+          onClick={() => cmds.toggleList?.({ kind: "ordered" })}
         >
           <ListOrdered className={iconClass} />
         </Button>
@@ -271,7 +284,7 @@ export function RichTextToolbar({ toolbar, variant }: RichTextToolbarProps) {
           variant="ghost"
           size={btnSize}
           className={btnClass}
-          onClick={() => cmds.toggleBlockquote()}
+          onClick={() => cmds.toggleBlockquote?.()}
         >
           <Quote className={iconClass} />
         </Button>
