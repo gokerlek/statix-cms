@@ -5,6 +5,7 @@ import { Control, Controller } from "react-hook-form";
 
 import { createEditor } from "prosekit/core";
 import { ProseKit, useDocChange, useEditor } from "prosekit/react";
+import "prosekit/basic/style.css";
 import "prosekit/extensions/list/style.css";
 
 import { Label } from "@/components/ui/label";
@@ -13,6 +14,9 @@ import { ContentFormValues } from "@/types/content";
 
 import { defineEditorExtension } from "./richtext/editorConfig";
 import { RichTextToolbar } from "./richtext/RichTextToolbar";
+import { RichTextInlineMenu } from "./richtext/InlineMenu";
+import { RichTextSlashMenu } from "./richtext/SlashMenu";
+import { RichTextBlockHandle } from "./richtext/BlockHandle";
 
 interface RichTextFieldProps {
   field: RichTextFieldType;
@@ -31,15 +35,24 @@ interface DirectRichTextFieldProps {
 }
 
 const defaultToolbar = [
+  "undo",
+  "redo",
+  "heading1",
+  "heading2",
+  "heading3",
   "bold",
   "italic",
   "underline",
+  "strike",
+  "code",
   "link",
   "fontSize",
   "textAlign",
   "bulletList",
   "orderedList",
   "blockquote",
+  "codeBlock",
+  "horizontalRule",
 ] as const;
 
 // Controller-based RichTextField (for normal fields)
@@ -149,7 +162,7 @@ function RichTextEditor({
   const containerClass = `border rounded-md ${error ? "border-destructive" : "border-border"}`;
 
   const editorClass = [
-    "prose max-w-none focus:outline-none",
+    "prose prose-sm dark:prose-invert max-w-none focus:outline-none",
     variant === "compact"
       ? "min-h-[60px] p-2"
       : variant === "block"
@@ -171,7 +184,12 @@ function RichTextEditor({
       <ProseKit editor={editor}>
         <div className={containerClass}>
           <RichTextToolbar toolbar={toolbar} variant={variant} />
-          <div ref={mountRef} className={editorClass} />
+          <div className="relative">
+            <div ref={mountRef} className={editorClass} />
+            <RichTextInlineMenu />
+            <RichTextSlashMenu />
+            <RichTextBlockHandle />
+          </div>
           <EditorUpdateHandler onChange={onChange} />
         </div>
       </ProseKit>

@@ -11,14 +11,23 @@ import {
   AlignRight,
   Bold,
   Check,
+  Code,
+  Code2,
+  Heading1,
+  Heading2,
+  Heading3,
   Italic,
   Link as LinkIcon,
   List,
   ListOrdered,
+  Minus,
   Quote,
+  Redo2,
+  Strikethrough,
   Trash2,
   Type,
   Underline as UnderlineIcon,
+  Undo2,
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -40,7 +49,6 @@ export function RichTextToolbar({ toolbar, variant }: RichTextToolbarProps) {
   const [linkUrl, setLinkUrl] = useState("");
   const [isLinkPopoverOpen, setIsLinkPopoverOpen] = useState(false);
 
-  // All callbacks use editor lazily (access view inside, not at definition time)
   const openLinkPopover = useCallback(() => {
     if (!editor.mounted) return;
     try {
@@ -73,27 +81,7 @@ export function RichTextToolbar({ toolbar, variant }: RichTextToolbarProps) {
     setLinkUrl("");
   }, []);
 
-  const handleLinkDelete = useCallback(() => {
-    if (!editor.mounted) return;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (editor.commands as any).removeLink?.();
-    setIsLinkPopoverOpen(false);
-  }, [editor]);
-
-  const toggleFontSize = useCallback(() => {
-    if (!editor.mounted) return;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const cmds = editor.commands as any;
-    const active = isMarkActive(editor.view.state, "fontSize");
-    if (active) {
-      cmds.unsetFontSize?.();
-    } else {
-      cmds.setFontSize?.("18px");
-    }
-  }, [editor]);
-
   // ---- Early return AFTER all hooks ----
-  // Editor not mounted yet on first render — render placeholder toolbar
   if (!editor.mounted) {
     return (
       <div
@@ -106,11 +94,29 @@ export function RichTextToolbar({ toolbar, variant }: RichTextToolbarProps) {
     );
   }
 
-  // Safe to access editor.view from here
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const cmds = editor.commands as any;
   const state = editor.view.state;
   const markActive = (markName: string) => isMarkActive(state, markName);
+
+  const nodeActive = (nodeName: string, attrs?: Record<string, unknown>) => {
+    try {
+      const { $from } = state.selection;
+      let depth = $from.depth;
+      while (depth >= 0) {
+        const node = $from.node(depth);
+        if (node.type.name === nodeName) {
+          if (!attrs) return true;
+          return Object.entries(attrs).every(([k, v]) => node.attrs[k] === v);
+        }
+        depth--;
+      }
+      return false;
+    } catch {
+      return false;
+    }
+  };
+
   const currentAlign = (() => {
     try {
       return (state.selection.$from.node()?.attrs?.textAlign as string) ?? null;
@@ -121,8 +127,8 @@ export function RichTextToolbar({ toolbar, variant }: RichTextToolbarProps) {
 
   const toolbarClass =
     variant === "compact"
-      ? "border-b border-border p-1 flex flex-wrap gap-0.5"
-      : "border-b border-border p-2 flex flex-wrap gap-1";
+      ? "border-b border-border p-1 flex flex-wrap gap-0.5 items-center"
+      : "border-b border-border p-2 flex flex-wrap gap-1 items-center";
 
   const btnSize = variant === "compact" ? undefined : ("sm" as const);
   const btnClass = variant === "compact" ? "h-7 w-7 p-0" : "";
@@ -132,6 +138,71 @@ export function RichTextToolbar({ toolbar, variant }: RichTextToolbarProps) {
 
   return (
     <div className={toolbarClass}>
+      {toolbar.includes("undo") && (
+        <Button
+          type="button"
+          variant="ghost"
+          size={btnSize}
+          className={btnClass}
+          onClick={() => cmds.undo?.()}
+          title="Geri Al"
+        >
+          <Undo2 className={iconClass} />
+        </Button>
+      )}
+
+      {toolbar.includes("redo") && (
+        <Button
+          type="button"
+          variant="ghost"
+          size={btnSize}
+          className={btnClass}
+          onClick={() => cmds.redo?.()}
+          title="İleri Al"
+        >
+          <Redo2 className={iconClass} />
+        </Button>
+      )}
+
+      {toolbar.includes("heading1") && (
+        <Button
+          type="button"
+          variant={btnVariant(nodeActive("heading", { level: 1 }))}
+          size={btnSize}
+          className={btnClass}
+          onClick={() => cmds.toggleHeading?.({ level: 1 })}
+          title="Başlık 1"
+        >
+          <Heading1 className={iconClass} />
+        </Button>
+      )}
+
+      {toolbar.includes("heading2") && (
+        <Button
+          type="button"
+          variant={btnVariant(nodeActive("heading", { level: 2 }))}
+          size={btnSize}
+          className={btnClass}
+          onClick={() => cmds.toggleHeading?.({ level: 2 })}
+          title="Başlık 2"
+        >
+          <Heading2 className={iconClass} />
+        </Button>
+      )}
+
+      {toolbar.includes("heading3") && (
+        <Button
+          type="button"
+          variant={btnVariant(nodeActive("heading", { level: 3 }))}
+          size={btnSize}
+          className={btnClass}
+          onClick={() => cmds.toggleHeading?.({ level: 3 })}
+          title="Başlık 3"
+        >
+          <Heading3 className={iconClass} />
+        </Button>
+      )}
+
       {toolbar.includes("bold") && (
         <Button
           type="button"
@@ -165,6 +236,32 @@ export function RichTextToolbar({ toolbar, variant }: RichTextToolbarProps) {
           onClick={() => cmds.toggleUnderline?.()}
         >
           <UnderlineIcon className={iconClass} />
+        </Button>
+      )}
+
+      {toolbar.includes("strike") && (
+        <Button
+          type="button"
+          variant={btnVariant(markActive("strike"))}
+          size={btnSize}
+          className={btnClass}
+          onClick={() => cmds.toggleStrike?.()}
+          title="Üstü Çizili"
+        >
+          <Strikethrough className={iconClass} />
+        </Button>
+      )}
+
+      {toolbar.includes("code") && (
+        <Button
+          type="button"
+          variant={btnVariant(markActive("code"))}
+          size={btnSize}
+          className={btnClass}
+          onClick={() => cmds.toggleCode?.()}
+          title="Satır İçi Kod"
+        >
+          <Code className={iconClass} />
         </Button>
       )}
 
@@ -208,7 +305,10 @@ export function RichTextToolbar({ toolbar, variant }: RichTextToolbarProps) {
                     type="button"
                     variant="destructive"
                     size="icon"
-                    onClick={handleLinkDelete}
+                    onClick={() => {
+                      cmds.removeLink?.();
+                      setIsLinkPopoverOpen(false);
+                    }}
                   >
                     <Trash2 className={iconClass} />
                   </Button>
@@ -225,7 +325,13 @@ export function RichTextToolbar({ toolbar, variant }: RichTextToolbarProps) {
           variant={btnVariant(markActive("fontSize"))}
           size={btnSize}
           className={btnClass}
-          onClick={toggleFontSize}
+          onClick={() => {
+            if (markActive("fontSize")) {
+              cmds.unsetFontSize?.();
+            } else {
+              cmds.setFontSize?.("18px");
+            }
+          }}
           title="Büyük Yazı"
         >
           <Type className={iconClass} />
@@ -287,6 +393,32 @@ export function RichTextToolbar({ toolbar, variant }: RichTextToolbarProps) {
           onClick={() => cmds.toggleBlockquote?.()}
         >
           <Quote className={iconClass} />
+        </Button>
+      )}
+
+      {toolbar.includes("codeBlock") && (
+        <Button
+          type="button"
+          variant={btnVariant(nodeActive("codeBlock"))}
+          size={btnSize}
+          className={btnClass}
+          onClick={() => cmds.insertCodeBlock?.({ language: "javascript" })}
+          title="Kod Bloğu"
+        >
+          <Code2 className={iconClass} />
+        </Button>
+      )}
+
+      {toolbar.includes("horizontalRule") && (
+        <Button
+          type="button"
+          variant="ghost"
+          size={btnSize}
+          className={btnClass}
+          onClick={() => cmds.insertHorizontalRule?.()}
+          title="Yatay Çizgi"
+        >
+          <Minus className={iconClass} />
         </Button>
       )}
     </div>
