@@ -1,6 +1,6 @@
 "use client";
 
-import { Globe } from "lucide-react";
+import { IconGlobe } from "@tabler/icons-react";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
@@ -31,7 +31,7 @@ export function LocalizationStats({ stats }: LocalizationStatsProps) {
     <Card className="h-full">
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
-          <Globe className="w-5 h-5" />
+          <IconGlobe className="w-5 h-5" />
 
           {ui.dashboard.localization.title}
         </CardTitle>

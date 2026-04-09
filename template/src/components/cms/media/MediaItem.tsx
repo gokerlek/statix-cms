@@ -1,6 +1,6 @@
 "use client";
 
-import { AlertCircle, CheckCircle2, FolderOpen, Trash2 } from "lucide-react";
+import { IconAlertCircle, IconCircleCheck, IconFolderOpen, IconTrash } from "@tabler/icons-react";
 
 import ui from "@/content/ui.json";
 import type { MediaFile } from "@/hooks/use-media";
@@ -73,7 +73,7 @@ export function MediaItem({
           className="absolute top-2 left-2 bg-yellow-500/90 text-white rounded-full p-1 shadow-sm"
           title={ui.mediaLibrary.orphaned}
         >
-          <AlertCircle className="w-3 h-3" />
+          <IconAlertCircle className="w-3 h-3" />
         </div>
       )}
 
@@ -87,7 +87,7 @@ export function MediaItem({
               : "bg-black/40 text-white hover:bg-black/60",
           )}
         >
-          <CheckCircle2 className="w-4 h-4" />
+          <IconCircleCheck className="w-4 h-4" />
         </div>
       )}
 
@@ -111,7 +111,7 @@ export function MediaItem({
               title="Klasör Değiştir"
               aria-label="Move to folder"
             >
-              <FolderOpen className="w-4 h-4" />
+              <IconFolderOpen className="w-4 h-4" />
             </button>
           )}
 
@@ -124,7 +124,7 @@ export function MediaItem({
             title="Delete"
             aria-label="Delete image"
           >
-            <Trash2 className="w-4 h-4" />
+            <IconTrash className="w-4 h-4" />
           </button>
         </div>
       </div>

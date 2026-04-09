@@ -1,6 +1,6 @@
 "use client";
 
-import { Loader2 } from "lucide-react";
+import { IconLoader2 } from "@tabler/icons-react";
 
 import { cn } from "@/lib/utils";
 
@@ -21,7 +21,7 @@ export function PageLoading({ message, className }: PageLoadingProps) {
         className,
       )}
     >
-      <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      <IconLoader2 className="h-8 w-8 animate-spin text-primary" />
 
       {message && <p className="text-sm text-muted-foreground">{message}</p>}
     </div>
@@ -37,7 +37,7 @@ interface ButtonLoadingProps {
 }
 
 export function ButtonLoading({ className }: ButtonLoadingProps) {
-  return <Loader2 className={cn("h-4 w-4 animate-spin", className)} />;
+  return <IconLoader2 className={cn("h-4 w-4 animate-spin", className)} />;
 }
 
 /**
@@ -52,7 +52,7 @@ interface SectionLoadingProps {
 export function SectionLoading({ message, className }: SectionLoadingProps) {
   return (
     <div className={cn("flex items-center justify-center", className)}>
-      <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+      <IconLoader2 className="h-6 w-6 animate-spin text-muted-foreground" />
 
       {message && <span className="ml-2 text-muted-foreground">{message}</span>}
     </div>

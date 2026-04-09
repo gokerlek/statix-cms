@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 
-import { Edit, Plus } from "lucide-react";
+import { IconEdit, IconPlus } from "@tabler/icons-react";
 
 import { Badge } from "@/components/ui/badge";
 import { buttonVariants } from "@/components/ui/button";
@@ -47,7 +47,7 @@ export function CollectionList({
         <CardContent className="text-center py-16">
           <div className="max-w-md mx-auto">
             <div className="w-16 h-16 bg-muted rounded-full flex items-center justify-center mx-auto mb-4">
-              <Plus className="w-8 h-8 text-muted-foreground" />
+              <IconPlus className="w-8 h-8 text-muted-foreground" />
             </div>
 
             <h3 className="mb-2">{ui.collectionList.noEntriesTitle}</h3>
@@ -63,7 +63,7 @@ export function CollectionList({
               href={ROUTES.ADMIN.COLLECTION_NEW(collectionSlug)}
               className="inline-flex items-center gap-2 px-6 py-3 bg-primary hover:bg-primary/90 text-primary-foreground rounded-lg transition-colors"
             >
-              <Plus className="w-5 h-5" />
+              <IconPlus className="w-5 h-5" />
 
               {ui.collectionList.createFirstEntry}
             </Link>
@@ -170,7 +170,7 @@ export function CollectionList({
                             }),
                           )}
                         >
-                          <Edit className="w-4 h-4" />
+                          <IconEdit className="w-4 h-4" />
                         </Link>
 
                         <DeleteCollectionButton

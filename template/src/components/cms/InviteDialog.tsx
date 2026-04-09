@@ -3,7 +3,7 @@
 import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { Loader2 } from "lucide-react";
+import { IconLoader2 } from "@tabler/icons-react";
 
 import { useInviteUser } from "@/hooks/use-users";
 import { Button } from "@/components/ui/button";
@@ -125,7 +125,7 @@ export function InviteDialog({ open, onOpenChange }: InviteDialogProps) {
                 disabled={inviteUser.isPending}
               >
                 {inviteUser.isPending && (
-                  <Loader2 className="w-4 h-4 animate-spin mr-2" />
+                  <IconLoader2 className="w-4 h-4 animate-spin mr-2" />
                 )}
                 {inviteUser.isPending
                   ? ui.users.inviteDialog.submitting

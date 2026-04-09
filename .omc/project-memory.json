@@ -1,0 +1,264 @@
+{
+  "version": "1.0.0",
+  "lastScanned": 1775669491394,
+  "projectRoot": "/Volumes/projects/statix-cms",
+  "techStack": {
+    "languages": [
+      {
+        "name": "JavaScript/TypeScript",
+        "version": ">=18.0.0",
+        "confidence": "high",
+        "markers": [
+          "package.json"
+        ]
+      }
+    ],
+    "frameworks": [],
+    "packageManager": "npm",
+    "runtime": "Node.js 18.0.0"
+  },
+  "build": {
+    "buildCommand": null,
+    "testCommand": null,
+    "lintCommand": null,
+    "devCommand": null,
+    "scripts": {}
+  },
+  "conventions": {
+    "namingStyle": null,
+    "importStyle": null,
+    "testPattern": null,
+    "fileOrganization": null
+  },
+  "structure": {
+    "isMonorepo": false,
+    "workspaces": [],
+    "mainDirectories": [
+      "bin"
+    ],
+    "gitBranches": {
+      "defaultBranch": "main",
+      "branchingStrategy": null
+    }
+  },
+  "customNotes": [],
+  "directoryMap": {
+    "bin": {
+      "path": "bin",
+      "purpose": "Executable scripts",
+      "fileCount": 1,
+      "lastAccessed": 1775669490292,
+      "keyFiles": [
+        "index.js"
+      ]
+    },
+    "template": {
+      "path": "template",
+      "purpose": null,
+      "fileCount": 16,
+      "lastAccessed": 1775669490292,
+      "keyFiles": [
+        "README.md",
+        "components.json",
+        "drizzle.config.ts",
+        "eslint.config.mjs",
+        "local.db"
+      ]
+    }
+  },
+  "hotPaths": [
+    {
+      "path": "template/src/app/api/admin/users/route.ts",
+      "accessCount": 4,
+      "lastAccessed": 1775674815083,
+      "type": "file"
+    },
+    {
+      "path": "template/src/components/cms/fields/richtext/RichTextToolbar.tsx",
+      "accessCount": 4,
+      "lastAccessed": 1775726476290,
+      "type": "file"
+    },
+    {
+      "path": "template/src/components/cms/fields/richtext/editorConfig.ts",
+      "accessCount": 4,
+      "lastAccessed": 1775726476342,
+      "type": "file"
+    },
+    {
+      "path": "template/src/components/cms/fields/RichTextField.tsx",
+      "accessCount": 4,
+      "lastAccessed": 1775726476394,
+      "type": "file"
+    },
+    {
+      "path": "template/src/app/admin/page.tsx",
+      "accessCount": 3,
+      "lastAccessed": 1775680152665,
+      "type": "file"
+    },
+    {
+      "path": "template/src/components/cms/StatusSelector.tsx",
+      "accessCount": 3,
+      "lastAccessed": 1775680713533,
+      "type": "file"
+    },
+    {
+      "path": "template/src/hooks/use-editor-form.ts",
+      "accessCount": 3,
+      "lastAccessed": 1775723520398,
+      "type": "file"
+    },
+    {
+      "path": "template/src/app/api/upload/route.ts",
+      "accessCount": 3,
+      "lastAccessed": 1775723916249,
+      "type": "file"
+    },
+    {
+      "path": "template/src",
+      "accessCount": 3,
+      "lastAccessed": 1775726483008,
+      "type": "directory"
+    },
+    {
+      "path": "template/src/components/cms/fields/ImageField.tsx",
+      "accessCount": 2,
+      "lastAccessed": 1775723915553,
+      "type": "file"
+    },
+    {
+      "path": "template/src/app/admin/[collectionSlug]/[id]/page.tsx",
+      "accessCount": 2,
+      "lastAccessed": 1775723919627,
+      "type": "file"
+    },
+    {
+      "path": "template/src/components/cms/fields/extensions/FontSize.ts",
+      "accessCount": 2,
+      "lastAccessed": 1775726476239,
+      "type": "file"
+    },
+    {
+      "path": "template/src/types/cms.ts",
+      "accessCount": 2,
+      "lastAccessed": 1775726555304,
+      "type": "file"
+    },
+    {
+      "path": "template/src/app/api/admin/audit/route.ts",
+      "accessCount": 1,
+      "lastAccessed": 1775674537715,
+      "type": "file"
+    },
+    {
+      "path": "template/src/components/cms/TrashCard.tsx",
+      "accessCount": 1,
+      "lastAccessed": 1775680021086,
+      "type": "file"
+    },
+    {
+      "path": "template/src/components/cms/UsersCard.tsx",
+      "accessCount": 1,
+      "lastAccessed": 1775680124329,
+      "type": "file"
+    },
+    {
+      "path": "template/src/components/cms/SingletonDashboardCard.tsx",
+      "accessCount": 1,
+      "lastAccessed": 1775680575683,
+      "type": "file"
+    },
+    {
+      "path": "template/src/components/cms/editor/EditorHeader.tsx",
+      "accessCount": 1,
+      "lastAccessed": 1775680585314,
+      "type": "file"
+    },
+    {
+      "path": "template/package.json",
+      "accessCount": 1,
+      "lastAccessed": 1775723515594,
+      "type": "file"
+    },
+    {
+      "path": "template/src/components/ui/upload-dropzone.tsx",
+      "accessCount": 1,
+      "lastAccessed": 1775723524780,
+      "type": "file"
+    },
+    {
+      "path": "template/src/hooks/use-file-upload.ts",
+      "accessCount": 1,
+      "lastAccessed": 1775723525008,
+      "type": "file"
+    },
+    {
+      "path": "template/src/hooks/use-multi-file-upload.ts",
+      "accessCount": 1,
+      "lastAccessed": 1775723525142,
+      "type": "file"
+    },
+    {
+      "path": "template/src/hooks/use-media.ts",
+      "accessCount": 1,
+      "lastAccessed": 1775723529803,
+      "type": "file"
+    },
+    {
+      "path": "template/src/lib/r2.ts",
+      "accessCount": 1,
+      "lastAccessed": 1775723535851,
+      "type": "file"
+    },
+    {
+      "path": "template/src/lib/file-validation.ts",
+      "accessCount": 1,
+      "lastAccessed": 1775723535864,
+      "type": "file"
+    },
+    {
+      "path": "template/src/components/cms",
+      "accessCount": 1,
+      "lastAccessed": 1775723541618,
+      "type": "directory"
+    },
+    {
+      "path": "template/src/components/cms/UploadSection.tsx",
+      "accessCount": 1,
+      "lastAccessed": 1775723547148,
+      "type": "file"
+    },
+    {
+      "path": "template/src/components/cms/fields/FileField.tsx",
+      "accessCount": 1,
+      "lastAccessed": 1775723547231,
+      "type": "file"
+    },
+    {
+      "path": "template/src/app/api/file/route.ts",
+      "accessCount": 1,
+      "lastAccessed": 1775723552338,
+      "type": "file"
+    },
+    {
+      "path": "template/src/app/api/media/list/route.ts",
+      "accessCount": 1,
+      "lastAccessed": 1775723560513,
+      "type": "file"
+    },
+    {
+      "path": "template/src/app/api/admin/users/[id]/avatar/route.ts",
+      "accessCount": 1,
+      "lastAccessed": 1775723560551,
+      "type": "file"
+    },
+    {
+      "path": "template/src/components/cms/FieldRenderer.tsx",
+      "accessCount": 1,
+      "lastAccessed": 1775723909117,
+      "type": "file"
+    }
+  ],
+  "userDirectives": []
+}

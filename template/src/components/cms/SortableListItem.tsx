@@ -4,7 +4,7 @@ import { Control } from "react-hook-form";
 
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { GripVertical, Trash2 } from "lucide-react";
+import { IconGripVertical, IconTrash } from "@tabler/icons-react";
 
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -68,7 +68,7 @@ export function SortableListItem({
               {...attributes}
               {...listeners}
             >
-              <GripVertical className="w-5 h-5" />
+              <IconGripVertical className="w-5 h-5" />
             </button>
           )}
 
@@ -87,7 +87,7 @@ export function SortableListItem({
               onClick={onRemove}
               aria-label="Remove item"
             >
-              <Trash2 className="w-4 h-4" />
+              <IconTrash className="w-4 h-4" />
             </Button>
           )}
         </div>

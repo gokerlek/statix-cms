@@ -1,6 +1,6 @@
 import Link from "next/link";
 
-import { Image as ImageIcon } from "lucide-react";
+import { IconPhoto } from "@tabler/icons-react";
 
 import { Button } from "@/components/ui/button";
 import { CardHeader, CardTitle } from "@/components/ui/card";
@@ -11,7 +11,7 @@ export function Header() {
   return (
     <CardHeader className="flex flex-row items-center justify-between">
       <CardTitle className="flex items-center gap-2">
-        <ImageIcon className="h-5 w-5" />
+        <IconPhoto className="h-5 w-5" />
 
         {ui.mediaOverview.title}
       </CardTitle>

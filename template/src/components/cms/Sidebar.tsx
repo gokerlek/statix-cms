@@ -5,11 +5,11 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 import {
-  FileText,
-  Image as ImageIcon,
-  LayoutDashboard,
-  Trash2,
-} from "lucide-react";
+  IconFileText,
+  IconPhoto,
+  IconLayoutDashboard,
+  IconTrash,
+} from "@tabler/icons-react";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import ui from "@/content/ui.json";
@@ -31,7 +31,7 @@ const navItems = [
   {
     label: "Dashboard",
     href: ROUTES.ADMIN.ROOT,
-    icon: LayoutDashboard,
+    icon: IconLayoutDashboard,
   },
 ];
 
@@ -93,7 +93,7 @@ export function Sidebar({ user }: SidebarProps) {
                   : "text-muted-foreground hover:bg-sidebar-accent/50 hover:text-sidebar-accent-foreground",
               )}
             >
-              <FileText className="mr-3 h-5 w-5" />
+              <IconFileText className="mr-3 h-5 w-5" />
 
               {collection.label}
             </Link>
@@ -120,7 +120,7 @@ export function Sidebar({ user }: SidebarProps) {
                       : "text-muted-foreground hover:bg-sidebar-accent/50 hover:text-sidebar-accent-foreground",
                   )}
                 >
-                  <FileText className="mr-3 h-5 w-5" />
+                  <IconFileText className="mr-3 h-5 w-5" />
 
                   {collection.label}
                 </Link>
@@ -143,7 +143,7 @@ export function Sidebar({ user }: SidebarProps) {
               : "text-muted-foreground hover:bg-sidebar-accent/50 hover:text-sidebar-accent-foreground",
           )}
         >
-          <ImageIcon className="mr-3 h-5 w-5" />
+          <IconPhoto className="mr-3 h-5 w-5" />
 
           {ui.sidebar.mediaLibrary}
         </Link>
@@ -157,7 +157,7 @@ export function Sidebar({ user }: SidebarProps) {
               : "text-muted-foreground hover:bg-sidebar-accent/50 hover:text-sidebar-accent-foreground",
           )}
         >
-          <Trash2 className="mr-3 h-5 w-5" />
+          <IconTrash className="mr-3 h-5 w-5" />
 
           {ui.sidebar.trash}
         </Link>

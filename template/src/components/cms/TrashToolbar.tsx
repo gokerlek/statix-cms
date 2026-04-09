@@ -1,4 +1,4 @@
-import { RotateCcw, Trash2, X } from "lucide-react";
+import { IconRestore, IconTrash, IconX } from "@tabler/icons-react";
 
 import {
   AlertDialog,
@@ -52,7 +52,7 @@ export function TrashToolbar({
               onClick={onRestore}
               disabled={isRestoring || isDeleting}
             >
-              <RotateCcw className="mr-2 h-4 w-4" />
+              <IconRestore className="mr-2 h-4 w-4" />
 
               {t("trash.restoreSelected")}
             </Button>
@@ -64,7 +64,7 @@ export function TrashToolbar({
                   size="sm"
                   disabled={isRestoring || isDeleting}
                 >
-                  <Trash2 className="mr-2 h-4 w-4" />
+                  <IconTrash className="mr-2 h-4 w-4" />
 
                   {t("trash.deleteSelected")}
                 </Button>
@@ -100,7 +100,7 @@ export function TrashToolbar({
                 size="sm"
                 className="text-destructive hover:text-destructive"
               >
-                <X className="mr-2 h-4 w-4" />
+                <IconX className="mr-2 h-4 w-4" />
 
                 {t("trash.emptyTrash")}
               </Button>

@@ -1,4 +1,4 @@
-import { AlertCircle, HardDrive } from "lucide-react";
+import { IconAlertCircle, IconDeviceFloppy } from "@tabler/icons-react";
 
 import ui from "@/content/ui.json";
 
@@ -23,7 +23,7 @@ export function StatsGrid({ totalSize, orphanedCount }: StatsGridProps) {
     <div className="grid grid-cols-2 gap-4">
       <div className="flex flex-col gap-1 p-3 bg-secondary/50 rounded-lg">
         <span className="text-xs text-muted-foreground flex items-center gap-1">
-          <HardDrive className="h-3 w-3" /> {ui.mediaOverview.totalStorage}
+          <IconDeviceFloppy className="h-3 w-3" /> {ui.mediaOverview.totalStorage}
         </span>
 
         <span className="text-xl font-bold">{formatBytes(totalSize)}</span>
@@ -31,7 +31,7 @@ export function StatsGrid({ totalSize, orphanedCount }: StatsGridProps) {
 
       <div className="flex flex-col gap-1 p-3 bg-secondary/50 rounded-lg">
         <span className="text-xs text-muted-foreground flex items-center gap-1">
-          <AlertCircle className="h-3 w-3" /> {ui.mediaOverview.orphaned}
+          <IconAlertCircle className="h-3 w-3" /> {ui.mediaOverview.orphaned}
         </span>
 
         <span className="text-xl font-bold">

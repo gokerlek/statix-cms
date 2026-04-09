@@ -1,6 +1,6 @@
 "use client";
 
-import { Image as ImageIcon, Upload } from "lucide-react";
+import { IconPhoto, IconUpload } from "@tabler/icons-react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -53,7 +53,7 @@ export function MediaDrawer() {
                   onClick={() => setMode("upload")}
                   className="gap-2"
                 >
-                  <Upload className="w-4 h-4" />
+                  <IconUpload className="w-4 h-4" />
 
                   {ui.mediaDrawer.addNew}
                 </Button>
@@ -66,7 +66,7 @@ export function MediaDrawer() {
                   onClick={() => setMode("select")}
                   className="gap-2"
                 >
-                  <ImageIcon className="w-4 h-4" />
+                  <IconPhoto className="w-4 h-4" />
 
                   {ui.mediaDrawer.selectFromGallery}
                 </Button>

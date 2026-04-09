@@ -1,4 +1,4 @@
-import { Activity, Database, GitBranch, Server } from "lucide-react";
+import { IconActivity, IconDatabase, IconGitBranch, IconServer } from "@tabler/icons-react";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
@@ -38,7 +38,7 @@ export function SystemHealth({ stats }: { stats: SystemStats }) {
     <Card>
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
-          <Activity className="h-5 w-5" />
+          <IconActivity className="h-5 w-5" />
           System Health
         </CardTitle>
       </CardHeader>
@@ -47,7 +47,7 @@ export function SystemHealth({ stats }: { stats: SystemStats }) {
         <div className="space-y-2">
           <div className="flex items-center justify-between text-sm">
             <span className="flex items-center gap-2 text-muted-foreground">
-              <Server className="h-4 w-4" /> API Rate Limit
+              <IconServer className="h-4 w-4" /> API Rate Limit
             </span>
 
             <span className="font-medium">
@@ -65,7 +65,7 @@ export function SystemHealth({ stats }: { stats: SystemStats }) {
         <div className="grid grid-cols-2 gap-4 pt-2">
           <div className="flex flex-col gap-1 p-3 bg-secondary/50 rounded-lg">
             <span className="text-xs text-muted-foreground flex items-center gap-1">
-              <Database className="h-3 w-3" /> Repo Size
+              <IconDatabase className="h-3 w-3" /> Repo Size
             </span>
 
             <span className="text-xl font-bold">
@@ -75,7 +75,7 @@ export function SystemHealth({ stats }: { stats: SystemStats }) {
 
           <div className="flex flex-col gap-1 p-3 bg-secondary/50 rounded-lg">
             <span className="text-xs text-muted-foreground flex items-center gap-1">
-              <GitBranch className="h-3 w-3" /> Open Issues
+              <IconGitBranch className="h-3 w-3" /> Open Issues
             </span>
 
             <span className="text-xl font-bold">

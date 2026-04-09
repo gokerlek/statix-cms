@@ -1,6 +1,6 @@
 "use client";
 
-import { Trash2 } from "lucide-react";
+import { IconTrash } from "@tabler/icons-react";
 
 import { useDeleteUser } from "@/hooks/use-users";
 import { useUserDetailStore } from "@/stores/useUserDetailStore";
@@ -33,7 +33,7 @@ export function UserDangerZone({ user, onClose, anyLoading }: UserDangerZoneProp
         onClick={() => setDeleteDialog(true)}
         disabled={anyLoading}
       >
-        <Trash2 className="w-3.5 h-3.5 mr-1.5" />
+        <IconTrash className="w-3.5 h-3.5 mr-1.5" />
         {ui.users.dangerZone.deleteButton}
       </Button>
 

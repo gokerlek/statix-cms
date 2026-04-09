@@ -1,4 +1,4 @@
-import { FileType } from "lucide-react";
+import { IconFileDescription } from "@tabler/icons-react";
 
 import ui from "@/content/ui.json";
 
@@ -15,7 +15,7 @@ export function FileTypes({ typeDistribution }: FileTypesProps) {
   return (
     <div className="space-y-3">
       <h4 className="text-sm font-medium flex items-center gap-2 text-muted-foreground">
-        <FileType className="h-4 w-4" /> {ui.mediaOverview.fileTypes}
+        <IconFileDescription className="h-4 w-4" /> {ui.mediaOverview.fileTypes}
       </h4>
 
       <div className="space-y-2">

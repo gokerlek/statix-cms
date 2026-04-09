@@ -3,7 +3,7 @@
 import { useState, useRef, KeyboardEvent } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { Github, Mail, ArrowLeft, Loader2 } from "lucide-react";
+import { IconBrandGithub, IconMail, IconArrowLeft, IconLoader2 } from "@tabler/icons-react";
 
 import { authClient } from "@/lib/auth-client";
 import { ROUTES } from "@/lib/constants";
@@ -113,9 +113,9 @@ export default function SignInPage() {
 
                 <Button type="submit" className="w-full" disabled={loading || !email}>
                   {loading ? (
-                    <Loader2 className="w-4 h-4 animate-spin mr-2" />
+                    <IconLoader2 className="w-4 h-4 animate-spin mr-2" />
                   ) : (
-                    <Mail className="w-4 h-4 mr-2" />
+                    <IconMail className="w-4 h-4 mr-2" />
                   )}
                   Giriş kodu gönder
                 </Button>
@@ -140,7 +140,7 @@ export default function SignInPage() {
                   onClick={() => handleSocial("github")}
                   disabled={loading}
                 >
-                  <Github className="w-4 h-4 mr-2" />
+                  <IconBrandGithub className="w-4 h-4 mr-2" />
                   GitHub ile giriş yap
                 </Button>
 
@@ -211,7 +211,7 @@ export default function SignInPage() {
                 disabled={loading || otp.join("").length !== 6}
               >
                 {loading ? (
-                  <Loader2 className="w-4 h-4 animate-spin mr-2" />
+                  <IconLoader2 className="w-4 h-4 animate-spin mr-2" />
                 ) : null}
                 Giriş yap
               </Button>
@@ -221,7 +221,7 @@ export default function SignInPage() {
                 onClick={() => { setStep("email"); setOtp(["", "", "", "", "", ""]); setError(""); }}
                 className="w-full flex items-center justify-center gap-2 text-sm text-primary-foreground/60 hover:text-primary-foreground/80 transition-colors"
               >
-                <ArrowLeft className="w-4 h-4" />
+                <IconArrowLeft className="w-4 h-4" />
                 Geri dön
               </button>
             </form>

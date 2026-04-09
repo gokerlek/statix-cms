@@ -2,7 +2,7 @@
 
 import { Component, ReactNode } from "react";
 
-import { AlertTriangle, RefreshCw } from "lucide-react";
+import { IconAlertTriangle, IconRefresh } from "@tabler/icons-react";
 
 import { Button } from "@/components/ui/button";
 import ui from "@/content/ui.json";
@@ -47,7 +47,7 @@ export class ErrorBoundary extends Component<
       return (
         <div className="flex min-h-[400px] flex-col items-center justify-center gap-4 p-8">
           <div className="flex h-16 w-16 items-center justify-center rounded-full bg-destructive/10">
-            <AlertTriangle className="h-8 w-8 text-destructive" />
+            <IconAlertTriangle className="h-8 w-8 text-destructive" />
           </div>
 
           <div className="text-center">
@@ -65,7 +65,7 @@ export class ErrorBoundary extends Component<
           </div>
 
           <Button onClick={this.handleReset} variant="outline" className="mt-4">
-            <RefreshCw className="mr-2 h-4 w-4" />
+            <IconRefresh className="mr-2 h-4 w-4" />
             {ui.errorBoundary.retry}
           </Button>
         </div>

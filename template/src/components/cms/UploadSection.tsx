@@ -3,14 +3,14 @@
 import React, { useState } from "react";
 
 import {
-  AlertTriangle,
-  CheckCircle,
-  ImagePlus,
-  Loader2,
-  Upload,
-  X,
-  XCircle,
-} from "lucide-react";
+  IconAlertTriangle,
+  IconCircleCheck,
+  IconPhotoPlus,
+  IconLoader2,
+  IconUpload,
+  IconX,
+  IconCircleX,
+} from "@tabler/icons-react";
 
 import { Button } from "@/components/ui/button";
 import { FilePreview } from "@/components/ui/file-preview";
@@ -115,7 +115,7 @@ export const UploadSection: React.FC<UploadSectionProps> = ({
           disabled={!singleUpload.file || singleUpload.uploading}
           className="w-full"
         >
-          <Upload className="w-4 h-4 mr-2" />
+          <IconUpload className="w-4 h-4 mr-2" />
           {singleUpload.uploading
             ? ui.uploadSection.uploadingButton
             : ui.uploadSection.uploadButton}
@@ -135,7 +135,7 @@ export const UploadSection: React.FC<UploadSectionProps> = ({
       {/* Header */}
       <div className="flex items-center justify-between px-4 py-3 border-b bg-muted/30">
         <div className="flex items-center gap-2 text-sm font-medium">
-          <ImagePlus className="w-4 h-4" />
+          <IconPhotoPlus className="w-4 h-4" />
           {ui.uploadSection.title}
 
           {hasFiles && (
@@ -162,7 +162,7 @@ export const UploadSection: React.FC<UploadSectionProps> = ({
             disabled={pendingCount === 0 || multiUpload.uploading}
             size="sm"
           >
-            <Upload className="w-4 h-4 mr-2" />
+            <IconUpload className="w-4 h-4 mr-2" />
             {multiUpload.uploading
               ? `Yükleniyor (${multiUpload.progress.completed}/${multiUpload.progress.total})`
               : `${pendingCount > 0 ? `${pendingCount} Dosya ` : ""}Yükle`}
@@ -196,7 +196,7 @@ export const UploadSection: React.FC<UploadSectionProps> = ({
                 />
 
                 <span className="inline-flex items-center gap-2 text-sm text-primary hover:underline">
-                  <ImagePlus className="w-4 h-4" />
+                  <IconPhotoPlus className="w-4 h-4" />
                   Daha fazla görsel ekle
                 </span>
               </label>
@@ -274,19 +274,19 @@ export const UploadSection: React.FC<UploadSectionProps> = ({
 
                       {/* Status or Remove */}
                       {fileItem.status === "uploading" && (
-                        <Loader2 className="w-4 h-4 animate-spin text-primary shrink-0" />
+                        <IconLoader2 className="w-4 h-4 animate-spin text-primary shrink-0" />
                       )}
 
                       {fileItem.status === "done" && (
-                        <CheckCircle className="w-4 h-4 text-green-500 shrink-0" />
+                        <IconCircleCheck className="w-4 h-4 text-green-500 shrink-0" />
                       )}
 
                       {fileItem.status === "error" && (
-                        <XCircle className="w-4 h-4 text-destructive shrink-0" />
+                        <IconCircleX className="w-4 h-4 text-destructive shrink-0" />
                       )}
 
                       {fileItem.status === "duplicate" && (
-                        <AlertTriangle className="w-4 h-4 text-yellow-500 shrink-0" />
+                        <IconAlertTriangle className="w-4 h-4 text-yellow-500 shrink-0" />
                       )}
 
                       {fileItem.status === "pending" && (
@@ -296,7 +296,7 @@ export const UploadSection: React.FC<UploadSectionProps> = ({
                           className="h-8 w-8 shrink-0"
                           onClick={() => multiUpload.removeFile(fileItem.id)}
                         >
-                          <X className="w-4 h-4" />
+                          <IconX className="w-4 h-4" />
                         </Button>
                       )}
                     </div>

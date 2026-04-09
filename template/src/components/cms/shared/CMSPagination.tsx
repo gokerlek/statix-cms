@@ -1,4 +1,4 @@
-import { ChevronLeftIcon, ChevronRightIcon } from "lucide-react";
+import { IconChevronLeft, IconChevronRight } from "@tabler/icons-react";
 
 import {
   Pagination,
@@ -72,7 +72,7 @@ export default function CMSPagination({
                 }}
                 role={currentPage === 1 ? "link" : undefined}
               >
-                <ChevronLeftIcon aria-hidden="true" size={16} />
+                <IconChevronLeft aria-hidden="true" size={16} />
               </PaginationLink>
             </PaginationItem>
 
@@ -128,7 +128,7 @@ export default function CMSPagination({
                 }}
                 role={currentPage === totalPages ? "link" : undefined}
               >
-                <ChevronRightIcon aria-hidden="true" size={16} />
+                <IconChevronRight aria-hidden="true" size={16} />
               </PaginationLink>
             </PaginationItem>
           </PaginationContent>

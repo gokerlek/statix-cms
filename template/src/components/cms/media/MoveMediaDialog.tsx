@@ -3,12 +3,12 @@
 import React, { useState } from "react";
 
 import {
-  AlertTriangle,
-  CheckCircle,
-  FileText,
-  FolderOpen,
-  Loader2,
-} from "lucide-react";
+  IconAlertTriangle,
+  IconCircleCheck,
+  IconFileText,
+  IconFolderOpen,
+  IconLoader2,
+} from "@tabler/icons-react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -88,7 +88,7 @@ export function MoveMediaDialog({
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            <FolderOpen className="h-5 w-5" />
+            <IconFolderOpen className="h-5 w-5" />
             {ui.mediaMove.dialogTitle}
           </DialogTitle>
 
@@ -100,7 +100,7 @@ export function MoveMediaDialog({
         {isPending ? (
           <div className="space-y-4 py-4">
             <div className="flex items-center justify-center gap-2 text-muted-foreground">
-              <Loader2 className="h-5 w-5 animate-spin" />
+              <IconLoader2 className="h-5 w-5 animate-spin" />
               <span>{ui.mediaMove.moving}</span>
             </div>
 
@@ -108,12 +108,12 @@ export function MoveMediaDialog({
 
             <div className="space-y-2 text-sm">
               <div className="flex items-center gap-2 text-green-600">
-                <CheckCircle className="h-4 w-4" />
+                <IconCircleCheck className="h-4 w-4" />
                 <span>{ui.mediaMove.copyingImage}</span>
               </div>
 
               <div className="flex items-center gap-2 text-muted-foreground">
-                <Loader2 className="h-4 w-4 animate-spin" />
+                <IconLoader2 className="h-4 w-4 animate-spin" />
                 <span>{ui.mediaMove.updatingReferences}</span>
               </div>
             </div>
@@ -165,7 +165,7 @@ export function MoveMediaDialog({
             ) : hasReferences ? (
               <div className="rounded-md border border-yellow-200 bg-yellow-50 p-3 text-sm dark:border-yellow-900/50 dark:bg-yellow-900/20">
                 <div className="flex items-start gap-2">
-                  <AlertTriangle className="h-5 w-5 shrink-0 text-yellow-600" />
+                  <IconAlertTriangle className="h-5 w-5 shrink-0 text-yellow-600" />
 
                   <div className="flex-1">
                     <p className="font-medium text-yellow-800 dark:text-yellow-200">
@@ -181,7 +181,7 @@ export function MoveMediaDialog({
                           key={ref.path}
                           className="flex items-center gap-2 text-yellow-700 dark:text-yellow-300"
                         >
-                          <FileText className="h-3.5 w-3.5" />
+                          <IconFileText className="h-3.5 w-3.5" />
                           <span className="truncate">{ref.title}</span>
                           <span className="text-xs text-yellow-600 dark:text-yellow-400">
                             ({ref.collection})
@@ -224,7 +224,7 @@ export function MoveMediaDialog({
             disabled={isPending || isSameFolder}
             type="button"
           >
-            {isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+            {isPending && <IconLoader2 className="mr-2 h-4 w-4 animate-spin" />}
             {ui.mediaMove.move}
           </Button>
         </DialogFooter>

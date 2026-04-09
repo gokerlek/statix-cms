@@ -1,6 +1,6 @@
 "use client";
 
-import { Loader2, Shield } from "lucide-react";
+import { IconLoader2, IconShield } from "@tabler/icons-react";
 
 import { useSetUserRole } from "@/hooks/use-users";
 import { useUserDetailStore } from "@/stores/useUserDetailStore";
@@ -68,9 +68,9 @@ export function UserRoleSection({ user, anyLoading }: UserRoleSectionProps) {
             disabled={anyLoading}
           >
             {setRole.isPending ? (
-              <Loader2 className="w-3.5 h-3.5 animate-spin mr-1" />
+              <IconLoader2 className="w-3.5 h-3.5 animate-spin mr-1" />
             ) : (
-              <Shield className="w-3.5 h-3.5 mr-1" />
+              <IconShield className="w-3.5 h-3.5 mr-1" />
             )}
             {ui.users.role.saveButton}
           </Button>
@@ -89,7 +89,7 @@ export function UserRoleSection({ user, anyLoading }: UserRoleSectionProps) {
               onClick={handleRoleSave}
               disabled={setRole.isPending}
             >
-              {setRole.isPending && <Loader2 className="w-3 h-3 animate-spin mr-1" />}
+              {setRole.isPending && <IconLoader2 className="w-3 h-3 animate-spin mr-1" />}
               {ui.users.role.demoteConfirm}
             </Button>
             <Button

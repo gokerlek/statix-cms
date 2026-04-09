@@ -16,7 +16,7 @@ import {
   sortableKeyboardCoordinates,
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
-import { Plus } from "lucide-react";
+import { IconPlus } from "@tabler/icons-react";
 
 import { Button } from "@/components/ui/button";
 import ui from "@/content/ui.json";
@@ -145,7 +145,7 @@ export function BlockEditor({
               onClick={() => addBlock(blockType)}
               className="flex items-center gap-2"
             >
-              <Plus className="w-4 h-4" />
+              <IconPlus className="w-4 h-4" />
               {ui.blockEditor.add} {blockType.label}
             </Button>
           ))}

@@ -3,7 +3,7 @@
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { Loader2 } from "lucide-react";
+import { IconLoader2 } from "@tabler/icons-react";
 
 import { useBanUser, useUnbanUser, type BanPayload } from "@/hooks/use-users";
 import { useUserDetailStore } from "@/stores/useUserDetailStore";
@@ -102,7 +102,7 @@ export function UserBanSection({ user, anyLoading }: UserBanSectionProps) {
             onClick={() => unban.mutate()}
             disabled={anyLoading}
           >
-            {unban.isPending && <Loader2 className="w-3.5 h-3.5 animate-spin mr-1" />}
+            {unban.isPending && <IconLoader2 className="w-3.5 h-3.5 animate-spin mr-1" />}
             {ui.users.ban.unbanButton}
           </Button>
         </div>
@@ -182,7 +182,7 @@ export function UserBanSection({ user, anyLoading }: UserBanSectionProps) {
                     className="h-8 text-xs"
                     disabled={ban.isPending}
                   >
-                    {ban.isPending && <Loader2 className="w-3.5 h-3.5 animate-spin mr-1" />}
+                    {ban.isPending && <IconLoader2 className="w-3.5 h-3.5 animate-spin mr-1" />}
                     {ui.users.ban.confirmButton}
                   </Button>
                   <Button

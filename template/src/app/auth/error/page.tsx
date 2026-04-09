@@ -4,7 +4,7 @@ import { Suspense } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 
-import { AlertCircle } from "lucide-react";
+import { IconAlertCircle } from "@tabler/icons-react";
 
 import { SectionLoading } from "@/components/ui/loading";
 import ui from "@/content/ui.json";
@@ -25,7 +25,7 @@ function ErrorContent() {
         <div className="bg-white/10 backdrop-blur-lg rounded-2xl shadow-2xl p-8 border border-red-500/20">
           <div className="text-center mb-8">
             <div className="inline-flex items-center justify-center w-16 h-16 bg-red-500/20 rounded-full mb-4">
-              <AlertCircle className="w-8 h-8 text-red-400" />
+              <IconAlertCircle className="w-8 h-8 text-red-400" />
             </div>
 
             <h1 className="text-3xl font-bold text-white mb-2">

@@ -16,7 +16,7 @@ import {
   sortableKeyboardCoordinates,
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
-import { Plus } from "lucide-react";
+import { IconPlus } from "@tabler/icons-react";
 
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
@@ -90,7 +90,7 @@ export function ListEditor({
 
         {!locked && (
           <Button type="button" onClick={addItem} size="sm" className="gap-1">
-            <Plus className="w-4 h-4" />
+            <IconPlus className="w-4 h-4" />
 
             {ui.listEditor.addItem}
           </Button>

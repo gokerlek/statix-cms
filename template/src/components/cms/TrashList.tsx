@@ -1,5 +1,5 @@
 import { formatDistanceToNow } from "date-fns";
-import { FileText, Image as ImageIcon } from "lucide-react";
+import { IconFileText, IconPhoto } from "@tabler/icons-react";
 
 import { Checkbox } from "@/components/ui/checkbox";
 import { useTranslation } from "@/hooks/use-translation";
@@ -59,9 +59,9 @@ export function TrashList({
 
             <div className="flex items-center gap-2 font-medium">
               {item.type === "media" ? (
-                <ImageIcon className="h-4 w-4 text-blue-500" />
+                <IconPhoto className="h-4 w-4 text-blue-500" />
               ) : (
-                <FileText className="h-4 w-4 text-orange-500" />
+                <IconFileText className="h-4 w-4 text-orange-500" />
               )}
 
               {item.name}

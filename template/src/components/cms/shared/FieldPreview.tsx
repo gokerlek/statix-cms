@@ -2,7 +2,7 @@
 
 import { ReactNode } from "react";
 
-import { Loader2, Trash2 } from "lucide-react";
+import { IconLoader2, IconTrash } from "@tabler/icons-react";
 
 import { Button } from "@/components/ui/button";
 import ui from "@/content/ui.json";
@@ -69,9 +69,9 @@ export function FieldPreview({
             aria-label={ui.common.delete}
           >
             {isDeleting ? (
-              <Loader2 className="size-4 animate-spin" />
+              <IconLoader2 className="size-4 animate-spin" />
             ) : (
-              <Trash2 className="size-4" />
+              <IconTrash className="size-4" />
             )}
           </Button>
         </div>

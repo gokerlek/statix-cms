@@ -1,4 +1,4 @@
-import { Clock, Image as ImageIcon } from "lucide-react";
+import { IconClock, IconPhoto } from "@tabler/icons-react";
 
 import ui from "@/content/ui.json";
 
@@ -21,7 +21,7 @@ export function MediaRecentActivity({ latestUploads }: RecentActivityProps) {
   return (
     <div className="space-y-3">
       <h4 className="text-sm font-medium flex items-center gap-2 text-muted-foreground">
-        <Clock className="h-4 w-4" /> {ui.mediaOverview.recentActivity}
+        <IconClock className="h-4 w-4" /> {ui.mediaOverview.recentActivity}
       </h4>
 
       <div className="grid grid-cols-3 md:grid-cols-6 gap-2">
@@ -41,7 +41,7 @@ export function MediaRecentActivity({ latestUploads }: RecentActivityProps) {
               />
             ) : (
               <div className="w-full h-full flex flex-col items-center justify-center p-2 text-center bg-secondary/50">
-                <ImageIcon className="h-6 w-6 text-muted-foreground mb-1" />
+                <IconPhoto className="h-6 w-6 text-muted-foreground mb-1" />
 
                 <span className="text-[10px] text-muted-foreground leading-tight line-clamp-2">
                   {activity.filename}

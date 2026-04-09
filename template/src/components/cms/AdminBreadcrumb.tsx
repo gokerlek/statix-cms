@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 
-import { ChevronLeft } from "lucide-react";
+import { IconChevronLeft } from "@tabler/icons-react";
 
 import { useBreadcrumb } from "@/components/cms/BreadcrumbContext";
 import { AreYouSureDialog } from "@/components/ui/are-you-sure-dialog";
@@ -116,7 +116,7 @@ export function AdminBreadcrumb() {
           onClick={() => handleNavigation(parentUrl)}
           aria-label="Go back"
         >
-          <ChevronLeft className="h-4 w-4" />
+          <IconChevronLeft className="h-4 w-4" />
         </Button>
 
         <Breadcrumb>

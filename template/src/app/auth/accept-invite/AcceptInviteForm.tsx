@@ -1,7 +1,7 @@
 "use client";
 
 import { useFormStatus } from "react-dom";
-import { Loader2, UserCheck } from "lucide-react";
+import { IconLoader2, IconUserCheck } from "@tabler/icons-react";
 
 import { Button } from "@/components/ui/button";
 
@@ -10,9 +10,9 @@ function SubmitButton() {
   return (
     <Button type="submit" className="w-full" disabled={pending}>
       {pending ? (
-        <Loader2 className="w-4 h-4 animate-spin mr-2" />
+        <IconLoader2 className="w-4 h-4 animate-spin mr-2" />
       ) : (
-        <UserCheck className="w-4 h-4 mr-2" />
+        <IconUserCheck className="w-4 h-4 mr-2" />
       )}
       Daveti kabul et
     </Button>

@@ -1,6 +1,6 @@
 import React from "react";
 
-import { X } from "lucide-react";
+import { IconX } from "@tabler/icons-react";
 
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -63,7 +63,7 @@ export function FilePreview({
           onClick={onClear}
           title="Clear preview"
         >
-          <X className="w-3 h-3" />
+          <IconX className="w-3 h-3" />
         </Button>
       )}
     </div>

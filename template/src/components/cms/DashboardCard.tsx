@@ -3,7 +3,7 @@
 import Link from "next/link";
 
 import { formatDistanceToNow } from "date-fns";
-import { Plus } from "lucide-react";
+import { IconPlus } from "@tabler/icons-react";
 
 import { DonutChart } from "@/components/cms/DonutChart";
 import { Button } from "@/components/ui/button";
@@ -106,7 +106,7 @@ export function DashboardCard({ stat }: DashboardCardProps) {
         {stat.count === 0 ? (
           <Button className="w-full" asChild>
             <Link href={addLink}>
-              <Plus className="mr-2 h-4 w-4" />
+              <IconPlus className="mr-2 h-4 w-4" />
 
               {ui.collectionList.createFirstEntry}
             </Link>
@@ -116,7 +116,7 @@ export function DashboardCard({ stat }: DashboardCardProps) {
             {addLink && (
               <Button variant="outline" size="icon" asChild>
                 <Link href={addLink} title={ui.common.createNew}>
-                  <Plus className="size-7" />
+                  <IconPlus className="size-7" />
                 </Link>
               </Button>
             )}

@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef } from "react";
-import { Camera, Check, Loader2, Pencil, Upload, X } from "lucide-react";
+import { IconCamera, IconCheck, IconLoader2, IconPencil, IconUpload, IconX } from "@tabler/icons-react";
 
 import { useUploadAvatar, useRemoveAvatar, useUpdateUserName } from "@/hooks/use-users";
 import { useUserDetailStore } from "@/stores/useUserDetailStore";
@@ -85,9 +85,9 @@ export function UserAvatarSection({ user, anyLoading }: UserAvatarSectionProps) 
         </Avatar>
         <div className="absolute inset-0 flex items-center justify-center rounded-full bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity">
           {avatarLoading ? (
-            <Loader2 className="w-4 h-4 text-white animate-spin" />
+            <IconLoader2 className="w-4 h-4 text-white animate-spin" />
           ) : (
-            <Camera className="w-4 h-4 text-white" />
+            <IconCamera className="w-4 h-4 text-white" />
           )}
         </div>
       </div>
@@ -119,9 +119,9 @@ export function UserAvatarSection({ user, anyLoading }: UserAvatarSectionProps) 
               disabled={updateName.isPending}
             >
               {updateName.isPending ? (
-                <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                <IconLoader2 className="w-3.5 h-3.5 animate-spin" />
               ) : (
-                <Check className="w-3.5 h-3.5 text-green-600" />
+                <IconCheck className="w-3.5 h-3.5 text-green-600" />
               )}
             </Button>
             <Button
@@ -133,7 +133,7 @@ export function UserAvatarSection({ user, anyLoading }: UserAvatarSectionProps) 
                 setNameValue(user.name ?? "");
               }}
             >
-              <X className="w-3.5 h-3.5" />
+              <IconX className="w-3.5 h-3.5" />
             </Button>
           </div>
         ) : (
@@ -145,7 +145,7 @@ export function UserAvatarSection({ user, anyLoading }: UserAvatarSectionProps) 
               className="h-6 w-6 shrink-0 opacity-50 hover:opacity-100"
               onClick={() => setEditingName(true)}
             >
-              <Pencil className="w-3 h-3" />
+              <IconPencil className="w-3 h-3" />
             </Button>
           </div>
         )}
@@ -159,7 +159,7 @@ export function UserAvatarSection({ user, anyLoading }: UserAvatarSectionProps) 
             onClick={() => fileInputRef.current?.click()}
             disabled={anyLoading}
           >
-            <Upload className="w-3 h-3 mr-1" />
+            <IconUpload className="w-3 h-3 mr-1" />
             {currentImage ? ui.users.avatar.change : ui.users.avatar.upload}
           </Button>
           {isCustomAvatar(currentImage) && (
@@ -170,7 +170,7 @@ export function UserAvatarSection({ user, anyLoading }: UserAvatarSectionProps) 
               onClick={handleRemove}
               disabled={anyLoading}
             >
-              <X className="w-3 h-3 mr-1" />
+              <IconX className="w-3 h-3 mr-1" />
               {ui.users.avatar.remove}
             </Button>
           )}

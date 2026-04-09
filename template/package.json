@@ -36,7 +36,6 @@
     "date-fns": "^4.1.0",
     "drizzle-orm": "^0.45.2",
     "immer": "^11.0.1",
-    "lucide-react": "^0.555.0",
     "next": "16.1.0-canary.19",
     "octokit": "^5.0.5",
     "prosekit": "^0.19.0",

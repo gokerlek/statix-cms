@@ -2,7 +2,7 @@
 
 import React, { cloneElement, MouseEvent, ReactElement } from "react";
 
-import { Image as ImageIcon } from "lucide-react";
+import { IconPhoto } from "@tabler/icons-react";
 
 import { Button } from "@/components/ui/button";
 import ui from "@/content/ui.json";
@@ -35,7 +35,7 @@ export function MediaPicker({ onSelect, trigger }: MediaPickerProps) {
       onClick={handleClick}
       type="button"
     >
-      <ImageIcon className="w-4 h-4" />
+      <IconPhoto className="w-4 h-4" />
 
       {ui.mediaPicker.selectMedia}
     </Button>

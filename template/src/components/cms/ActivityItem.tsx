@@ -4,12 +4,12 @@ import Link from "next/link";
 
 import { formatDistanceToNow } from "date-fns";
 import {
-  ExternalLink,
-  FilePenLine,
-  GitCommit,
-  PlusCircle,
-  Trash2,
-} from "lucide-react";
+  IconExternalLink,
+  IconFilePencil,
+  IconGitCommit,
+  IconCirclePlus,
+  IconTrash,
+} from "@tabler/icons-react";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -29,10 +29,10 @@ export interface Activity {
 }
 
 const ICON_MAP: Record<string, React.ElementType> = {
-  create: PlusCircle,
-  update: FilePenLine,
-  delete: Trash2,
-  default: GitCommit,
+  create: IconCirclePlus,
+  update: IconFilePencil,
+  delete: IconTrash,
+  default: IconGitCommit,
 };
 
 export function getActivityType(message: string): string {
@@ -157,7 +157,7 @@ export function ActivityItem({ activity }: ActivityItemProps) {
               >
                 <span className="sm:hidden">{ui.dashboard.activity.link}</span>
 
-                <ExternalLink className="w-4 h-4" />
+                <IconExternalLink className="w-4 h-4" />
               </Link>
             </Button>
           </div>

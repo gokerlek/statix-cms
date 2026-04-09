@@ -1,7 +1,7 @@
 "use client";
 
 import { DraggableSyntheticListeners } from "@dnd-kit/core";
-import { GripVertical, Trash2 } from "lucide-react";
+import { IconGripVertical, IconTrash } from "@tabler/icons-react";
 
 import { Button } from "@/components/ui/button";
 import { DragAttributes } from "@/types/form";
@@ -30,7 +30,7 @@ export function BlockHeader({
           {...dragAttributes}
           {...dragListeners}
         >
-          <GripVertical className="w-5 h-5" />
+          <IconGripVertical className="w-5 h-5" />
         </button>
       )}
 
@@ -45,7 +45,7 @@ export function BlockHeader({
               size="icon"
               onClick={onRemove}
             >
-              <Trash2 className="w-4 h-4" />
+              <IconTrash className="w-4 h-4" />
             </Button>
           )}
         </div>

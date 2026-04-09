@@ -1,6 +1,6 @@
 import Link from "next/link";
 
-import { ArrowRight, FileText, Github, Lock, Upload } from "lucide-react";
+import { IconArrowRight, IconFileText, IconBrandGithub, IconLock, IconUpload } from "@tabler/icons-react";
 
 import ui from "@/content/ui.json";
 import { ROUTES } from "@/lib/constants";
@@ -23,7 +23,7 @@ export default function Home() {
             >
               {ui.common.goToAdmin}
 
-              <ArrowRight className="w-5 h-5" />
+              <IconArrowRight className="w-5 h-5" />
             </Link>
 
             <a
@@ -32,7 +32,7 @@ export default function Home() {
               rel="noopener noreferrer"
               className="flex items-center gap-2 px-8 py-4 bg-white/10 hover:bg-white/20 text-white rounded-lg transition-all duration-200 backdrop-blur-sm font-semibold text-lg"
             >
-              <Github className="w-5 h-5" />
+              <IconBrandGithub className="w-5 h-5" />
 
               {ui.common.viewOnGithub}
             </a>
@@ -42,7 +42,7 @@ export default function Home() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-16">
           <div className="bg-white/10 backdrop-blur-lg rounded-xl p-6 border border-white/20">
             <div className="w-12 h-12 bg-primary/20 rounded-lg flex items-center justify-center mb-4">
-              <Lock className="w-6 h-6 text-purple-400" />
+              <IconLock className="w-6 h-6 text-purple-400" />
             </div>
 
             <h3 className="text-lg font-semibold text-white mb-2">
@@ -56,7 +56,7 @@ export default function Home() {
 
           <div className="bg-white/10 backdrop-blur-lg rounded-xl p-6 border border-white/20">
             <div className="w-12 h-12 bg-pink-500/20 rounded-lg flex items-center justify-center mb-4">
-              <FileText className="w-6 h-6 text-pink-400" />
+              <IconFileText className="w-6 h-6 text-pink-400" />
             </div>
 
             <h3 className="text-lg font-semibold text-white mb-2">
@@ -70,7 +70,7 @@ export default function Home() {
 
           <div className="bg-white/10 backdrop-blur-lg rounded-xl p-6 border border-white/20">
             <div className="w-12 h-12 bg-black/20 rounded-lg flex items-center justify-center mb-4">
-              <Github className="w-6 h-6 text-gray-700" />
+              <IconBrandGithub className="w-6 h-6 text-gray-700" />
             </div>
 
             <h3 className="text-lg font-semibold text-white mb-2">
@@ -84,7 +84,7 @@ export default function Home() {
 
           <div className="bg-white/10 backdrop-blur-lg rounded-xl p-6 border border-white/20">
             <div className="w-12 h-12 bg-green-500/20 rounded-lg flex items-center justify-center mb-4">
-              <Upload className="w-6 h-6 text-green-400" />
+              <IconUpload className="w-6 h-6 text-green-400" />
             </div>
 
             <h3 className="text-lg font-semibold text-white mb-2">
@@ -148,7 +148,7 @@ export default function Home() {
             >
               {ui.home.getStarted}
 
-              <ArrowRight className="w-4 h-4" />
+              <IconArrowRight className="w-4 h-4" />
             </Link>
           </div>
         </div>

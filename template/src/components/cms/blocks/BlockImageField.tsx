@@ -1,6 +1,6 @@
 "use client";
 
-import { Image as ImageIcon, Plus, Trash2 } from "lucide-react";
+import { IconPhoto, IconPlus, IconTrash } from "@tabler/icons-react";
 
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
@@ -62,7 +62,7 @@ export function BlockImageField({
             onClick={() => onUpdate("")}
             type="button"
           >
-            <Trash2 className="h-4 w-4" />
+            <IconTrash className="h-4 w-4" />
           </Button>
         </div>
       ) : (
@@ -74,7 +74,7 @@ export function BlockImageField({
               onSelect={onUpdate}
               trigger={
                 <Button variant="secondary" type="button">
-                  <ImageIcon className="mr-2 h-4 w-4" />
+                  <IconPhoto className="mr-2 h-4 w-4" />
                   Select from Gallery
                 </Button>
               }
@@ -87,7 +87,7 @@ export function BlockImageField({
               onClick={() => openDrawer("select", onUpdate)}
               type="button"
             >
-              <Plus className="mr-2 h-4 w-4" />
+              <IconPlus className="mr-2 h-4 w-4" />
               Add New
             </Button>
           </div>

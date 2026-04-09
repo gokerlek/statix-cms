@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 
-import { AlertCircle, FileText } from "lucide-react";
+import { IconAlertCircle, IconFileText } from "@tabler/icons-react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -39,7 +39,7 @@ export function DashboardUnsavedAlert() {
       role="alert"
     >
       <div className="flex items-center gap-2 mb-1">
-        <AlertCircle className="h-4 w-4 text-orange-600 dark:text-orange-400" />
+        <IconAlertCircle className="h-4 w-4 text-orange-600 dark:text-orange-400" />
 
         <h5 className="font-medium leading-none tracking-tight flex items-center gap-2">
           {ui.dashboard.alert.title}
@@ -85,7 +85,7 @@ export function DashboardUnsavedAlert() {
                     onClick={() => setOpen(false)}
                   >
                     <div className="flex items-center gap-3">
-                      <FileText className="w-4 h-4 text-muted-foreground" />
+                      <IconFileText className="w-4 h-4 text-muted-foreground" />
 
                       <div>
                         <div className="font-medium text-sm group-hover:text-primary transition-colors">

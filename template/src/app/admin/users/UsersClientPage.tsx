@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { UserPlus } from "lucide-react";
+import { IconUserPlus } from "@tabler/icons-react";
 
 import { useUsers } from "@/hooks/use-users";
 
@@ -80,7 +80,7 @@ export function UsersClientPage({
           </p>
         </div>
         <Button onClick={() => setInviteOpen(true)}>
-          <UserPlus className="w-4 h-4 mr-2" />
+          <IconUserPlus className="w-4 h-4 mr-2" />
           {ui.users.inviteButton}
         </Button>
       </div>

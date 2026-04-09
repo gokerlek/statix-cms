@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
-import { Plus } from "lucide-react";
+import { IconPlus } from "@tabler/icons-react";
 
 import { CollectionList } from "@/components/cms/CollectionList";
 import { Button } from "@/components/ui/button";
@@ -80,7 +80,7 @@ export default async function CollectionPage({ params }: PageProps) {
             href={ROUTES.ADMIN.COLLECTION_NEW(collectionSlug)}
             title={ui.common.createNew}
           >
-            <Plus className="size-7" />
+            <IconPlus className="size-7" />
           </Link>
         </Button>
       </div>

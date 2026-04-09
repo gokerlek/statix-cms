@@ -129,8 +129,7 @@ export const statixConfig: StatixConfig = {
         {
           name: "description",
           label: "Description",
-          type: "textarea",
-          rows: 4,
+          type: "richtext",
           placeholder: "Tell your story...",
           localized: true,
         },

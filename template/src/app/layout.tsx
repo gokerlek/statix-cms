@@ -4,6 +4,7 @@ import { Toaster } from "sonner";
 
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { QueryProvider } from "@/components/providers/query-provider";
+import { TooltipProvider } from "@/components/ui/tooltip";
 
 import type { Metadata } from "next";
 
@@ -38,9 +39,12 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <QueryProvider>
-          <ErrorBoundary>{children}</ErrorBoundary>
-
-          <Toaster richColors position="top-center" />
+          <TooltipProvider>
+            <div className="contents">
+              <ErrorBoundary>{children}</ErrorBoundary>
+              <Toaster richColors position="top-center" />
+            </div>
+          </TooltipProvider>
         </QueryProvider>
       </body>
     </html>

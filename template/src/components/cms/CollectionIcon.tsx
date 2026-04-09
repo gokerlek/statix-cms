@@ -2,7 +2,7 @@
 
 import { ElementType } from "react";
 
-import { FileText, Settings, Users } from "lucide-react";
+import { IconFileText, IconSettings, IconUsers } from "@tabler/icons-react";
 
 interface CollectionIconProps {
   icon?: string;
@@ -10,13 +10,13 @@ interface CollectionIconProps {
 }
 
 const IconMap: Record<string, ElementType> = {
-  FileText,
-  Users,
-  Settings,
+  FileText: IconFileText,
+  Users: IconUsers,
+  Settings: IconSettings,
 };
 
 export function CollectionIcon({ icon, className }: CollectionIconProps) {
-  if (!icon) return <FileText className={className} />;
+  if (!icon) return <IconFileText className={className} />;
 
   // Check if it's an SVG path
   if (icon.startsWith("M")) {
@@ -36,7 +36,7 @@ export function CollectionIcon({ icon, className }: CollectionIconProps) {
     );
   }
 
-  const LucideIcon = IconMap[icon] || FileText;
+  const LucideIcon = IconMap[icon] || IconFileText;
 
   return <LucideIcon className={className} />;
 }

@@ -3,7 +3,7 @@
 import { ChangeEvent, useRef, useState } from "react";
 import { Control, Controller } from "react-hook-form";
 
-import { Edit, FileIcon, Loader2 } from "lucide-react";
+import { IconEdit, IconFile, IconLoader2 } from "@tabler/icons-react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
@@ -178,7 +178,7 @@ export function FileField({ field, control, name }: FileFieldProps) {
                   path={filePath}
                   preview={
                     <div className="flex flex-col items-center gap-1">
-                      <FileIcon className={`size-10 ${iconColor}`} />
+                      <IconFile className={`size-10 ${iconColor}`} />
 
                       <span className="text-xs font-medium text-muted-foreground">
                         {fileExtension}
@@ -194,9 +194,9 @@ export function FileField({ field, control, name }: FileFieldProps) {
                       disabled={isUploading}
                     >
                       {isUploading ? (
-                        <Loader2 className="size-4 animate-spin" />
+                        <IconLoader2 className="size-4 animate-spin" />
                       ) : (
-                        <Edit className="size-4" />
+                        <IconEdit className="size-4" />
                       )}
                     </Button>
                   }
@@ -210,7 +210,7 @@ export function FileField({ field, control, name }: FileFieldProps) {
                 >
                   {isUploading ? (
                     <div className="flex flex-col items-center gap-2">
-                      <Loader2 className="size-8 animate-spin text-muted-foreground" />
+                      <IconLoader2 className="size-8 animate-spin text-muted-foreground" />
 
                       <p className="text-sm text-muted-foreground">
                         {ui.fileField.uploading}
@@ -218,7 +218,7 @@ export function FileField({ field, control, name }: FileFieldProps) {
                     </div>
                   ) : (
                     <>
-                      <FileIcon className="size-12 text-muted-foreground" />
+                      <IconFile className="size-12 text-muted-foreground" />
 
                       <div className="space-y-1">
                         <p className="text-sm font-medium">

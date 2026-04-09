@@ -1,6 +1,6 @@
 "use client";
 
-import { Trash2 } from "lucide-react";
+import { IconTrash } from "@tabler/icons-react";
 
 import { AreYouSureDialog } from "@/components/ui/are-you-sure-dialog";
 import { Button } from "@/components/ui/button";
@@ -41,7 +41,7 @@ export function DeleteCollectionButton({
           disabled={isDeleting}
           aria-label={ui.common.delete}
         >
-          <Trash2 className="size-4" />
+          <IconTrash className="size-4" />
         </Button>
       }
       title={ui.common.areYouSure}

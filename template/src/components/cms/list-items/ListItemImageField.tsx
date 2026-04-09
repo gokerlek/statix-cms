@@ -1,6 +1,6 @@
 "use client";
 
-import { Image as ImageIcon, Plus, Trash2 } from "lucide-react";
+import { IconPhoto, IconPlus, IconTrash } from "@tabler/icons-react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -53,7 +53,7 @@ export function ListItemImageField({
                     size="icon"
                     className="h-8 w-8 text-white hover:text-white hover:bg-white/20"
                   >
-                    <ImageIcon className="w-4 h-4" />
+                    <IconPhoto className="w-4 h-4" />
                   </Button>
                 }
               />
@@ -70,7 +70,7 @@ export function ListItemImageField({
                 onUpdate("");
               }}
             >
-              <Trash2 className="h-3 w-3" />
+              <IconTrash className="h-3 w-3" />
             </Button>
           </div>
         ) : (
@@ -84,7 +84,7 @@ export function ListItemImageField({
                   className="w-10 h-10 shrink-0"
                   title="Select from Gallery"
                 >
-                  <ImageIcon className="w-4 h-4 text-muted-foreground" />
+                  <IconPhoto className="w-4 h-4 text-muted-foreground" />
                 </Button>
               }
             />
@@ -101,7 +101,7 @@ export function ListItemImageField({
               }}
               title="Add New"
             >
-              <Plus className="w-4 h-4 text-muted-foreground" />
+              <IconPlus className="w-4 h-4 text-muted-foreground" />
             </Button>
           </div>
         )}

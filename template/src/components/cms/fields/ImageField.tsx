@@ -2,7 +2,7 @@
 
 import { Control, Controller } from "react-hook-form";
 
-import { Edit, ImageIcon, Plus } from "lucide-react";
+import { IconEdit, IconPhoto, IconPlus } from "@tabler/icons-react";
 
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
@@ -55,7 +55,7 @@ export function ImageField({ field, control, name }: ImageFieldProps) {
                     onSelect={formField.onChange}
                     trigger={
                       <Button variant="secondary" size="icon" type="button">
-                        <Edit className="size-4" />
+                        <IconEdit className="size-4" />
                       </Button>
                     }
                   />
@@ -69,7 +69,7 @@ export function ImageField({ field, control, name }: ImageFieldProps) {
                     onSelect={formField.onChange}
                     trigger={
                       <Button variant="secondary" type="button">
-                        <ImageIcon className="mr-2 h-4 w-4" />
+                        <IconPhoto className="mr-2 h-4 w-4" />
 
                         {ui.imageField.selectFromGallery}
                       </Button>
@@ -85,7 +85,7 @@ export function ImageField({ field, control, name }: ImageFieldProps) {
                     onClick={() => openDrawer("select", formField.onChange)}
                     type="button"
                   >
-                    <Plus className="mr-2 h-4 w-4" />
+                    <IconPlus className="mr-2 h-4 w-4" />
 
                     {ui.imageField.addNew}
                   </Button>
