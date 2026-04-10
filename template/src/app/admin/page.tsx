@@ -66,10 +66,10 @@ export default async function AdminDashboard({ searchParams }: AdminDashboardPro
         <div className="flex flex-col gap-4">
           <UserProfileCard user={user as CMSUser} />
 
-            <div className="grid grid-cols-1 gap-4 md:grid-cols-3 h-full">
-                <TrashCard />
-                <UsersCard />
-            </div>
+          <div className="flex gap-4  h-full">
+            <TrashCard />
+            {user.role === "admin" && <UsersCard />}
+          </div>
         </div>
 
         <SystemHealth stats={systemStats} />
