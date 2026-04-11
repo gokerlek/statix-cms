@@ -1,22 +1,11 @@
 "use client";
 
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { UserAvatar } from "@/components/cms/shared/UserAvatar";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import ui from "@/content/ui.json";
 import type { CMSUser } from "@/app/admin/users/page";
 
-function getInitials(name: string | null, email: string): string {
-  if (name) {
-    return name
-      .split(" ")
-      .map((n) => n[0])
-      .join("")
-      .toUpperCase()
-      .slice(0, 2);
-  }
-  return email.slice(0, 2).toUpperCase();
-}
 
 interface UserListItemProps {
   user: CMSUser;
@@ -42,12 +31,12 @@ export function UserListItem({ user, lastLogin, isSelf, onClick }: UserListItemP
       <CardContent className="flex flex-col gap-3 p-4">
         {/* Avatar + name row */}
         <div className="flex items-center gap-3">
-          <Avatar className="size-10">
-            <AvatarImage src={user.image ?? undefined} alt={user.name ?? user.email} />
-            <AvatarFallback className="text-sm font-medium">
-              {getInitials(user.name, user.email)}
-            </AvatarFallback>
-          </Avatar>
+          <UserAvatar
+            src={user.image}
+            name={user.name}
+            email={user.email}
+            className="size-10"
+          />
           <div className="flex-1 min-w-0">
             <p className="font-medium truncate">{user.name || "—"}</p>
             <p className="text-xs text-muted-foreground truncate">{user.email}</p>

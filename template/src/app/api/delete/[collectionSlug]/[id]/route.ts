@@ -5,6 +5,7 @@ import { requireAdmin } from "@/lib/session";
 import { ROUTES } from "@/lib/constants";
 import { getGitHubCMS } from "@/lib/github-cms";
 import { statixConfig } from "@/statix.config";
+import { writeAudit, getIp } from "@/lib/audit";
 
 interface RouteContext {
   params: Promise<{ collectionSlug: string; id: string }>;
@@ -12,8 +13,9 @@ interface RouteContext {
 
 export async function POST(request: NextRequest, context: RouteContext) {
   try {
+    let session: Awaited<ReturnType<typeof requireAdmin>>;
     try {
-      await requireAdmin();
+      session = await requireAdmin();
     } catch (e) {
       const msg = e instanceof Error ? e.message : "Forbidden";
       return NextResponse.json({ error: msg }, { status: msg === "Unauthorized" ? 401 : 403 });
@@ -57,7 +59,17 @@ export async function POST(request: NextRequest, context: RouteContext) {
       return NextResponse.json({ error: "File not found" }, { status: 404 });
     }
 
-    await github.softDeleteFile(filePath, existing.sha, "collection_item");
+    await github.softDeleteFile(filePath, existing.sha, "collection_item", session.user);
+
+    writeAudit({
+      userId: session.user.id,
+      userEmail: session.user.email,
+      action: "content.delete",
+      entityType: "content",
+      entityId: id,
+      metadata: { collection: collectionSlug, path: filePath },
+      ipAddress: getIp(request),
+    }).catch(console.error);
 
     // Revalidate the collection page
     revalidatePath(ROUTES.ADMIN.COLLECTION(collectionSlug));

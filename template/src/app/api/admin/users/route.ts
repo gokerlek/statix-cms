@@ -59,13 +59,10 @@ export async function POST(request: NextRequest) {
 
     const reqHeaders = await headers();
 
-    // Self-mutation guard (except create/list/invite which don't target a specific user)
-    if (
-      action !== "create" &&
-      action !== "invite" &&
-      userId &&
-      userId === session.user.id
-    ) {
+    // Self-mutation guard — block destructive ops on own account, allow profile updates
+    const selfAllowed = ["create", "invite", "updateName", "updateAvatar"];
+
+    if (!selfAllowed.includes(action) && userId && userId === session.user.id) {
       return NextResponse.json(
         { error: "Kendi hesabınıza bu işlemi yapamazsınız" },
         { status: 400 },

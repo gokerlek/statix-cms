@@ -11,7 +11,7 @@ import {
   IconTrash,
 } from "@tabler/icons-react";
 
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { UserAvatar } from "@/components/cms/shared/UserAvatar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import ui from "@/content/ui.json";
@@ -93,15 +93,11 @@ export function ActivityItem({ activity }: ActivityItemProps) {
     <Card className="gap-0 py-0 rounded-lg">
       <CardContent className="flex flex-col sm:flex-row sm:items-center justify-between p-4">
         <div className="flex items-start sm:items-center gap-4 mb-3 sm:mb-0 min-w-0 flex-1">
-          <Avatar className="h-10 w-10 border-2 border-background shadow-sm shrink-0">
-            <AvatarImage
-              src={activity.author.avatar_url}
-              alt={activity.author.name}
-            />
-            <AvatarFallback>
-              {activity.author.name.charAt(0).toUpperCase()}
-            </AvatarFallback>
-          </Avatar>
+          <UserAvatar
+            src={activity.author.avatar_url}
+            name={activity.author.name}
+            className="h-10 w-10 border-2 border-background shadow-sm shrink-0"
+          />
 
           <div className="flex flex-col gap-1.5 min-w-0 flex-1">
             <div className="flex flex-col sm:flex-row sm:items-center gap-2 min-w-0">

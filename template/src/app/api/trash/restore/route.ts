@@ -48,7 +48,7 @@ export async function POST(request: NextRequest) {
         await restoreR2(item.path);
       } else {
         // type === "content" — GitHub'dan restore
-        await github.restoreTrashItem(item.path);
+        await github.restoreTrashItem(item.path, session.user);
       }
       await writeAudit({
         userId: session.user.id,

@@ -2,6 +2,20 @@ import { Octokit } from "octokit";
 
 import { env } from "@/lib/env";
 
+export interface StatixUser {
+  email: string;
+  name: string;
+}
+
+function buildCommitMessage(
+  action: string,
+  path: string,
+  user?: StatixUser,
+): string {
+  if (!user) return `${action} ${path}`;
+  return `${action} ${path}\n\nstatix-user: ${user.email}\nstatix-name: ${user.name}\nstatix-action: ${action.toLowerCase()}\nstatix-time: ${new Date().toISOString()}`;
+}
+
 export interface GitHubFile {
   [key: string]: unknown;
   name: string;
@@ -78,8 +92,13 @@ export class GitHubCMS {
   /**
    * Save file to GitHub (create or update)
    */
-  async saveFile(path: string, content: unknown, sha?: string): Promise<void> {
-    const message = sha ? `Update ${path}` : `Create ${path}`;
+  async saveFile(
+    path: string,
+    content: unknown,
+    sha?: string,
+    user?: StatixUser,
+  ): Promise<void> {
+    const message = buildCommitMessage(sha ? "Update" : "Create", path, user);
     const contentBase64 = Buffer.from(
       JSON.stringify(content, null, 2),
     ).toString("base64");
@@ -98,12 +117,12 @@ export class GitHubCMS {
   /**
    * Delete file from GitHub
    */
-  async deleteFile(path: string, sha: string): Promise<void> {
+  async deleteFile(path: string, sha: string, user?: StatixUser): Promise<void> {
     await this.octokit.rest.repos.deleteFile({
       owner: this.owner,
       repo: this.repo,
       path,
-      message: `Delete ${path}`,
+      message: buildCommitMessage("Delete", path, user),
       sha,
       branch: this.branch,
     });
@@ -327,6 +346,7 @@ export class GitHubCMS {
     targetPath: string,
     sha: string,
     content?: unknown,
+    user?: StatixUser,
   ): Promise<void> {
     // 1. Get content if not provided
     let fileContent = content;
@@ -342,10 +362,10 @@ export class GitHubCMS {
     }
 
     // 2. Create at new path
-    await this.saveFile(targetPath, fileContent);
+    await this.saveFile(targetPath, fileContent, undefined, user);
 
     // 3. Delete from old path
-    await this.deleteFile(sourcePath, sha);
+    await this.deleteFile(sourcePath, sha, user);
   }
 
   /**
@@ -354,6 +374,7 @@ export class GitHubCMS {
   async updateMediaReferences(
     oldUrl: string,
     newUrl: string,
+    user?: StatixUser,
   ): Promise<{ updatedFiles: string[] }> {
     const updatedFiles: string[] = [];
     const { statixConfig } = await import("@/statix.config");
@@ -379,7 +400,7 @@ export class GitHubCMS {
         const contentStr = JSON.stringify(fileData.content);
         if (contentStr.includes(oldUrl)) {
           const newContentStr = contentStr.split(oldUrl).join(newUrl);
-          await this.saveFile(file.path, JSON.parse(newContentStr), fileData.sha);
+          await this.saveFile(file.path, JSON.parse(newContentStr), fileData.sha, user);
           updatedFiles.push(file.path);
         }
       } catch (error) {
@@ -397,6 +418,7 @@ export class GitHubCMS {
     path: string,
     sha: string,
     type: "collection_item" | "media" = "collection_item",
+    user?: StatixUser,
   ): Promise<void> {
     const file = await this.getFile(path);
 
@@ -414,8 +436,8 @@ export class GitHubCMS {
     const filename = path.split("/").pop();
     const trashPath = `content/trash/${filename}`;
 
-    await this.saveFile(trashPath, trashItem);
-    await this.deleteFile(path, sha);
+    await this.saveFile(trashPath, trashItem, undefined, user);
+    await this.deleteFile(path, sha, user);
   }
 
   /**
@@ -491,7 +513,7 @@ export class GitHubCMS {
   /**
    * Restore item from trash
    */
-  async restoreTrashItem(trashPath: string): Promise<void> {
+  async restoreTrashItem(trashPath: string, user?: StatixUser): Promise<void> {
     const file = await this.getFile(trashPath);
 
     if (!file) throw new Error("Trash item not found");
@@ -515,20 +537,17 @@ export class GitHubCMS {
         throw new Error("Failed to get media content");
       }
 
-      // Restore to original path
+      // Restore to original path — buildCommitMessage ile kullanıcı bilgisi eklenir
       await this.octokit.rest.repos.createOrUpdateFileContents({
         owner: this.owner,
         repo: this.repo,
         path: data.originalPath,
-        message: `Restore ${filename}`,
+        message: buildCommitMessage("Restore", filename ?? data.originalPath, user),
         content: response.data.content,
         branch: this.branch,
       });
 
       // Delete from trash (binary + meta)
-      // We need SHA for binary to delete it
-      // Actually getFile tries to parse JSON. We should use octokit directly or just delete without SHA if possible (but API needs SHA usually)
-      // Let's get SHA properly
       const binaryResponse = await this.octokit.rest.repos.getContent({
         owner: this.owner,
         repo: this.repo,
@@ -537,14 +556,14 @@ export class GitHubCMS {
       });
 
       if ("sha" in binaryResponse.data) {
-        await this.deleteFile(trashMediaPath, binaryResponse.data.sha);
+        await this.deleteFile(trashMediaPath, binaryResponse.data.sha, user);
       }
 
-      await this.deleteFile(trashPath, file.sha);
+      await this.deleteFile(trashPath, file.sha, user);
     } else {
       // Restore collection item
-      await this.saveFile(data.originalPath, data.data);
-      await this.deleteFile(trashPath, file.sha);
+      await this.saveFile(data.originalPath, data.data, undefined, user);
+      await this.deleteFile(trashPath, file.sha, user);
     }
   }
 

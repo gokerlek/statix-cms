@@ -1,7 +1,0 @@
-{
-  "tool_name": "Bash",
-  "tool_input_preview": "{\"command\":\"cd /Volumes/projects/statix-cms/template && npm uninstall @tiptap/extension-font-size @tiptap/extension-link @tiptap/extension-text-align @tiptap/extension-text-style @tiptap/extension-und...",
-  "error": "Exit code 1\nnpm warn ERESOLVE overriding peer dependency\nnpm warn While resolving: @tiptap/extension-font-size@3.0.0-next.3\nnpm warn Found: @tiptap/core@2.27.2\nnpm warn node_modules/@tiptap/core\nnpm warn   peer @tiptap/core@\"^2.7.0\" from @tiptap/extension-blockquote@2.27.2\nnpm warn   node_modules/@tiptap/extension-blockquote\nnpm warn     @tiptap/extension-blockquote@\"^2.27.2\" from @tiptap/starter-kit@2.27.2\nnpm warn     node_modules/@tiptap/starter-kit\nnpm warn   25 more (@tiptap/extension-bold,...",
-  "timestamp": "2026-04-09T09:32:00.420Z",
-  "retry_count": 1
-}

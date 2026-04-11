@@ -1,7 +1,8 @@
+import { unstable_cache } from "next/cache";
+
 import { getGitHubCMS } from "@/lib/github-cms";
 import { listR2Media, listR2Trash } from "@/lib/r2";
 import { statixConfig } from "@/statix.config";
-import { GitHubCommit } from "@/types/github";
 
 interface CollectionField {
   name: string;
@@ -96,13 +97,6 @@ export async function getRecentActivity(limit: number = 5) {
   return await github.getRecentCommits(limit);
 }
 
-export async function getAllRecentActivity(limit: number = 100) {
-  const github = getGitHubCMS();
-
-  // Fetch a larger batch for client-side filtering/search
-  // We limit to 100 for performance, but this "Detailed" view is still "Recent" activity
-  return await github.getRecentCommits(limit, undefined, 1);
-}
 
 export async function getLocalizationStats() {
   const github = getGitHubCMS();
@@ -228,18 +222,19 @@ export async function getLocalizationStats() {
   return localizationStats;
 }
 
-export async function getSystemStats() {
-  const github = getGitHubCMS();
-  const [rateLimit, repoDetails] = await Promise.all([
-    github.getRateLimit(),
-    github.getRepoDetails(),
-  ]);
+export const getSystemStats = unstable_cache(
+  async () => {
+    const github = getGitHubCMS();
+    const [rateLimit, repoDetails] = await Promise.all([
+      github.getRateLimit(),
+      github.getRepoDetails(),
+    ]);
 
-  return {
-    rateLimit,
-    repoDetails,
-  };
-}
+    return { rateLimit, repoDetails };
+  },
+  ["system-stats"],
+  { revalidate: 300 },
+);
 
 export async function getMediaStats() {
   // R2'den dosya listesi ve trash

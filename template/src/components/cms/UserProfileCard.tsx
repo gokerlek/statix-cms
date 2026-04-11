@@ -2,10 +2,9 @@
 
 import { useState } from "react";
 import Image from "next/image";
-import { useRouter } from "next/navigation";
 
 import { SignOutButton } from "@/components/cms/SignOutButton";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { UserAvatar } from "@/components/cms/shared/UserAvatar";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { UserDetailDrawer } from "@/components/cms/UserDetailDrawer";
 import type { CMSUser } from "@/app/admin/users/page";
@@ -15,7 +14,6 @@ interface UserProfileCardProps {
 }
 
 export function UserProfileCard({ user }: UserProfileCardProps) {
-  const router = useRouter();
   const [drawerOpen, setDrawerOpen] = useState(false);
 
   return (
@@ -37,15 +35,12 @@ export function UserProfileCard({ user }: UserProfileCardProps) {
           onClick={() => setDrawerOpen(true)}
           title="Profili düzenle"
         >
-          <Avatar className="h-8 w-8 shrink-0">
-            <AvatarImage
-              src={user.image || undefined}
-              alt={user.name || "User"}
-            />
-            <AvatarFallback>
-              {user.name?.charAt(0).toUpperCase()}
-            </AvatarFallback>
-          </Avatar>
+          <UserAvatar
+            src={user.image}
+            name={user.name}
+            email={user.email}
+            className="h-8 w-8 shrink-0"
+          />
 
           <div className="flex-1 min-w-0">
             <p className="text-sm font-medium truncate">{user.name || "User"}</p>

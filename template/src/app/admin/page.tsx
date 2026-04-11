@@ -6,9 +6,8 @@ import { DashboardCard } from "@/components/cms/DashboardCard";
 import { DashboardUnsavedAlert } from "@/components/cms/DashboardUnsavedAlert";
 import { LocalizationStats } from "@/components/cms/LocalizationStats";
 import { MediaOverview } from "@/components/cms/MediaOverview";
-import { RecentActivity } from "@/components/cms/RecentActivity";
+import { MonitorSummaryCard } from "@/components/cms/MonitorSummaryCard";
 import { SingletonDashboardCard } from "@/components/cms/SingletonDashboardCard";
-import { SystemHealth } from "@/components/cms/SystemHealth";
 import { TrashCard } from "@/components/cms/TrashCard";
 import { UsersCard } from "@/components/cms/UsersCard";
 import { UserProfileCard } from "@/components/cms/UserProfileCard";
@@ -16,9 +15,9 @@ import type { CMSUser } from "@/app/admin/users/page";
 import {
   getCollectionStats,
   getLocalizationStats,
-  getRecentActivity,
   getSystemStats,
 } from "@/lib/dashboard-data";
+import { getMonitorSummary } from "@/lib/monitor-data";
 import { getSession } from "@/lib/session";
 
 interface AdminDashboardProps {
@@ -36,12 +35,14 @@ export default async function AdminDashboard({ searchParams }: AdminDashboardPro
   const user = session.user;
 
 
-  const [collectionStats, recentCommits, localizationStats, systemStats] =
+  const isAdmin = user.role === "admin";
+
+  const [collectionStats, localizationStats, monitorSummary] =
     await Promise.all([
       getCollectionStats(),
-      getRecentActivity(5),
       getLocalizationStats(),
       getSystemStats(),
+      isAdmin ? getMonitorSummary() : Promise.resolve(null),
     ]);
 
   const regularCollections = collectionStats.filter(
@@ -68,11 +69,13 @@ export default async function AdminDashboard({ searchParams }: AdminDashboardPro
 
           <div className="flex gap-4  h-full">
             <TrashCard />
-            {user.role === "admin" && <UsersCard />}
+            {isAdmin && <UsersCard />}
           </div>
         </div>
 
-        <SystemHealth stats={systemStats} />
+        {isAdmin && monitorSummary && (
+          <MonitorSummaryCard summary={monitorSummary} />
+        )}
 
         {regularCollections.length > 0 &&
           regularCollections.map((collection) => (
@@ -89,8 +92,6 @@ export default async function AdminDashboard({ searchParams }: AdminDashboardPro
       <MediaOverview />
 
       <LocalizationStats stats={localizationStats} />
-
-      <RecentActivity activities={recentCommits} />
     </div>
   );
 }

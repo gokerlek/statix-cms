@@ -1,6 +1,6 @@
 {
   "version": "1.0.0",
-  "lastScanned": 1775669491394,
+  "lastScanned": 1775894453917,
   "projectRoot": "/Volumes/projects/statix-cms",
   "techStack": {
     "languages": [
@@ -47,7 +47,7 @@
       "path": "bin",
       "purpose": "Executable scripts",
       "fileCount": 1,
-      "lastAccessed": 1775669490292,
+      "lastAccessed": 1775894453895,
       "keyFiles": [
         "index.js"
       ]
@@ -56,7 +56,7 @@
       "path": "template",
       "purpose": null,
       "fileCount": 16,
-      "lastAccessed": 1775669490292,
+      "lastAccessed": 1775894453895,
       "keyFiles": [
         "README.md",
         "components.json",
@@ -68,195 +68,303 @@
   },
   "hotPaths": [
     {
-      "path": "template/src/app/api/admin/users/route.ts",
-      "accessCount": 4,
-      "lastAccessed": 1775674815083,
+      "path": "template/src/lib/monitor-data.ts",
+      "accessCount": 42,
+      "lastAccessed": 1775944448717,
       "type": "file"
     },
     {
-      "path": "template/src/components/cms/fields/richtext/RichTextToolbar.tsx",
-      "accessCount": 4,
-      "lastAccessed": 1775726476290,
+      "path": "template/src/lib/github-cms.ts",
+      "accessCount": 26,
+      "lastAccessed": 1775916187555,
       "type": "file"
     },
     {
-      "path": "template/src/components/cms/fields/richtext/editorConfig.ts",
-      "accessCount": 4,
-      "lastAccessed": 1775726476342,
+      "path": "template/src/content/ui.json",
+      "accessCount": 25,
+      "lastAccessed": 1775943294491,
       "type": "file"
     },
     {
-      "path": "template/src/components/cms/fields/RichTextField.tsx",
-      "accessCount": 4,
-      "lastAccessed": 1775726476394,
-      "type": "file"
-    },
-    {
-      "path": "template/src/app/admin/page.tsx",
-      "accessCount": 3,
-      "lastAccessed": 1775680152665,
-      "type": "file"
-    },
-    {
-      "path": "template/src/components/cms/StatusSelector.tsx",
-      "accessCount": 3,
-      "lastAccessed": 1775680713533,
-      "type": "file"
-    },
-    {
-      "path": "template/src/hooks/use-editor-form.ts",
-      "accessCount": 3,
-      "lastAccessed": 1775723520398,
-      "type": "file"
-    },
-    {
-      "path": "template/src/app/api/upload/route.ts",
-      "accessCount": 3,
-      "lastAccessed": 1775723916249,
+      "path": "template/src/app/admin/monitor/page.tsx",
+      "accessCount": 21,
+      "lastAccessed": 1775942948335,
       "type": "file"
     },
     {
       "path": "template/src",
-      "accessCount": 3,
-      "lastAccessed": 1775726483008,
+      "accessCount": 21,
+      "lastAccessed": 1775943350711,
       "type": "directory"
     },
     {
-      "path": "template/src/components/cms/fields/ImageField.tsx",
-      "accessCount": 2,
-      "lastAccessed": 1775723915553,
+      "path": "template/src/app/admin/page.tsx",
+      "accessCount": 11,
+      "lastAccessed": 1775943276509,
       "type": "file"
     },
     {
-      "path": "template/src/app/admin/[collectionSlug]/[id]/page.tsx",
-      "accessCount": 2,
-      "lastAccessed": 1775723919627,
+      "path": "template/src/lib/dashboard-data.ts",
+      "accessCount": 11,
+      "lastAccessed": 1775943291050,
       "type": "file"
     },
     {
-      "path": "template/src/components/cms/fields/extensions/FontSize.ts",
-      "accessCount": 2,
-      "lastAccessed": 1775726476239,
+      "path": "template/src/app/admin/activity/page.tsx",
+      "accessCount": 9,
+      "lastAccessed": 1775913307799,
       "type": "file"
     },
     {
-      "path": "template/src/types/cms.ts",
-      "accessCount": 2,
-      "lastAccessed": 1775726555304,
+      "path": "template/src/components/cms/monitor/CommitTimeline.tsx",
+      "accessCount": 8,
+      "lastAccessed": 1775909510661,
+      "type": "file"
+    },
+    {
+      "path": "template/src/app/api/content/[collectionSlug]/[id]/route.ts",
+      "accessCount": 8,
+      "lastAccessed": 1775910852507,
+      "type": "file"
+    },
+    {
+      "path": "template/src/app/api/delete/[collectionSlug]/[id]/route.ts",
+      "accessCount": 8,
+      "lastAccessed": 1775910854466,
+      "type": "file"
+    },
+    {
+      "path": "template/src/components/cms/monitor/RecentAuditFeed.tsx",
+      "accessCount": 8,
+      "lastAccessed": 1775912973176,
+      "type": "file"
+    },
+    {
+      "path": "template/src/components/cms/ActivityItem.tsx",
+      "accessCount": 8,
+      "lastAccessed": 1775944469054,
+      "type": "file"
+    },
+    {
+      "path": "template/src/components/cms/activity/UnifiedFeedItem.tsx",
+      "accessCount": 8,
+      "lastAccessed": 1775944491240,
+      "type": "file"
+    },
+    {
+      "path": "template/src/components/cms/MonitorSummaryCard.tsx",
+      "accessCount": 7,
+      "lastAccessed": 1775902312915,
+      "type": "file"
+    },
+    {
+      "path": "template/src/components/cms/monitor/ActivityByUserChart.tsx",
+      "accessCount": 5,
+      "lastAccessed": 1775909113914,
+      "type": "file"
+    },
+    {
+      "path": "template/src/components/cms/monitor/ActionTypeChart.tsx",
+      "accessCount": 5,
+      "lastAccessed": 1775909124816,
+      "type": "file"
+    },
+    {
+      "path": "template/src/components/cms/monitor/SystemStatusCards.tsx",
+      "accessCount": 5,
+      "lastAccessed": 1775909124931,
+      "type": "file"
+    },
+    {
+      "path": "template/src/components/cms/AuditLogTab.tsx",
+      "accessCount": 5,
+      "lastAccessed": 1775910558367,
+      "type": "file"
+    },
+    {
+      "path": "template/src/db/schema.ts",
+      "accessCount": 5,
+      "lastAccessed": 1775910701288,
       "type": "file"
     },
     {
       "path": "template/src/app/api/admin/audit/route.ts",
-      "accessCount": 1,
-      "lastAccessed": 1775674537715,
+      "accessCount": 4,
+      "lastAccessed": 1775910199374,
       "type": "file"
     },
     {
-      "path": "template/src/components/cms/TrashCard.tsx",
-      "accessCount": 1,
-      "lastAccessed": 1775680021086,
+      "path": "template/src/lib/audit.ts",
+      "accessCount": 4,
+      "lastAccessed": 1775910824571,
       "type": "file"
     },
     {
-      "path": "template/src/components/cms/UsersCard.tsx",
-      "accessCount": 1,
-      "lastAccessed": 1775680124329,
+      "path": "template/src/components/cms/monitor/ActivityTrendChart.tsx",
+      "accessCount": 4,
+      "lastAccessed": 1775942948372,
       "type": "file"
     },
     {
-      "path": "template/src/components/cms/SingletonDashboardCard.tsx",
-      "accessCount": 1,
-      "lastAccessed": 1775680575683,
+      "path": "template/next.config.ts",
+      "accessCount": 3,
+      "lastAccessed": 1775907247144,
       "type": "file"
     },
     {
-      "path": "template/src/components/cms/editor/EditorHeader.tsx",
-      "accessCount": 1,
-      "lastAccessed": 1775680585314,
+      "path": "template/src/app/api/admin/users/route.ts",
+      "accessCount": 3,
+      "lastAccessed": 1775909117664,
       "type": "file"
     },
     {
-      "path": "template/package.json",
-      "accessCount": 1,
-      "lastAccessed": 1775723515594,
+      "path": "template/src/statix.config.ts",
+      "accessCount": 3,
+      "lastAccessed": 1775909922203,
       "type": "file"
     },
     {
-      "path": "template/src/components/ui/upload-dropzone.tsx",
-      "accessCount": 1,
-      "lastAccessed": 1775723524780,
+      "path": "template/src/components/cms/DetailedRecentActivity.tsx",
+      "accessCount": 3,
+      "lastAccessed": 1775910709308,
       "type": "file"
     },
     {
-      "path": "template/src/hooks/use-file-upload.ts",
-      "accessCount": 1,
-      "lastAccessed": 1775723525008,
+      "path": "template/src/app/api/media/move/route.ts",
+      "accessCount": 2,
+      "lastAccessed": 1775910229986,
       "type": "file"
     },
     {
-      "path": "template/src/hooks/use-multi-file-upload.ts",
+      "path": "",
+      "accessCount": 2,
+      "lastAccessed": 1775914737539,
+      "type": "directory"
+    },
+    {
+      "path": "template/src/app/api/trash/restore/route.ts",
       "accessCount": 1,
-      "lastAccessed": 1775723525142,
+      "lastAccessed": 1775894620108,
       "type": "file"
     },
     {
-      "path": "template/src/hooks/use-media.ts",
+      "path": "template/src/lib/db.ts",
       "accessCount": 1,
-      "lastAccessed": 1775723529803,
-      "type": "file"
-    },
-    {
-      "path": "template/src/lib/r2.ts",
-      "accessCount": 1,
-      "lastAccessed": 1775723535851,
-      "type": "file"
-    },
-    {
-      "path": "template/src/lib/file-validation.ts",
-      "accessCount": 1,
-      "lastAccessed": 1775723535864,
+      "lastAccessed": 1775894644691,
       "type": "file"
     },
     {
       "path": "template/src/components/cms",
       "accessCount": 1,
-      "lastAccessed": 1775723541618,
+      "lastAccessed": 1775894695237,
       "type": "directory"
     },
     {
-      "path": "template/src/components/cms/UploadSection.tsx",
+      "path": "template/src/components/cms/DonutChart.tsx",
       "accessCount": 1,
-      "lastAccessed": 1775723547148,
+      "lastAccessed": 1775894699923,
       "type": "file"
     },
     {
-      "path": "template/src/components/cms/fields/FileField.tsx",
+      "path": "template/src/components/cms/media-overview/FileTypes.tsx",
       "accessCount": 1,
-      "lastAccessed": 1775723547231,
+      "lastAccessed": 1775894700382,
       "type": "file"
     },
     {
-      "path": "template/src/app/api/file/route.ts",
+      "path": "template/src/components/cms/DashboardCard.tsx",
       "accessCount": 1,
-      "lastAccessed": 1775723552338,
+      "lastAccessed": 1775894708127,
       "type": "file"
     },
     {
-      "path": "template/src/app/api/media/list/route.ts",
+      "path": "template/src/components/cms/SystemHealth.tsx",
       "accessCount": 1,
-      "lastAccessed": 1775723560513,
+      "lastAccessed": 1775894708838,
       "type": "file"
     },
     {
-      "path": "template/src/app/api/admin/users/[id]/avatar/route.ts",
+      "path": "template/src/app/admin/monitor/loading.tsx",
       "accessCount": 1,
-      "lastAccessed": 1775723560551,
+      "lastAccessed": 1775894801802,
       "type": "file"
     },
     {
-      "path": "template/src/components/cms/FieldRenderer.tsx",
+      "path": "template/src/app/admin/monitor/error.tsx",
       "accessCount": 1,
-      "lastAccessed": 1775723909117,
+      "lastAccessed": 1775894806795,
+      "type": "file"
+    },
+    {
+      "path": "template/src/components/ui",
+      "accessCount": 1,
+      "lastAccessed": 1775894819412,
+      "type": "directory"
+    },
+    {
+      "path": "template/src/components/cms/shared/EmptyState.tsx",
+      "accessCount": 1,
+      "lastAccessed": 1775895460072,
+      "type": "file"
+    },
+    {
+      "path": "template",
+      "accessCount": 1,
+      "lastAccessed": 1775904382626,
+      "type": "directory"
+    },
+    {
+      "path": "template/src/app/api/upload/route.ts",
+      "accessCount": 1,
+      "lastAccessed": 1775909118092,
+      "type": "file"
+    },
+    {
+      "path": "template/src/app/admin/layout.tsx",
+      "accessCount": 1,
+      "lastAccessed": 1775909125181,
+      "type": "file"
+    },
+    {
+      "path": "template/src/db",
+      "accessCount": 1,
+      "lastAccessed": 1775909524154,
+      "type": "directory"
+    },
+    {
+      "path": "template/src/lib/session.ts",
+      "accessCount": 1,
+      "lastAccessed": 1775909925193,
+      "type": "directory"
+    },
+    {
+      "path": "template/src/lib",
+      "accessCount": 1,
+      "lastAccessed": 1775910222197,
+      "type": "directory"
+    },
+    {
+      "path": "template/src/app/api",
+      "accessCount": 1,
+      "lastAccessed": 1775910236782,
+      "type": "directory"
+    },
+    {
+      "path": "template/src/types/github.ts",
+      "accessCount": 1,
+      "lastAccessed": 1775910558879,
+      "type": "file"
+    },
+    {
+      "path": "template/src/lib/activity-feed.ts",
+      "accessCount": 1,
+      "lastAccessed": 1775910896250,
+      "type": "file"
+    },
+    {
+      "path": "template/src/app/api/admin/activity/route.ts",
+      "accessCount": 1,
+      "lastAccessed": 1775910909355,
       "type": "file"
     }
   ],

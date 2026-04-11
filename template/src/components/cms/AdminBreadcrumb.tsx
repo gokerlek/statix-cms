@@ -132,19 +132,33 @@ export function AdminBreadcrumb() {
                 (c) => c.slug === path,
               );
 
+              // Static admin route segments — never treated as item IDs
+              const STATIC_SEGMENTS = new Set([
+                "media",
+                "monitor",
+                "users",
+                "trash",
+                "activity",
+              ]);
+
               // Check if this path segment is an item ID (not a known segment)
               const isItemSegment =
                 path !== baseSegment &&
                 !collection &&
                 path !== "new" &&
                 path !== "index" &&
-                path !== "media" &&
-                path !== "activity";
+                !STATIC_SEGMENTS.has(path);
 
               if (path === baseSegment) {
                 label = "Dashboard";
               } else if (path === "media") {
                 label = ui.mediaPage.title;
+              } else if (path === "monitor") {
+                label = ui.monitor.title;
+              } else if (path === "users") {
+                label = ui.users.title;
+              } else if (path === "trash") {
+                label = ui.trash.title;
               } else if (path === "activity") {
                 label = ui.dashboard.stats.recentActivity;
               } else if (collection) {

@@ -6,6 +6,7 @@ import { ROUTES } from "@/lib/constants";
 import { getGitHubCMS } from "@/lib/github-cms";
 import { slugify } from "@/lib/utils";
 import { statixConfig } from "@/statix.config";
+import { writeAudit, getIp } from "@/lib/audit";
 
 interface RouteContext {
   params: Promise<{ collectionSlug: string; id: string }>;
@@ -156,7 +157,7 @@ export async function POST(request: NextRequest, context: RouteContext) {
     // 1. Renaming (slug change) - NO LONGER APPLIES TO UUID FILENAMES (filename stays same)
     // 2. Migration (moving from subfolder to root)
     if (oldPath && oldPath !== targetPath && oldSha) {
-      await github.deleteFile(oldPath, oldSha);
+      await github.deleteFile(oldPath, oldSha, session.user);
       // Reset SHA for the new file creation since it's a new path
       oldSha = undefined;
     } else if (oldPath === targetPath) {
@@ -180,7 +181,17 @@ export async function POST(request: NextRequest, context: RouteContext) {
     // Save to target path
     // Note: If we moved, oldSha is undefined, so it creates a new file
     // If we updated in place, oldSha is passed to update
-    await github.saveFile(targetPath, contentWithMeta, oldSha);
+    await github.saveFile(targetPath, contentWithMeta, oldSha, session.user);
+
+    writeAudit({
+      userId: session.user.id,
+      userEmail: session.user.email,
+      action: id === "new" ? "content.create" : "content.update",
+      entityType: "content",
+      entityId: identifier,
+      metadata: { collection: collectionSlug, path: targetPath },
+      ipAddress: getIp(request),
+    }).catch(console.error);
 
     // Revalidate the collection page
     revalidatePath(ROUTES.ADMIN.COLLECTION(collectionSlug));

@@ -65,7 +65,7 @@ export async function POST(request: NextRequest) {
 
     // GitHub content JSON'larında URL referanslarını güncelle
     const github = getGitHubCMS();
-    const updatedFiles = await github.updateMediaReferences(oldUrl, newUrl);
+    const updatedFiles = await github.updateMediaReferences(oldUrl, newUrl, session.user);
 
     await writeAudit({
       userId: session.user.id,

@@ -388,5 +388,84 @@
       "inviteSent": "Invite sent",
       "inviteFailed": "Failed to send invite"
     }
+  },
+  "monitor": {
+    "title": "System Monitor",
+    "subtitle": "Track who did what and when, and monitor system health",
+    "empty": "No activity recorded yet",
+    "noCommits": "No commit history",
+    "actionsLabel": "Actions",
+    "systemStatus": {
+      "rateLimit": "GitHub API Rate Limit",
+      "resetsAt": "Resets at {time}",
+      "repoSize": "Repository Size",
+      "repoSizeLabel": "Total size on disk"
+    },
+    "activityTrend": {
+      "title": "Daily Activity Trend",
+      "subtitle": "Last 30 days"
+    },
+    "topUsers": {
+      "title": "Top Active Users",
+      "subtitle": "Last 30 days"
+    },
+    "collectionCounts": {
+      "title": "Content by Collection",
+      "subtitle": "Total changes per collection",
+      "empty": "No content changes recorded yet.",
+      "tooltip": "Changes"
+    },
+    "activityByUser": {
+      "title": "Activity by User",
+      "subtitle": "Last 30 days — most active users"
+    },
+    "commitTimeline": {
+      "title": "GitHub Commit History",
+      "subtitle": "CMS user parsed from commit"
+    },
+    "auditFeed": {
+      "title": "Recent Activity",
+      "subtitle": "System audit log",
+      "viewAll": "View All"
+    },
+    "summaryCard": {
+      "title": "System Monitor",
+      "today": "Today",
+      "actions": "actions",
+      "repoSize": "Repo Size",
+      "repoSizeLabel": "on disk",
+      "githubApi": "GitHub API",
+      "lastLogin": "Last login:",
+      "goToMonitor": "Go to Monitor"
+    },
+    "error": {
+      "title": "Failed to load monitor data",
+      "description": "There was a problem connecting to the GitHub API or database.",
+      "retry": "Try again"
+    },
+    "actionLabels": {
+      "auth.login": "Login",
+      "auth.logout": "Logout",
+      "user.create": "User Created",
+      "user.name_update": "Name Updated",
+      "user.avatar_update": "Avatar Updated",
+      "user.role_change": "Role Changed",
+      "user.ban": "User Banned",
+      "user.invite": "User Invited",
+      "media.upload": "Media Uploaded",
+      "media.delete": "Media Deleted",
+      "content.create": "Content Created",
+      "content.update": "Content Updated",
+      "content.delete": "Content Deleted",
+      "content.restore": "Content Restored",
+      "content.permanent_delete": "Permanently Deleted",
+      "github.commit": "Commit",
+      "user.delete": "User Deleted",
+      "user.unban": "User Unbanned",
+      "media.soft_delete": "Media Trashed",
+      "media.restore": "Media Restored",
+      "media.permanent_delete": "Media Deleted",
+      "media.move": "Media Moved"
+    }
   }
 }

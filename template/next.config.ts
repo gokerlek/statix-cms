@@ -4,6 +4,15 @@ const nextConfig: NextConfig = {
   /* config options here */
   reactCompiler: true,
 
+  images: {
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "avatars.githubusercontent.com",
+      },
+    ],
+  },
+
   // Allow larger file uploads (50MB)
   experimental: {
     serverActions: {

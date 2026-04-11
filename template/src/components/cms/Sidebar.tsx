@@ -11,7 +11,7 @@ import {
   IconTrash,
 } from "@tabler/icons-react";
 
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { UserAvatar } from "@/components/cms/shared/UserAvatar";
 import ui from "@/content/ui.json";
 import { ROUTES } from "@/lib/constants";
 import { cn } from "@/lib/utils";
@@ -165,16 +165,12 @@ export function Sidebar({ user }: SidebarProps) {
 
       <div className="pt-4 border-t border-sidebar-border">
         <div className="flex items-center gap-3 px-2 mb-4">
-          <Avatar className="h-8 w-8">
-            <AvatarImage
-              src={user?.image || undefined}
-              alt={user?.name || "User"}
-            />
-
-            <AvatarFallback>
-              {user?.name?.charAt(0).toUpperCase()}
-            </AvatarFallback>
-          </Avatar>
+          <UserAvatar
+            src={user?.image}
+            name={user?.name}
+            email={user?.email}
+            className="h-8 w-8"
+          />
 
           <div className="flex-1 min-w-0">
             <p className="text-sm font-medium truncate">
