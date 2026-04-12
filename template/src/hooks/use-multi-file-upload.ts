@@ -75,25 +75,12 @@ export function useMultiFileUpload(): MultiFileUploadState &
         }) || [],
       );
 
-      // DEBUG: Log for troubleshooting
-      console.log("=== DUPLICATE CHECK DEBUG ===");
-      console.log("existingMedia count:", existingMedia?.length || 0);
-      console.log("existingMediaNames:", Array.from(existingMediaNames));
-
       const newFiles: FileItem[] = [];
       const duplicateNames: string[] = [];
       const existingNames: string[] = [];
 
       Array.from(selectedFiles).forEach((file) => {
         const sanitizedName = sanitizeFilename(file.name);
-
-        // DEBUG
-        console.log(
-          `Checking: "${file.name}" => sanitized: "${sanitizedName}"`,
-        );
-        console.log(
-          `  In media library: ${existingMediaNames.has(sanitizedName)}`,
-        );
 
         // Helper to get filename without extension (only removes last extension like .png, .jpg)
         const getNameWithoutExtension = (name: string) => {

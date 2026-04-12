@@ -2,25 +2,18 @@
 
 import { Control, useFieldArray } from "react-hook-form";
 
-import {
-  closestCenter,
-  DndContext,
-  DragEndEvent,
-  KeyboardSensor,
-  PointerSensor,
-  useSensor,
-  useSensors,
-} from "@dnd-kit/core";
-import {
-  SortableContext,
-  sortableKeyboardCoordinates,
-  verticalListSortingStrategy,
-} from "@dnd-kit/sortable";
 import { IconPlus } from "@tabler/icons-react";
 
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import ui from "@/content/ui.json";
+import {
+  closestCenter,
+  DndContext,
+  SortableContext,
+  useSortableList,
+  verticalListSortingStrategy,
+} from "@/hooks/use-sortable-list";
 import { Field } from "@/types/cms";
 
 import { SortableListItem } from "./SortableListItem";
@@ -50,27 +43,7 @@ export function ListEditor({
     name: name as never,
   });
 
-  const sensors = useSensors(
-    useSensor(PointerSensor, {
-      activationConstraint: {
-        distance: 8,
-      },
-    }),
-    useSensor(KeyboardSensor, {
-      coordinateGetter: sortableKeyboardCoordinates,
-    }),
-  );
-
-  const handleDragEnd = (event: DragEndEvent) => {
-    const { active, over } = event;
-
-    if (over && active.id !== over.id) {
-      const oldIndex = items.findIndex((item) => item.id === active.id);
-      const newIndex = items.findIndex((item) => item.id === over.id);
-
-      move(oldIndex, newIndex);
-    }
-  };
+  const { sensors, handleDragEnd } = useSortableList({ items, move });
 
   const addItem = () => {
     const newItem: Record<string, unknown> = {

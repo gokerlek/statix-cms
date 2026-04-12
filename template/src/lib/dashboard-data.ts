@@ -2,25 +2,10 @@ import { unstable_cache } from "next/cache";
 
 import { getContentIndex, isMediaOrphaned } from "@/lib/content-index";
 import { formatStatus, resolveStatus } from "@/lib/content-status";
+import type { Collection } from "@/types/cms";
 import { getGitHubCMS } from "@/lib/github-cms";
 import { listR2Media, listR2Trash } from "@/lib/r2";
 import { statixConfig } from "@/statix.config";
-
-interface CollectionField {
-  name: string;
-  type: string;
-  label: string;
-  required?: boolean;
-  localized?: boolean;
-}
-
-interface Collection {
-  slug: string;
-  label: string;
-  path: string;
-  type?: "collection" | "singleton";
-  fields: CollectionField[];
-}
 
 interface FileContent {
   translations?: Record<string, Record<string, unknown>>;

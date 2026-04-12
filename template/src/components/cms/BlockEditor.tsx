@@ -2,24 +2,17 @@
 
 import { Control, useFieldArray, useWatch } from "react-hook-form";
 
-import {
-  closestCenter,
-  DndContext,
-  DragEndEvent,
-  KeyboardSensor,
-  PointerSensor,
-  useSensor,
-  useSensors,
-} from "@dnd-kit/core";
-import {
-  SortableContext,
-  sortableKeyboardCoordinates,
-  verticalListSortingStrategy,
-} from "@dnd-kit/sortable";
 import { IconPlus } from "@tabler/icons-react";
 
 import { Button } from "@/components/ui/button";
 import ui from "@/content/ui.json";
+import {
+  closestCenter,
+  DndContext,
+  SortableContext,
+  useSortableList,
+  verticalListSortingStrategy,
+} from "@/hooks/use-sortable-list";
 import { Block, BlockType } from "@/types/cms";
 import { ContentFormValues } from "@/types/content";
 
@@ -48,27 +41,7 @@ export function BlockEditor({
     name: name,
   }) as Block[] | undefined;
 
-  const sensors = useSensors(
-    useSensor(PointerSensor, {
-      activationConstraint: {
-        distance: 8,
-      },
-    }),
-    useSensor(KeyboardSensor, {
-      coordinateGetter: sortableKeyboardCoordinates,
-    }),
-  );
-
-  const handleDragEnd = (event: DragEndEvent) => {
-    const { active, over } = event;
-
-    if (over && active.id !== over.id) {
-      const oldIndex = fields.findIndex((field) => field.id === active.id);
-      const newIndex = fields.findIndex((field) => field.id === over.id);
-
-      move(oldIndex, newIndex);
-    }
-  };
+  const { sensors, handleDragEnd } = useSortableList({ items: fields, move });
 
   const addBlock = (blockType: BlockType) => {
     const newBlock: Block = {

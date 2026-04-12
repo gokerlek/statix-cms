@@ -12,6 +12,7 @@ import { TrashCard } from "@/components/cms/TrashCard";
 import { UsersCard } from "@/components/cms/UsersCard";
 import { UserProfileCard } from "@/components/cms/UserProfileCard";
 import type { CMSUser } from "@/app/admin/users/page";
+import { cleanupOldAuditLogs } from "@/lib/audit";
 import {
   getCollectionStats,
   getLocalizationStats,
@@ -44,6 +45,9 @@ export default async function AdminDashboard({ searchParams }: AdminDashboardPro
       getSystemStats(),
       isAdmin ? getMonitorSummary() : Promise.resolve(null),
     ]);
+
+  // Opportunistic cleanup — runs on every dashboard load, fire-and-forget
+  cleanupOldAuditLogs().catch(() => {});
 
   const regularCollections = collectionStats.filter(
     (c) => c.type !== "singleton",

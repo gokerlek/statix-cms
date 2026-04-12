@@ -28,7 +28,7 @@ export interface GitHubFile {
   title?: string; // Display title extracted from content
 }
 
-interface TrashItemContent {
+export interface TrashItemContent {
   originalPath: string;
   deletedAt: string;
   type: "collection_item" | "media";
