@@ -2,6 +2,7 @@ import { revalidatePath } from "next/cache";
 import { NextRequest, NextResponse } from "next/server";
 
 import { trashActionSchema } from "@/lib/api-schemas";
+import { handleApiError } from "@/lib/api-response";
 import { writeAudit, getIp } from "@/lib/audit";
 import { ROUTES } from "@/lib/constants";
 import { getGitHubCMS } from "@/lib/github-cms";
@@ -46,19 +47,6 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    if (
-      error instanceof Error &&
-      (error.message === "Unauthorized" || error.message === "Forbidden")
-    ) {
-      return NextResponse.json(
-        { error: error.message },
-        { status: error.message === "Unauthorized" ? 401 : 403 },
-      );
-    }
-    console.error("Restore error:", error);
-    return NextResponse.json(
-      { error: "Failed to restore items" },
-      { status: 500 },
-    );
+    return handleApiError(error, "Failed to restore items");
   }
 }

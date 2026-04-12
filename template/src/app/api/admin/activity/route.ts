@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 
+import { handleApiError } from "@/lib/api-response";
 import { requireAdmin } from "@/lib/session";
 import { getUnifiedActivity } from "@/lib/activity-feed";
 
@@ -18,16 +19,6 @@ export async function GET(request: NextRequest) {
     const result = await getUnifiedActivity({ limit, cursor });
     return NextResponse.json(result);
   } catch (error) {
-    if (
-      error instanceof Error &&
-      (error.message === "Unauthorized" || error.message === "Forbidden")
-    ) {
-      return NextResponse.json(
-        { error: error.message },
-        { status: error.message === "Unauthorized" ? 401 : 403 },
-      );
-    }
-    console.error("Activity feed error:", error);
-    return NextResponse.json({ error: "Failed to load activity" }, { status: 500 });
+    return handleApiError(error, "Failed to load activity");
   }
 }

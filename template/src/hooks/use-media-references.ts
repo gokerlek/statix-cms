@@ -2,6 +2,8 @@
 
 import { useQuery } from "@tanstack/react-query";
 
+import { QUERY_KEYS } from "@/lib/query-keys";
+
 interface MediaReference {
   path: string;
   title: string;
@@ -10,7 +12,7 @@ interface MediaReference {
 
 export function useMediaReferences(filename: string | null) {
   return useQuery<MediaReference[]>({
-    queryKey: ["media-references", filename],
+    queryKey: QUERY_KEYS.mediaReferences(filename ?? ""),
     queryFn: async () => {
       if (!filename) return [];
 

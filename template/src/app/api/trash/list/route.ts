@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 
+import { handleApiError } from "@/lib/api-response";
 import { getGitHubCMS } from "@/lib/github-cms";
 import { listR2Trash } from "@/lib/r2";
 import { requireAdmin } from "@/lib/session";
@@ -29,19 +30,6 @@ export async function GET() {
 
     return NextResponse.json(allItems);
   } catch (error) {
-    if (
-      error instanceof Error &&
-      (error.message === "Unauthorized" || error.message === "Forbidden")
-    ) {
-      return NextResponse.json(
-        { error: error.message },
-        { status: error.message === "Unauthorized" ? 401 : 403 },
-      );
-    }
-    console.error("Trash list error:", error);
-    return NextResponse.json(
-      { error: "Failed to fetch trash items" },
-      { status: 500 },
-    );
+    return handleApiError(error, "Failed to fetch trash items");
   }
 }

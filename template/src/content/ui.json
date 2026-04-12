@@ -23,7 +23,12 @@
     "collectionNotFound": "Collection not found",
     "backTo": "Back to {page}",
     "viewAll": "View All",
-    "confirm": "Confirm"
+    "confirm": "Confirm",
+    "error": {
+      "title": "Something went wrong",
+      "description": "An unexpected error occurred. Please try again.",
+      "retry": "Try again"
+    }
   },
   "sidebar": {
     "dashboard": "Dashboard",

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 
 import { env } from "@/lib/env";
+import { handleApiError } from "@/lib/api-response";
 import { requireAdmin } from "@/lib/session";
 
 interface RouteContext {
@@ -31,19 +32,6 @@ export async function GET(_request: NextRequest, context: RouteContext) {
 
     return NextResponse.redirect(r2Url, { status: 302 });
   } catch (error) {
-    if (
-      error instanceof Error &&
-      (error.message === "Unauthorized" || error.message === "Forbidden")
-    ) {
-      return NextResponse.json(
-        { error: error.message },
-        { status: error.message === "Unauthorized" ? 401 : 403 },
-      );
-    }
-    console.error("Trash media serve error:", error);
-    return NextResponse.json(
-      { error: "Internal Server Error" },
-      { status: 500 },
-    );
+    return handleApiError(error, "Internal Server Error");
   }
 }

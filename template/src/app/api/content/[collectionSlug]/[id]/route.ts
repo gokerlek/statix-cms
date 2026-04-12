@@ -2,6 +2,7 @@ import { revalidatePath } from "next/cache";
 import { NextRequest, NextResponse } from "next/server";
 
 import { contentSaveSchema } from "@/lib/api-schemas";
+import { handleApiError } from "@/lib/api-response";
 import { CONTENT_STATUSES, DEFAULT_STATUS, resolveStatus } from "@/lib/content-status";
 import { requireAdmin } from "@/lib/session";
 import { ROUTES } from "@/lib/constants";
@@ -71,12 +72,7 @@ export async function GET(request: NextRequest, context: RouteContext) {
 
     return NextResponse.json(content);
   } catch (error) {
-    console.error("GET error:", error);
-
-    return NextResponse.json(
-      { error: "Failed to load content" },
-      { status: 500 },
-    );
+    return handleApiError(error, "Failed to load content");
   }
 }
 
@@ -204,20 +200,6 @@ export async function POST(request: NextRequest, context: RouteContext) {
 
     return NextResponse.json({ success: true, id: identifier });
   } catch (error) {
-    if (
-      error instanceof Error &&
-      (error.message === "Unauthorized" || error.message === "Forbidden")
-    ) {
-      return NextResponse.json(
-        { error: error.message },
-        { status: error.message === "Unauthorized" ? 401 : 403 },
-      );
-    }
-    console.error("POST error:", error);
-
-    return NextResponse.json(
-      { error: "Failed to save content" },
-      { status: 500 },
-    );
+    return handleApiError(error, "Failed to save content");
   }
 }

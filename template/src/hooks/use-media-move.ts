@@ -4,6 +4,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 
 import ui from "@/content/ui.json";
+import { QUERY_KEYS } from "@/lib/query-keys";
 
 interface MoveMediaParams {
   currentPath: string;
@@ -36,7 +37,7 @@ export function useMoveMedia() {
       return response.json();
     },
     onSuccess: (data) => {
-      queryClient.invalidateQueries({ queryKey: ["media"] });
+      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.media });
 
       const message =
         data.updatedFiles > 0

@@ -2,6 +2,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 
 import ui from "@/content/ui.json";
+import { QUERY_KEYS } from "@/lib/query-keys";
 export interface MediaFile {
   [key: string]: unknown;
   name: string;
@@ -16,7 +17,7 @@ export interface MediaFile {
 
 export function useMedia() {
   return useQuery<MediaFile[]>({
-    queryKey: ["media"],
+    queryKey: QUERY_KEYS.media,
     queryFn: async () => {
       const response = await fetch("/api/media/list");
 
@@ -73,7 +74,7 @@ export function useUploadMedia() {
     },
     onSuccess: () => {
       toast.success(ui.toasts.success.upload);
-      queryClient.invalidateQueries({ queryKey: ["media"] });
+      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.media });
     },
   });
 }
@@ -99,15 +100,15 @@ export function useDeleteMedia() {
     },
     onMutate: async ({ path }) => {
       // Cancel any outgoing refetches (so they don't overwrite our optimistic update)
-      await queryClient.cancelQueries({ queryKey: ["media"] });
+      await queryClient.cancelQueries({ queryKey: QUERY_KEYS.media });
 
       // Snapshot the previous value
-      const previousMedia = queryClient.getQueryData<MediaFile[]>(["media"]);
+      const previousMedia = queryClient.getQueryData<MediaFile[]>(QUERY_KEYS.media);
 
       // Optimistically update to the new value
       if (previousMedia) {
         queryClient.setQueryData<MediaFile[]>(
-          ["media"],
+          QUERY_KEYS.media,
           previousMedia.filter((file) => file.path !== path),
         );
       }
@@ -118,15 +119,15 @@ export function useDeleteMedia() {
     onError: (err, newTodo, context) => {
       // If the mutation fails, use the context returned from onMutate to roll back
       if (context?.previousMedia) {
-        queryClient.setQueryData(["media"], context.previousMedia);
+        queryClient.setQueryData(QUERY_KEYS.media, context.previousMedia);
       }
 
       toast.error(ui.toasts.error.delete);
     },
     onSettled: () => {
       // Always refetch after error or success:
-      queryClient.invalidateQueries({ queryKey: ["media"] });
-      queryClient.invalidateQueries({ queryKey: ["trash"] });
+      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.media });
+      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.trash });
     },
     onSuccess: () => {
       toast.success(ui.toasts.success.delete);

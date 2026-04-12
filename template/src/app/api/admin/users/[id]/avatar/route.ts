@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { eq } from "drizzle-orm";
 
 import { db } from "@/lib/db";
+import { handleApiError } from "@/lib/api-response";
 import { user } from "@/db/schema";
 import { requireSelfOrAdmin } from "@/lib/session";
 import { uploadToR2, deleteFromR2, extractR2Key } from "@/lib/r2";
@@ -125,17 +126,7 @@ export async function POST(
 
     return NextResponse.json({ url });
   } catch (error) {
-    if (
-      error instanceof Error &&
-      (error.message === "Unauthorized" || error.message === "Forbidden")
-    ) {
-      return NextResponse.json(
-        { error: error.message },
-        { status: error.message === "Unauthorized" ? 401 : 403 },
-      );
-    }
-    console.error("Avatar upload error:", error);
-    return NextResponse.json({ error: "Yükleme başarısız" }, { status: 500 });
+    return handleApiError(error, "Yükleme başarısız");
   }
 }
 
@@ -185,16 +176,6 @@ export async function DELETE(
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    if (
-      error instanceof Error &&
-      (error.message === "Unauthorized" || error.message === "Forbidden")
-    ) {
-      return NextResponse.json(
-        { error: error.message },
-        { status: error.message === "Unauthorized" ? 401 : 403 },
-      );
-    }
-    console.error("Avatar delete error:", error);
-    return NextResponse.json({ error: "Silme başarısız" }, { status: 500 });
+    return handleApiError(error, "Silme başarısız");
   }
 }

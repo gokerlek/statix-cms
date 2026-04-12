@@ -30,12 +30,11 @@ export async function writeAudit(params: {
     .catch((e) => console.error("[audit]", e));
 }
 
+import { getClientIp } from "@/lib/rate-limit";
+
+/** Extracts client IP from request — delegates to shared getClientIp */
 export function getIp(request: Request): string | null {
-  return (
-    request.headers.get("x-forwarded-for")?.split(",")[0].trim() ??
-    request.headers.get("x-real-ip") ??
-    null
-  );
+  return getClientIp(request.headers) || null;
 }
 
 export async function cleanupOldAuditLogs(daysToKeep = 90) {

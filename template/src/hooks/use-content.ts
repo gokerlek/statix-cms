@@ -2,6 +2,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 
 import { ContentFormValues } from "@/types/content";
+import { QUERY_KEYS } from "@/lib/query-keys";
 
 interface UseContentOptions {
   collectionSlug: string;
@@ -13,7 +14,7 @@ export function useContent({ collectionSlug, id }: UseContentOptions) {
   const isNew = id === "new";
 
   const contentQuery = useQuery({
-    queryKey: ["content", collectionSlug, id, isNew],
+    queryKey: QUERY_KEYS.content(collectionSlug, id ?? "", isNew),
     queryFn: async () => {
       if (isNew || !id) return null;
 
@@ -41,7 +42,7 @@ export function useContent({ collectionSlug, id }: UseContentOptions) {
     },
     onSuccess: (_data) => {
       toast.success("Content saved successfully");
-      queryClient.invalidateQueries({ queryKey: ["content", collectionSlug] });
+      queryClient.invalidateQueries({ queryKey: ["content", collectionSlug] }); // prefix match
       // If it was new, we might want to redirect or update the URL, but that's handled in the component usually
     },
     onError: (error) => {

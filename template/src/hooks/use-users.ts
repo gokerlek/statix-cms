@@ -3,6 +3,7 @@ import { toast } from "sonner";
 
 import ui from "@/content/ui.json";
 import type { CMSUser } from "@/app/admin/users/page";
+import { QUERY_KEYS } from "@/lib/query-keys";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -21,15 +22,11 @@ async function userPost<T = Record<string, never>>(
   return data as T;
 }
 
-// ─── Query key ────────────────────────────────────────────────────────────────
-
-export const USERS_QUERY_KEY = ["users"] as const;
-
 // ─── Users list (query) ───────────────────────────────────────────────────────
 
 export function useUsers(initialData?: CMSUser[]) {
   return useQuery<CMSUser[]>({
-    queryKey: USERS_QUERY_KEY,
+    queryKey: QUERY_KEYS.users,
     queryFn: async () => {
       const res = await fetch("/api/admin/users");
       if (!res.ok) throw new Error("Failed to fetch users");
@@ -52,7 +49,7 @@ export function useInviteUser() {
       userPost({ action: "invite", ...payload }),
     onSuccess: async () => {
       toast.success(ui.users.toasts.inviteSent);
-      await queryClient.invalidateQueries({ queryKey: USERS_QUERY_KEY });
+      await queryClient.invalidateQueries({ queryKey: QUERY_KEYS.users });
     },
     onError: () => {
       toast.error(ui.users.toasts.inviteFailed);
@@ -78,7 +75,7 @@ export function useUploadAvatar(userId: string) {
     },
     onSuccess: async () => {
       toast.success(ui.users.toasts.avatarUploaded);
-      await queryClient.invalidateQueries({ queryKey: USERS_QUERY_KEY });
+      await queryClient.invalidateQueries({ queryKey: QUERY_KEYS.users });
     },
     onError: () => {
       toast.error(ui.users.toasts.avatarUploadFailed);
@@ -96,7 +93,7 @@ export function useRemoveAvatar(userId: string) {
     },
     onSuccess: async () => {
       toast.success(ui.users.toasts.avatarRemoved);
-      await queryClient.invalidateQueries({ queryKey: USERS_QUERY_KEY });
+      await queryClient.invalidateQueries({ queryKey: QUERY_KEYS.users });
     },
     onError: () => {
       toast.error(ui.users.toasts.avatarRemoveFailed);
@@ -113,7 +110,7 @@ export function useUpdateUserName(userId: string) {
       userPost({ action: "updateName", userId, name }),
     onSuccess: async () => {
       toast.success(ui.users.toasts.nameUpdated);
-      await queryClient.invalidateQueries({ queryKey: USERS_QUERY_KEY });
+      await queryClient.invalidateQueries({ queryKey: QUERY_KEYS.users });
     },
     onError: () => {
       toast.error(ui.users.toasts.nameUpdateFailed);
@@ -130,7 +127,7 @@ export function useSetUserRole(userId: string) {
       userPost({ action: "setRole", userId, role }),
     onSuccess: async () => {
       toast.success(ui.users.toasts.roleUpdated);
-      await queryClient.invalidateQueries({ queryKey: USERS_QUERY_KEY });
+      await queryClient.invalidateQueries({ queryKey: QUERY_KEYS.users });
     },
     onError: () => {
       toast.error(ui.users.toasts.roleUpdateFailed);
@@ -152,7 +149,7 @@ export function useBanUser(userId: string) {
       userPost({ action: "ban", userId, ...payload }),
     onSuccess: async () => {
       toast.success(ui.users.toasts.banned);
-      await queryClient.invalidateQueries({ queryKey: USERS_QUERY_KEY });
+      await queryClient.invalidateQueries({ queryKey: QUERY_KEYS.users });
     },
     onError: () => {
       toast.error(ui.users.toasts.banFailed);
@@ -168,7 +165,7 @@ export function useUnbanUser(userId: string) {
     mutationFn: async () => userPost({ action: "unban", userId }),
     onSuccess: async () => {
       toast.success(ui.users.toasts.unbanned);
-      await queryClient.invalidateQueries({ queryKey: USERS_QUERY_KEY });
+      await queryClient.invalidateQueries({ queryKey: QUERY_KEYS.users });
     },
     onError: () => {
       toast.error(ui.users.toasts.unbanFailed);
@@ -185,7 +182,7 @@ export function useDeleteUser(userId: string, email: string, onClose: () => void
     onSuccess: async () => {
       toast.success(ui.users.toasts.deleted);
       onClose();
-      await queryClient.invalidateQueries({ queryKey: USERS_QUERY_KEY });
+      await queryClient.invalidateQueries({ queryKey: QUERY_KEYS.users });
     },
     onError: () => {
       toast.error(ui.users.toasts.deleteFailed);

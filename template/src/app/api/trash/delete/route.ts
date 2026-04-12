@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 
 import { trashActionSchema } from "@/lib/api-schemas";
+import { handleApiError } from "@/lib/api-response";
 import { writeAudit, getIp, cleanupOldAuditLogs } from "@/lib/audit";
 import { getGitHubCMS } from "@/lib/github-cms";
 import { deleteFromR2 } from "@/lib/r2";
@@ -44,19 +45,6 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    if (
-      error instanceof Error &&
-      (error.message === "Unauthorized" || error.message === "Forbidden")
-    ) {
-      return NextResponse.json(
-        { error: error.message },
-        { status: error.message === "Unauthorized" ? 401 : 403 },
-      );
-    }
-    console.error("Trash delete error:", error);
-    return NextResponse.json(
-      { error: "Failed to delete items" },
-      { status: 500 },
-    );
+    return handleApiError(error, "Failed to delete items");
   }
 }

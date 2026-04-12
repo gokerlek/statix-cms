@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 
 import { mediaMoveSchema, r2KeySchema } from "@/lib/api-schemas";
+import { handleApiError } from "@/lib/api-response";
 import { writeAudit, getIp } from "@/lib/audit";
 import { getGitHubCMS } from "@/lib/github-cms";
 import { extractR2Key, getPublicUrl, moveR2 } from "@/lib/r2";
@@ -66,19 +67,6 @@ export async function POST(request: NextRequest) {
       updatedFiles: updatedFiles.updatedFiles.length,
     });
   } catch (error) {
-    if (
-      error instanceof Error &&
-      (error.message === "Unauthorized" || error.message === "Forbidden")
-    ) {
-      return NextResponse.json(
-        { error: error.message },
-        { status: error.message === "Unauthorized" ? 401 : 403 },
-      );
-    }
-    console.error("Move error:", error);
-    return NextResponse.json(
-      { error: "Failed to move file" },
-      { status: 500 },
-    );
+    return handleApiError(error, "Failed to move file");
   }
 }

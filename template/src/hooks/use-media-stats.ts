@@ -1,5 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 
+import { QUERY_KEYS } from "@/lib/query-keys";
+
 interface ActivityItem {
   sha: string;
   url?: string;
@@ -27,7 +29,7 @@ async function fetchMediaStats(): Promise<MediaStats> {
 
 export function useMediaStats() {
   return useQuery({
-    queryKey: ["media", "stats"],
+    queryKey: QUERY_KEYS.mediaStats,
     queryFn: fetchMediaStats,
   });
 }

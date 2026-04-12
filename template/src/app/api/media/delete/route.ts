@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 
 import { mediaDeleteSchema, r2KeySchema } from "@/lib/api-schemas";
+import { handleApiError } from "@/lib/api-response";
 import { writeAudit, getIp } from "@/lib/audit";
 import { extractR2Key, softDeleteR2 } from "@/lib/r2";
 import { requireAdmin } from "@/lib/session";
@@ -50,19 +51,6 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ success: true, trashKey });
   } catch (error) {
-    if (
-      error instanceof Error &&
-      (error.message === "Unauthorized" || error.message === "Forbidden")
-    ) {
-      return NextResponse.json(
-        { error: error.message },
-        { status: error.message === "Unauthorized" ? 401 : 403 },
-      );
-    }
-    console.error("Media delete error:", error);
-    return NextResponse.json(
-      { error: "Failed to delete media" },
-      { status: 500 },
-    );
+    return handleApiError(error, "Failed to delete media");
   }
 }

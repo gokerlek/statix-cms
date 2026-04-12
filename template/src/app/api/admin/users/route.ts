@@ -6,6 +6,7 @@ import { z } from "zod";
 import { Resend } from "resend";
 
 import { db } from "@/lib/db";
+import { handleApiError } from "@/lib/api-response";
 import { user, userInvites } from "@/db/schema";
 import { writeAudit, getIp } from "@/lib/audit";
 import { auth } from "@/lib/auth";
@@ -37,17 +38,7 @@ export async function GET() {
 
     return NextResponse.json(result);
   } catch (error) {
-    if (
-      error instanceof Error &&
-      (error.message === "Unauthorized" || error.message === "Forbidden")
-    ) {
-      return NextResponse.json(
-        { error: error.message },
-        { status: error.message === "Unauthorized" ? 401 : 403 },
-      );
-    }
-    console.error("List users error:", error);
-    return NextResponse.json({ error: "Failed to list users" }, { status: 500 });
+    return handleApiError(error, "Failed to list users");
   }
 }
 
@@ -348,19 +339,6 @@ export async function POST(request: NextRequest) {
         { status: 400 },
       );
     }
-    if (
-      error instanceof Error &&
-      (error.message === "Unauthorized" || error.message === "Forbidden")
-    ) {
-      return NextResponse.json(
-        { error: error.message },
-        { status: error.message === "Unauthorized" ? 401 : 403 },
-      );
-    }
-    console.error("Admin user action error:", error);
-    return NextResponse.json(
-      { error: "Failed to perform user action" },
-      { status: 500 },
-    );
+    return handleApiError(error, "Failed to perform user action");
   }
 }

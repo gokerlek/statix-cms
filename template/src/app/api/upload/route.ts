@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 
 import { sanitizeFilename, validateFileUpload } from "@/lib/file-validation";
+import { handleApiError } from "@/lib/api-response";
 import { writeAudit, getIp } from "@/lib/audit";
 import { uploadToR2 } from "@/lib/r2";
 import { requireAdmin } from "@/lib/session";
@@ -63,19 +64,6 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ url });
   } catch (error) {
-    if (
-      error instanceof Error &&
-      (error.message === "Unauthorized" || error.message === "Forbidden")
-    ) {
-      return NextResponse.json(
-        { error: error.message },
-        { status: error.message === "Unauthorized" ? 401 : 403 },
-      );
-    }
-    console.error("Upload error:", error);
-    return NextResponse.json(
-      { error: "Failed to upload file" },
-      { status: 500 },
-    );
+    return handleApiError(error, "Failed to upload file");
   }
 }

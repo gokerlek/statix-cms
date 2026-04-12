@@ -1,6 +1,7 @@
 import { useInfiniteQuery } from "@tanstack/react-query";
 
 import type { UnifiedActivityItem } from "@/lib/activity-feed";
+import { QUERY_KEYS } from "@/lib/query-keys";
 
 interface ActivityPage {
   items: UnifiedActivityItem[];
@@ -23,8 +24,6 @@ async function fetchActivityPage(cursor?: string): Promise<ActivityPage> {
   };
 }
 
-export const ACTIVITY_QUERY_KEY = ["activity"] as const;
-
 interface UseActivityOptions {
   initialItems: UnifiedActivityItem[];
   initialCursor: string | null;
@@ -32,7 +31,7 @@ interface UseActivityOptions {
 
 export function useActivity({ initialItems, initialCursor }: UseActivityOptions) {
   return useInfiniteQuery<ActivityPage>({
-    queryKey: ACTIVITY_QUERY_KEY,
+    queryKey: QUERY_KEYS.activity,
     queryFn: ({ pageParam }) => fetchActivityPage(pageParam as string | undefined),
     getNextPageParam: (lastPage) => lastPage.nextCursor ?? undefined,
     initialPageParam: undefined,

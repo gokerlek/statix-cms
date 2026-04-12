@@ -2,6 +2,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 
 import { useTranslation } from "@/hooks/use-translation";
+import { QUERY_KEYS } from "@/lib/query-keys";
 
 export interface TrashItem {
   name: string;
@@ -15,7 +16,7 @@ export function useTrash() {
   useTranslation();
 
   return useQuery<TrashItem[]>({
-    queryKey: ["trash"],
+    queryKey: QUERY_KEYS.trash,
     queryFn: async () => {
       const response = await fetch("/api/trash/list");
 
@@ -47,13 +48,13 @@ export function useRestoreTrash() {
       return response.json();
     },
     onMutate: async (selectedItems) => {
-      await queryClient.cancelQueries({ queryKey: ["trash"] });
-      const previousTrash = queryClient.getQueryData<TrashItem[]>(["trash"]);
+      await queryClient.cancelQueries({ queryKey: QUERY_KEYS.trash });
+      const previousTrash = queryClient.getQueryData<TrashItem[]>(QUERY_KEYS.trash);
       const paths = selectedItems.map((i) => i.path);
 
       if (previousTrash) {
         queryClient.setQueryData<TrashItem[]>(
-          ["trash"],
+          QUERY_KEYS.trash,
           previousTrash.filter((item) => !paths.includes(item.path)),
         );
       }
@@ -62,14 +63,14 @@ export function useRestoreTrash() {
     },
     onError: (_err, _vars, context) => {
       if (context?.previousTrash) {
-        queryClient.setQueryData(["trash"], context.previousTrash);
+        queryClient.setQueryData(QUERY_KEYS.trash, context.previousTrash);
       }
 
       toast.error(t("toasts.error.globalMutation"));
     },
     onSettled: () => {
-      queryClient.invalidateQueries({ queryKey: ["trash"] });
-      queryClient.invalidateQueries({ queryKey: ["media"] });
+      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.trash });
+      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.media });
       queryClient.invalidateQueries({ queryKey: ["collection"] });
     },
     onSuccess: () => {
@@ -97,13 +98,13 @@ export function useDeleteTrash() {
       return response.json();
     },
     onMutate: async (selectedItems) => {
-      await queryClient.cancelQueries({ queryKey: ["trash"] });
-      const previousTrash = queryClient.getQueryData<TrashItem[]>(["trash"]);
+      await queryClient.cancelQueries({ queryKey: QUERY_KEYS.trash });
+      const previousTrash = queryClient.getQueryData<TrashItem[]>(QUERY_KEYS.trash);
       const paths = selectedItems.map((i) => i.path);
 
       if (previousTrash) {
         queryClient.setQueryData<TrashItem[]>(
-          ["trash"],
+          QUERY_KEYS.trash,
           previousTrash.filter((item) => !paths.includes(item.path)),
         );
       }
@@ -112,13 +113,13 @@ export function useDeleteTrash() {
     },
     onError: (_err, _vars, context) => {
       if (context?.previousTrash) {
-        queryClient.setQueryData(["trash"], context.previousTrash);
+        queryClient.setQueryData(QUERY_KEYS.trash, context.previousTrash);
       }
 
       toast.error(t("toasts.error.delete"));
     },
     onSettled: () => {
-      queryClient.invalidateQueries({ queryKey: ["trash"] });
+      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.trash });
     },
     onSuccess: () => {
       toast.success(t("toasts.success.delete"));

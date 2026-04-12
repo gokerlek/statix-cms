@@ -8,30 +8,25 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import ui from "@/content/ui.json";
 
-interface MonitorErrorProps {
+interface ErrorProps {
   error: Error & { digest?: string };
   reset: () => void;
 }
 
-export default function MonitorError({ error, reset }: MonitorErrorProps) {
+export default function AdminError({ error, reset }: ErrorProps) {
   useEffect(() => {
-    console.error("Monitor page error:", error);
+    console.error("Admin page error:", error);
   }, [error]);
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold tracking-tight">{ui.monitor.title}</h1>
-        <p className="text-muted-foreground text-sm">{ui.monitor.subtitle}</p>
-      </div>
-
-      <Card>
-        <CardContent className="flex flex-col items-center justify-center py-16 gap-4 text-center">
+    <div className="flex items-center justify-center min-h-[50vh]">
+      <Card className="max-w-md w-full">
+        <CardContent className="flex flex-col items-center justify-center py-12 gap-4 text-center">
           <IconAlertCircle className="h-12 w-12 text-destructive" />
           <div className="space-y-1">
-            <p className="font-medium">{ui.monitor.error.title}</p>
+            <p className="font-medium">{ui.common.error.title}</p>
             <p className="text-sm text-muted-foreground">
-              {ui.monitor.error.description}
+              {ui.common.error.description}
             </p>
           </div>
           <Button variant="outline" onClick={reset}>

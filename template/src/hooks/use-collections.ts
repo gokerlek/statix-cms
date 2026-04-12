@@ -3,10 +3,11 @@ import { toast } from "sonner";
 
 import ui from "@/content/ui.json";
 import { GitHubFile } from "@/lib/github-cms";
+import { QUERY_KEYS } from "@/lib/query-keys";
 
 export function useCollectionItems(slug: string, initialData?: GitHubFile[]) {
   return useQuery<GitHubFile[]>({
-    queryKey: ["collection", slug],
+    queryKey: QUERY_KEYS.collection(slug),
     queryFn: async () => {
       const response = await fetch(`/api/collections/${slug}`);
 
@@ -38,16 +39,15 @@ export function useDeleteCollectionItem(slug: string) {
       return response.json();
     },
     onMutate: async ({ id }) => {
-      await queryClient.cancelQueries({ queryKey: ["collection", slug] });
+      await queryClient.cancelQueries({ queryKey: QUERY_KEYS.collection(slug) });
 
-      const previousItems = queryClient.getQueryData<GitHubFile[]>([
-        "collection",
-        slug,
-      ]);
+      const previousItems = queryClient.getQueryData<GitHubFile[]>(
+        QUERY_KEYS.collection(slug),
+      );
 
       if (previousItems) {
         queryClient.setQueryData<GitHubFile[]>(
-          ["collection", slug],
+          QUERY_KEYS.collection(slug),
           previousItems.filter((item) => item.name.replace(".json", "") !== id),
         );
       }
@@ -56,12 +56,12 @@ export function useDeleteCollectionItem(slug: string) {
     },
     onError: (err, newTodo, context) => {
       if (context?.previousItems) {
-        queryClient.setQueryData(["collection", slug], context.previousItems);
+        queryClient.setQueryData(QUERY_KEYS.collection(slug), context.previousItems);
       }
     },
     onSettled: () => {
-      queryClient.invalidateQueries({ queryKey: ["collection", slug] });
-      queryClient.invalidateQueries({ queryKey: ["trash"] });
+      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.collection(slug) });
+      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.trash });
     },
     onSuccess: () => {
       toast.success(ui.toasts.success.collectionItemDeleted);
