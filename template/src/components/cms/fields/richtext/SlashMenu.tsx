@@ -9,10 +9,25 @@ import {
   AutocompletePopover,
 } from "prosekit/react/autocomplete";
 
-// "/" ile başlayan, boşlukla başlamayan girişleri yakala
+import ui from "@/content/ui.json";
+
 const regex = canUseRegexLookbehind()
   ? /(?<!\S)\/(\S.*)?$/u
   : /\/(\S.*)?$/u;
+
+const t = ui.richTextToolbar.slashMenu;
+
+const SLASH_ITEMS = [
+  { label: t.paragraph, shortcut: "", action: (c: Record<string, ((...a: unknown[]) => void) | undefined>) => c.setParagraph?.() },
+  { label: t.heading1, shortcut: "#", action: (c: Record<string, ((...a: unknown[]) => void) | undefined>) => c.setHeading?.({ level: 1 }) },
+  { label: t.heading2, shortcut: "##", action: (c: Record<string, ((...a: unknown[]) => void) | undefined>) => c.setHeading?.({ level: 2 }) },
+  { label: t.heading3, shortcut: "###", action: (c: Record<string, ((...a: unknown[]) => void) | undefined>) => c.setHeading?.({ level: 3 }) },
+  { label: t.bulletList, shortcut: "-", action: (c: Record<string, ((...a: unknown[]) => void) | undefined>) => c.wrapInList?.({ kind: "bullet" }) },
+  { label: t.orderedList, shortcut: "1.", action: (c: Record<string, ((...a: unknown[]) => void) | undefined>) => c.wrapInList?.({ kind: "ordered" }) },
+  { label: t.blockquote, shortcut: ">", action: (c: Record<string, ((...a: unknown[]) => void) | undefined>) => c.setBlockquote?.() },
+  { label: t.horizontalRule, shortcut: "---", action: (c: Record<string, ((...a: unknown[]) => void) | undefined>) => c.insertHorizontalRule?.() },
+  { label: t.codeBlock, shortcut: "```", action: (c: Record<string, ((...a: unknown[]) => void) | undefined>) => c.setCodeBlock?.() },
+];
 
 const itemClass =
   "relative flex cursor-default select-none items-center justify-between scroll-my-1 rounded-sm px-3 py-1.5 text-sm outline-none data-focused:bg-accent data-focused:text-accent-foreground";
@@ -28,79 +43,23 @@ export function RichTextSlashMenu() {
       className="z-50 relative block max-h-96 min-w-60 select-none overflow-auto whitespace-nowrap rounded-lg border border-border bg-background p-1 shadow-md [&:not([data-state])]:hidden"
     >
       <AutocompleteList>
-        <AutocompleteItem
-          className={itemClass}
-          onSelect={() => cmds.setParagraph?.()}
-        >
-          <span>Metin</span>
-        </AutocompleteItem>
-
-        <AutocompleteItem
-          className={itemClass}
-          onSelect={() => cmds.setHeading?.({ level: 1 })}
-        >
-          <span>Başlık 1</span>
-          <kbd className="font-mono text-xs text-muted-foreground">#</kbd>
-        </AutocompleteItem>
-
-        <AutocompleteItem
-          className={itemClass}
-          onSelect={() => cmds.setHeading?.({ level: 2 })}
-        >
-          <span>Başlık 2</span>
-          <kbd className="font-mono text-xs text-muted-foreground">##</kbd>
-        </AutocompleteItem>
-
-        <AutocompleteItem
-          className={itemClass}
-          onSelect={() => cmds.setHeading?.({ level: 3 })}
-        >
-          <span>Başlık 3</span>
-          <kbd className="font-mono text-xs text-muted-foreground">###</kbd>
-        </AutocompleteItem>
-
-        <AutocompleteItem
-          className={itemClass}
-          onSelect={() => cmds.wrapInList?.({ kind: "bullet" })}
-        >
-          <span>Madde İşaretli Liste</span>
-          <kbd className="font-mono text-xs text-muted-foreground">-</kbd>
-        </AutocompleteItem>
-
-        <AutocompleteItem
-          className={itemClass}
-          onSelect={() => cmds.wrapInList?.({ kind: "ordered" })}
-        >
-          <span>Numaralı Liste</span>
-          <kbd className="font-mono text-xs text-muted-foreground">1.</kbd>
-        </AutocompleteItem>
-
-        <AutocompleteItem
-          className={itemClass}
-          onSelect={() => cmds.setBlockquote?.()}
-        >
-          <span>Alıntı</span>
-          <kbd className="font-mono text-xs text-muted-foreground">&gt;</kbd>
-        </AutocompleteItem>
-
-        <AutocompleteItem
-          className={itemClass}
-          onSelect={() => cmds.insertHorizontalRule?.()}
-        >
-          <span>Yatay Çizgi</span>
-          <kbd className="font-mono text-xs text-muted-foreground">---</kbd>
-        </AutocompleteItem>
-
-        <AutocompleteItem
-          className={itemClass}
-          onSelect={() => cmds.setCodeBlock?.()}
-        >
-          <span>Kod Bloğu</span>
-          <kbd className="font-mono text-xs text-muted-foreground">```</kbd>
-        </AutocompleteItem>
+        {SLASH_ITEMS.map((item) => (
+          <AutocompleteItem
+            key={item.label}
+            className={itemClass}
+            onSelect={() => item.action(cmds)}
+          >
+            <span>{item.label}</span>
+            {item.shortcut && (
+              <kbd className="font-mono text-xs text-muted-foreground">
+                {item.shortcut}
+              </kbd>
+            )}
+          </AutocompleteItem>
+        ))}
 
         <AutocompleteEmpty className={itemClass}>
-          <span>Sonuç bulunamadı</span>
+          <span>{t.noResults}</span>
         </AutocompleteEmpty>
       </AutocompleteList>
     </AutocompletePopover>
