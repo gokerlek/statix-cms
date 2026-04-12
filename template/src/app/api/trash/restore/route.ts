@@ -1,6 +1,7 @@
 import { revalidatePath } from "next/cache";
 import { NextRequest, NextResponse } from "next/server";
 
+import { trashActionSchema } from "@/lib/api-schemas";
 import { writeAudit, getIp } from "@/lib/audit";
 import { ROUTES } from "@/lib/constants";
 import { getGitHubCMS } from "@/lib/github-cms";
@@ -12,34 +13,15 @@ export async function POST(request: NextRequest) {
     const session = await requireAdmin();
 
     const body = await request.json();
-    const { items } = body; // [{ type: "content" | "media", path: string }]
-
-    if (!items || !Array.isArray(items)) {
+    const parsed = trashActionSchema.safeParse(body);
+    if (!parsed.success) {
       return NextResponse.json(
-        { error: "Invalid request body" },
+        { error: parsed.error.issues[0]?.message ?? "Invalid input" },
         { status: 400 },
       );
     }
 
-    // Validate paths to prevent traversal and invalid prefixes
-    for (const item of items) {
-      if (
-        !item.path ||
-        item.path.includes("..") ||
-        item.path.includes("//")
-      ) {
-        return NextResponse.json(
-          { error: "Invalid item path" },
-          { status: 400 },
-        );
-      }
-      if (item.type === "media" && !item.path.startsWith("trash/")) {
-        return NextResponse.json(
-          { error: "Invalid media path" },
-          { status: 400 },
-        );
-      }
-    }
+    const { items } = parsed.data;
 
     const github = getGitHubCMS();
 

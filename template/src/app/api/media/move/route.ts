@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 
+import { mediaMoveSchema, r2KeySchema } from "@/lib/api-schemas";
 import { writeAudit, getIp } from "@/lib/audit";
 import { getGitHubCMS } from "@/lib/github-cms";
 import { extractR2Key, getPublicUrl, moveR2 } from "@/lib/r2";
@@ -10,17 +11,16 @@ export async function POST(request: NextRequest) {
     const session = await requireAdmin();
 
     const body = await request.json();
-    const { currentUrl, currentPath, newFolder } = body;
-
-    if ((!currentUrl && !currentPath) || !newFolder) {
+    const parsed = mediaMoveSchema.safeParse(body);
+    if (!parsed.success) {
       return NextResponse.json(
-        { error: "currentUrl or currentPath, and newFolder are required" },
+        { error: parsed.error.issues[0]?.message ?? "Invalid input" },
         { status: 400 },
       );
     }
 
-    // currentPath doğrudan R2 key, currentUrl'den key çıkar
-    const sourceKey = currentPath ?? extractR2Key(currentUrl);
+    const { currentUrl, currentPath, newFolder } = parsed.data;
+    const sourceKey = currentPath ?? extractR2Key(currentUrl!);
     if (!sourceKey) {
       return NextResponse.json(
         { error: "Invalid media URL or path" },
@@ -28,27 +28,10 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // sourceKey sadece uploads/ veya avatars/ olabilir
-    if (
-      (!sourceKey.startsWith("uploads/") &&
-        !sourceKey.startsWith("avatars/")) ||
-      sourceKey.includes("..") ||
-      sourceKey.includes("//")
-    ) {
+    const keyValidation = r2KeySchema.safeParse(sourceKey);
+    if (!keyValidation.success) {
       return NextResponse.json(
-        { error: "Invalid source path" },
-        { status: 400 },
-      );
-    }
-
-    // newFolder sadece alfanümerik + dash/underscore (path traversal imkansız)
-    if (
-      newFolder &&
-      newFolder !== "default" &&
-      !/^[a-zA-Z0-9_-]+$/.test(newFolder)
-    ) {
-      return NextResponse.json(
-        { error: "Invalid folder name" },
+        { error: keyValidation.error.issues[0]?.message ?? "Invalid source path" },
         { status: 400 },
       );
     }

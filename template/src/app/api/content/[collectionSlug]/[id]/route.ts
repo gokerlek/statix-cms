@@ -1,6 +1,7 @@
 import { revalidatePath } from "next/cache";
 import { NextRequest, NextResponse } from "next/server";
 
+import { contentSaveSchema } from "@/lib/api-schemas";
 import { CONTENT_STATUSES, DEFAULT_STATUS, resolveStatus } from "@/lib/content-status";
 import { getSession, requireAdmin } from "@/lib/session";
 import { ROUTES } from "@/lib/constants";
@@ -99,7 +100,15 @@ export async function POST(request: NextRequest, context: RouteContext) {
       );
     }
 
-    const data = await request.json();
+    const rawData = await request.json();
+    const parsed = contentSaveSchema.safeParse(rawData);
+    if (!parsed.success) {
+      return NextResponse.json(
+        { error: parsed.error.issues[0]?.message ?? "Invalid content data" },
+        { status: 400 },
+      );
+    }
+    const data = parsed.data as Record<string, unknown>;
 
     const github = getGitHubCMS();
 
@@ -108,7 +117,7 @@ export async function POST(request: NextRequest, context: RouteContext) {
     let identifier = id;
 
     // Auto-generate slug from title, name, or label
-    const slugSource = data.title || data.name || data.label;
+    const slugSource = (data.title || data.name || data.label) as string | undefined;
 
     if (slugSource) {
       data.slug = slugify(slugSource);
@@ -172,7 +181,7 @@ export async function POST(request: NextRequest, context: RouteContext) {
     const contentWithMeta = {
       ...data,
       _meta: {
-        createdAt: data._meta?.createdAt || new Date().toISOString(),
+        createdAt: (data._meta as Record<string, unknown>)?.createdAt as string || new Date().toISOString(),
         updatedAt: new Date().toISOString(),
         createdBy: session.user?.email,
         updatedBy: session.user?.email,

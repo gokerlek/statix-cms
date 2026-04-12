@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 
+import { fileDeleteSchema } from "@/lib/api-schemas";
 import { getMaxUploadSize, validateFileUpload } from "@/lib/file-validation";
 import { deleteFromR2, uploadToR2 } from "@/lib/r2";
 import { requireAdmin } from "@/lib/session";
@@ -61,11 +62,16 @@ export async function DELETE(request: NextRequest) {
   try {
     await requireAdmin();
 
-    const { key } = await request.json();
-
-    if (!key || !key.startsWith("files/")) {
-      return NextResponse.json({ error: "Invalid file key" }, { status: 400 });
+    const body = await request.json();
+    const parsed = fileDeleteSchema.safeParse(body);
+    if (!parsed.success) {
+      return NextResponse.json(
+        { error: parsed.error.issues[0]?.message ?? "Invalid input" },
+        { status: 400 },
+      );
     }
+
+    const { key } = parsed.data;
 
     await deleteFromR2(key);
 

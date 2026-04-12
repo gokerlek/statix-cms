@@ -69,8 +69,8 @@
   "hotPaths": [
     {
       "path": "template/src/app/api/content/[collectionSlug]/[id]/route.ts",
-      "accessCount": 15,
-      "lastAccessed": 1775998947292,
+      "accessCount": 19,
+      "lastAccessed": 1776001210071,
       "type": "file"
     },
     {
@@ -140,6 +140,18 @@
       "type": "file"
     },
     {
+      "path": "template/src/app/api/admin/users/route.ts",
+      "accessCount": 5,
+      "lastAccessed": 1775999519185,
+      "type": "file"
+    },
+    {
+      "path": "template/src/app/api/upload/route.ts",
+      "accessCount": 5,
+      "lastAccessed": 1775999523867,
+      "type": "file"
+    },
+    {
       "path": "template/src/lib/r2.ts",
       "accessCount": 4,
       "lastAccessed": 1775994497136,
@@ -152,21 +164,9 @@
       "type": "file"
     },
     {
-      "path": "template/src/app/api/upload/route.ts",
-      "accessCount": 4,
-      "lastAccessed": 1775995159151,
-      "type": "file"
-    },
-    {
       "path": "template/src/hooks/use-media.ts",
       "accessCount": 4,
       "lastAccessed": 1775995204005,
-      "type": "file"
-    },
-    {
-      "path": "template/src/app/api/admin/users/route.ts",
-      "accessCount": 4,
-      "lastAccessed": 1775995574221,
       "type": "file"
     },
     {
@@ -243,8 +243,8 @@
     },
     {
       "path": "template/package.json",
-      "accessCount": 2,
-      "lastAccessed": 1775993408937,
+      "accessCount": 3,
+      "lastAccessed": 1775999521954,
       "type": "file"
     },
     {
