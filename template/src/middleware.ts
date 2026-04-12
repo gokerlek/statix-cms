@@ -17,6 +17,23 @@ const SESSION_COOKIE = "better-auth.session_token";
 export async function middleware(request: NextRequest) {
   const path = request.nextUrl.pathname;
 
+  // CSRF protection: verify Origin header on mutation requests
+  if (request.method !== "GET" && request.method !== "HEAD") {
+    const origin = request.headers.get("origin");
+    const host = request.headers.get("host");
+
+    if (origin && host) {
+      const originHost = new URL(origin).host;
+
+      if (originHost !== host) {
+        return NextResponse.json(
+          { error: "CSRF validation failed" },
+          { status: 403 },
+        );
+      }
+    }
+  }
+
   // Apply rate limiting to API routes (except auth)
   if (path.startsWith("/api") && !path.startsWith("/api/auth")) {
     const clientIp = getClientIp(request.headers);
