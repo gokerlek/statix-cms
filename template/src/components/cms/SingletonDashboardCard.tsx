@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 
+import { resolveStatus } from "@/lib/content-status";
 import { Button } from "@/components/ui/button";
 import ui from "@/content/ui.json";
 import { ROUTES } from "@/lib/constants";
@@ -49,7 +50,7 @@ export function SingletonDashboardCard({ stat }: SingletonDashboardCardProps) {
     >
       <div className="flex items-center justify-between text-sm">
         <LastUpdated dateString={stat?.lastUpdated} />
-        <StatusBadge status={status || "draft"} />
+        <StatusBadge status={resolveStatus(status)} />
       </div>
     </CMSCard>
   );

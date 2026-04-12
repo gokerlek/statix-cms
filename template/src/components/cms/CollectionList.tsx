@@ -4,6 +4,7 @@ import Link from "next/link";
 
 import { IconEdit, IconPlus } from "@tabler/icons-react";
 
+import { resolveStatus } from "@/lib/content-status";
 import { Badge } from "@/components/ui/badge";
 import { buttonVariants } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -153,7 +154,7 @@ export function CollectionList({
                     </td>
 
                     <td className="px-6 py-4">
-                      <StatusBadge status={file.status || "published"} />
+                      <StatusBadge status={resolveStatus(file.status)} />
                     </td>
 
                     <td className="px-6 py-4">

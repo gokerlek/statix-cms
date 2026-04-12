@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
 
+import { resolveStatus } from "@/lib/content-status";
 import { GitHubFile } from "@/lib/github-cms";
 
 export function useCollectionSearch(files: GitHubFile[]) {
@@ -15,7 +16,7 @@ export function useCollectionSearch(files: GitHubFile[]) {
 
       // Filter by status
       // Status is now returned by the API based on the folder structure
-      const status = file.status || "published"; // Default to published for legacy
+      const status = resolveStatus(file.status);
 
       const matchesStatus = statusFilter === "all" || status === statusFilter;
 

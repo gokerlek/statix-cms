@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 
+import { resolveStatus } from "@/lib/content-status";
 import { resolveContentTitle } from "@/lib/content-utils";
 import { getGitHubCMS } from "@/lib/github-cms";
 import { getSession } from "@/lib/session";
@@ -50,7 +51,7 @@ export async function GET(
             collection,
             contentData as ContentData | null,
           );
-          const status = contentData?.status || "published";
+          const status = resolveStatus(contentData?.status);
 
           return {
             ...file,

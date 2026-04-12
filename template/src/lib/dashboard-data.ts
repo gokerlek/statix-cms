@@ -1,5 +1,6 @@
 import { unstable_cache } from "next/cache";
 
+import { formatStatus, resolveStatus } from "@/lib/content-status";
 import { getGitHubCMS } from "@/lib/github-cms";
 import { listR2Media, listR2Trash } from "@/lib/r2";
 import { statixConfig } from "@/statix.config";
@@ -48,35 +49,22 @@ export async function getCollectionStats() {
         }
       }
 
-      if (collection.fields.some((f) => f.name === "status")) {
-        // Fetch content for all files to check status
-        // Note: This might be slow for large collections, consider optimizing or caching
-        const fileContents = await Promise.all(
-          files.map((f) => github.getFile(f.path)),
-        );
+      // Always read file contents to check actual status
+      const fileContents = await Promise.all(
+        files.map((f) => github.getFile(f.path)),
+      );
 
-        fileContents.forEach((file) => {
-          if (
-            file &&
-            file.content &&
-            typeof file.content === "object" &&
-            "status" in file.content
-          ) {
-            const status = String(file.content.status);
-            // Capitalize first letter
-            const formattedStatus =
-              status.charAt(0).toUpperCase() + status.slice(1);
+      fileContents.forEach((file) => {
+        if (file && file.content && typeof file.content === "object") {
+          const status = resolveStatus(
+            (file.content as { status?: string }).status,
+          );
+          const formattedStatus = formatStatus(status);
 
-            statusBreakdown[formattedStatus] =
-              (statusBreakdown[formattedStatus] || 0) + 1;
-          }
-        });
-      } else {
-        // If no status field, assume all are Published (or just count them)
-        if (files.length > 0) {
-          statusBreakdown["Published"] = files.length;
+          statusBreakdown[formattedStatus] =
+            (statusBreakdown[formattedStatus] || 0) + 1;
         }
-      }
+      });
 
       return {
         ...collection,

@@ -1,6 +1,7 @@
 import { Control, Controller } from "react-hook-form";
 import { toast } from "sonner";
 
+import { resolveStatus } from "@/lib/content-status";
 import {
   Select,
   SelectContent,
@@ -33,7 +34,7 @@ export function StatusSelector({ control }: StatusSelectorProps) {
         >
           <SelectTrigger className="w-[140px]">
             <div className="flex items-center gap-2">
-              <StatusBadge status={value || "draft"} />
+              <StatusBadge status={resolveStatus(value)} />
             </div>
           </SelectTrigger>
 

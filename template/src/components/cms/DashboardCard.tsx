@@ -8,6 +8,7 @@ import { IconPlus } from "@tabler/icons-react";
 import { DonutChart } from "@/components/cms/DonutChart";
 import { Button } from "@/components/ui/button";
 import ui from "@/content/ui.json";
+import { STATUS_CHART_CONFIG } from "@/lib/content-status";
 import { ROUTES } from "@/lib/constants";
 
 import { CollectionIcon } from "./CollectionIcon";
@@ -26,20 +27,7 @@ interface DashboardCardProps {
   stat: Stat;
 }
 
-const chartConfig = {
-  Published: {
-    label: "published",
-    color: "var(--status-published)",
-  },
-  Draft: {
-    label: "draft",
-    color: "var(--status-draft)",
-  },
-  Archived: {
-    label: "archived",
-    color: "var(--status-archived)",
-  },
-};
+const chartConfig = STATUS_CHART_CONFIG;
 
 export function DashboardCard({ stat }: DashboardCardProps) {
   const viewLink = ROUTES.ADMIN.COLLECTION(stat.slug);

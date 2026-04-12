@@ -1,6 +1,7 @@
 import { revalidatePath } from "next/cache";
 import { NextRequest, NextResponse } from "next/server";
 
+import { CONTENT_STATUSES, DEFAULT_STATUS, resolveStatus } from "@/lib/content-status";
 import { getSession, requireAdmin } from "@/lib/session";
 import { ROUTES } from "@/lib/constants";
 import { getGitHubCMS } from "@/lib/github-cms";
@@ -38,11 +39,11 @@ export async function GET(request: NextRequest, context: RouteContext) {
     // Check root first (new standard)
     const filePath = `${collection.path}/${id}.json`;
     let result = await github.getFile(filePath);
-    let foundStatus = "published"; // Default for root files
+    let foundStatus = DEFAULT_STATUS; // Default for root files
 
     // If not found, check status folders (legacy support)
     if (!result) {
-      const statuses = ["draft", "published", "archived"];
+      const statuses = CONTENT_STATUSES;
 
       for (const status of statuses) {
         const legacyPath = `${collection.path}/${status}/${id}.json`;
@@ -68,7 +69,7 @@ export async function GET(request: NextRequest, context: RouteContext) {
     // Add status to the response if not present in content
     const content = {
       ...(result.content as object),
-      status: (result.content as { status?: string }).status || foundStatus,
+      status: resolveStatus((result.content as { status?: string }).status) || foundStatus,
     };
 
     return NextResponse.json(content);

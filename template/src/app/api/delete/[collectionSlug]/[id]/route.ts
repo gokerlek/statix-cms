@@ -1,6 +1,7 @@
 import { revalidatePath } from "next/cache";
 import { NextRequest, NextResponse } from "next/server";
 
+import { CONTENT_STATUSES } from "@/lib/content-status";
 import { requireAdmin } from "@/lib/session";
 import { ROUTES } from "@/lib/constants";
 import { getGitHubCMS } from "@/lib/github-cms";
@@ -41,7 +42,7 @@ export async function POST(request: NextRequest, context: RouteContext) {
 
     // If not found in root, check legacy status folders
     if (!existing) {
-      const statuses = ["draft", "published", "archived"];
+      const statuses = CONTENT_STATUSES;
 
       for (const status of statuses) {
         const legacyPath = `${collection.path}/${status}/${id}.json`;

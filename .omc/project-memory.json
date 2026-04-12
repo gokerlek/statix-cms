@@ -69,8 +69,8 @@
   "hotPaths": [
     {
       "path": "template/src/app/api/content/[collectionSlug]/[id]/route.ts",
-      "accessCount": 9,
-      "lastAccessed": 1775996470893,
+      "accessCount": 15,
+      "lastAccessed": 1775998947292,
       "type": "file"
     },
     {
@@ -101,6 +101,12 @@
       "path": "template/src/app/api/collections/[slug]/route.ts",
       "accessCount": 6,
       "lastAccessed": 1775997373116,
+      "type": "file"
+    },
+    {
+      "path": "template/src/statix.config.ts",
+      "accessCount": 6,
+      "lastAccessed": 1775999325899,
       "type": "file"
     },
     {
@@ -161,12 +167,6 @@
       "path": "template/src/app/api/admin/users/route.ts",
       "accessCount": 4,
       "lastAccessed": 1775995574221,
-      "type": "file"
-    },
-    {
-      "path": "template/src/statix.config.ts",
-      "accessCount": 4,
-      "lastAccessed": 1775996484464,
       "type": "file"
     },
     {

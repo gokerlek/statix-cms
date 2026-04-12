@@ -6,6 +6,7 @@ import { IconPlus } from "@tabler/icons-react";
 import { CollectionList } from "@/components/cms/CollectionList";
 import { Button } from "@/components/ui/button";
 import ui from "@/content/ui.json";
+import { resolveStatus } from "@/lib/content-status";
 import { ROUTES } from "@/lib/constants";
 import { resolveContentTitle } from "@/lib/content-utils";
 import { getGitHubCMS } from "@/lib/github-cms";
@@ -42,7 +43,7 @@ export default async function CollectionPage({ params }: PageProps) {
         try {
           const content = await github.getFile(file.path);
           const status =
-            (content?.content as { status?: string })?.status || "draft";
+            resolveStatus((content?.content as { status?: string })?.status);
           const title = resolveContentTitle(
             collection,
             content?.content as ContentData | null,
