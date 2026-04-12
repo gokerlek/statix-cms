@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 
 import { fileDeleteSchema } from "@/lib/api-schemas";
-import { getMaxUploadSize, validateFileUpload } from "@/lib/file-validation";
+import { getMaxUploadSize, sanitizeFilename, validateFileUpload } from "@/lib/file-validation";
 import { deleteFromR2, uploadToR2 } from "@/lib/r2";
 import { requireAdmin } from "@/lib/session";
 import { formatFileSize } from "@/lib/utils";
@@ -32,7 +32,7 @@ export async function POST(request: NextRequest) {
     }
 
     const timestamp = Date.now();
-    const sanitizedName = file.name.replace(/[^a-zA-Z0-9.-]/g, "_");
+    const sanitizedName = sanitizeFilename(file.name);
     const filename = `${timestamp}-${sanitizedName}`;
     const key = `files/${filename}`;
 

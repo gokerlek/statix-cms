@@ -1,15 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 
-import { getSession } from "@/lib/session";
+import { requireAdmin } from "@/lib/session";
 import { getMediaReferences } from "@/lib/media-utils";
 
 export async function GET(request: NextRequest) {
   try {
-    const session = await getSession();
-
-    if (!session) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
+    await requireAdmin();
 
     const searchParams = request.nextUrl.searchParams;
     const filename = searchParams.get("filename");

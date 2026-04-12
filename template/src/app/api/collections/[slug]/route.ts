@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { resolveStatus } from "@/lib/content-status";
 import { resolveContentTitle } from "@/lib/content-utils";
 import { getGitHubCMS } from "@/lib/github-cms";
-import { getSession } from "@/lib/session";
+import { requireAdmin } from "@/lib/session";
 import { statixConfig } from "@/statix.config";
 import { ContentData } from "@/types/content";
 
@@ -14,11 +14,7 @@ export async function GET(
   { params }: { params: Promise<{ slug: string }> },
 ) {
   try {
-    const session = await getSession();
-
-    if (!session) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
+    await requireAdmin();
 
     const { slug } = await params;
     const collection = statixConfig.collections.find((c) => c.slug === slug);
