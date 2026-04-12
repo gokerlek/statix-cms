@@ -273,75 +273,58 @@ export function useEditorForm({
     removeChange(collection.slug, id);
   }, [collection, id, removeChange]);
 
-  // Auto-save changes
+  // Unified watch: auto-save + locale sync in a single subscription
   useEffect(() => {
     if (!collection || !id) return;
 
     const subscription = watch((value, { name }) => {
-      // Ignore system resets (where name is undefined) to prevent race conditions
       if (!name) return;
 
+      // ── Auto-save to localStorage ──
       const serverValues = getDefaultValues();
 
-      // Compare current form value with server defaults
       if (serverValues && deepEqual(value, serverValues)) {
-        // Form matches server data -> Clear local unsaved data
         const localKey = `unsaved-content-${collection.slug}-${id}`;
 
         if (localStorage.getItem(localKey)) {
           clearLocalData();
         }
+      } else {
+        const localKey = `unsaved-content-${collection.slug}-${id}`;
 
-        return;
-      }
+        localStorage.setItem(localKey, JSON.stringify(value));
 
-      // If different, save local data
-      const localKey = `unsaved-content-${collection.slug}-${id}`;
+        const titleField = collection.titleField || "title";
+        let title = value[titleField];
 
-      localStorage.setItem(localKey, JSON.stringify(value));
+        if (!title && value.translations) {
+          const translations = value.translations as Record<
+            string,
+            Record<string, unknown>
+          >;
+          const defaultLoc = statixConfig.i18n?.defaultLocale || "en";
 
-      // Determine display title
-      const titleField = collection.titleField || "title";
-      let title = value[titleField];
+          title = translations[defaultLoc]?.[titleField] as string | undefined;
 
-      // Check localized fields if title not found at top level
-      if (!title && value.translations) {
-        const translations = value.translations as Record<
-          string,
-          Record<string, unknown>
-        >;
-        // Try default locale first, then any available locale
-        const defaultLoc = statixConfig.i18n?.defaultLocale || "en";
-
-        title = translations[defaultLoc]?.[titleField] as string | undefined;
-
-        if (!title) {
-          // Try any available locale
-          for (const locale of Object.keys(translations)) {
-            if (translations[locale]?.[titleField]) {
-              title = translations[locale][titleField];
-              break;
+          if (!title) {
+            for (const locale of Object.keys(translations)) {
+              if (translations[locale]?.[titleField]) {
+                title = translations[locale][titleField];
+                break;
+              }
             }
           }
         }
+
+        if (!title && value.name) title = value.name;
+
+        if (!title) title = id;
+
+        addChange(collection.slug, id, String(title));
       }
 
-      // Fallback for title
-      if (!title && value.name) title = value.name;
-
-      if (!title) title = id;
-
-      addChange(collection.slug, id, String(title));
-    });
-
-    return () => subscription.unsubscribe();
-  }, [watch, collection, id, addChange, getDefaultValues, clearLocalData]);
-
-  // Sync validation and structure across locales
-  useEffect(() => {
-    const subscription = watch((value, { name }) => {
-      // Logic to sync structure from default locale to others
-      if (!name || !name.startsWith(`translations.${defaultLocale}`)) return;
+      // ── Locale sync: replicate blocks/list structure from default locale ──
+      if (!name.startsWith(`translations.${defaultLocale}`)) return;
 
       const currentValues = getValues();
       const defaultTranslations = currentValues.translations?.[defaultLocale];
@@ -365,11 +348,8 @@ export function useEditorForm({
               field.name
             ] as IdentifiableItem[]) || [];
 
-          // Reconstruct target array based on default array structure (matching by ID)
           const newTargetArray = defaultArray.map(
             (defaultItem: IdentifiableItem) => {
-              // If item has no ID, we can't reliably sync.
-              // Blocks always have IDs. Lists should have IDs (we'll ensure this).
               if (!defaultItem.id) return defaultItem;
 
               const existingItem = targetArray.find(
@@ -378,7 +358,6 @@ export function useEditorForm({
 
               if (existingItem) return existingItem;
 
-              // Create new item
               const newItem: Record<string, unknown> = { id: defaultItem.id };
 
               if (field.type === "blocks") {
@@ -400,7 +379,6 @@ export function useEditorForm({
             },
           );
 
-          // Deep compare to avoid unnecessary updates
           if (JSON.stringify(newTargetArray) !== JSON.stringify(targetArray)) {
             setValue(targetPath, newTargetArray);
           }
@@ -409,7 +387,7 @@ export function useEditorForm({
     });
 
     return () => subscription.unsubscribe();
-  }, [watch, defaultLocale, localizedFields, locales, setValue, getValues]);
+  }, [watch, collection, id, addChange, getDefaultValues, clearLocalData, defaultLocale, localizedFields, locales, setValue, getValues]);
 
   const discardChanges = useCallback(() => {
     const serverValues = getDefaultValues();

@@ -1,5 +1,6 @@
 "use client";
 
+import React from "react";
 import { Control } from "react-hook-form";
 
 import { useSortable } from "@dnd-kit/sortable";
@@ -25,7 +26,7 @@ interface SortableListItemProps {
   locked?: boolean;
 }
 
-export function SortableListItem({
+function SortableListItemInner({
   id,
   fields,
   onRemove,
@@ -95,3 +96,5 @@ export function SortableListItem({
     </div>
   );
 }
+
+export const SortableListItem = React.memo(SortableListItemInner);

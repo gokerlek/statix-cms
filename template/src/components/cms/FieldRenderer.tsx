@@ -1,8 +1,10 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import { Control } from "react-hook-form";
 
 import { Label } from "@/components/ui/label";
+import { Skeleton } from "@/components/ui/skeleton";
 import { Field } from "@/types/cms";
 import { ContentFormValues } from "@/types/content";
 
@@ -12,12 +14,16 @@ import { DateField } from "./fields/DateField";
 import { FileField } from "./fields/FileField";
 import { ImageField } from "./fields/ImageField";
 import { NumberField } from "./fields/NumberField";
-import { RichTextField } from "./fields/RichTextField";
 import { SelectField } from "./fields/SelectField";
 import { SwitchField } from "./fields/SwitchField";
 import { TextareaField } from "./fields/TextareaField";
 import { TextField } from "./fields/TextField";
 import { ListEditor } from "./ListEditor";
+
+const RichTextField = dynamic(
+  () => import("./fields/RichTextField").then((m) => m.RichTextField),
+  { ssr: false, loading: () => <Skeleton className="h-48 w-full" /> },
+);
 
 interface FieldRendererProps {
   field: Field;
