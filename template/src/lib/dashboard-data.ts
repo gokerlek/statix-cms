@@ -1,5 +1,6 @@
 import { unstable_cache } from "next/cache";
 
+import { getContentIndex, isMediaOrphaned } from "@/lib/content-index";
 import { formatStatus, resolveStatus } from "@/lib/content-status";
 import { getGitHubCMS } from "@/lib/github-cms";
 import { listR2Media, listR2Trash } from "@/lib/r2";
@@ -272,25 +273,15 @@ export async function getMediaStats() {
   // Orphaned: içerik taraması başarılıysa gerçek sayı, yoksa null (UI "-" gösterir)
   let orphanedCount: number | null = null;
   try {
-    const github = getGitHubCMS();
-    const collectionResults = await Promise.allSettled(
-      statixConfig.collections.map(async (col) => {
-        const files = await github.getCollection(col.path);
-        return Promise.all(files.map((f) => github.getFile(f.path)));
-      }),
-    );
-    const contentItems = collectionResults
-      .filter((r) => r.status === "fulfilled")
-      .flatMap((r) => (r as PromiseFulfilledResult<{ content: unknown }[]>).value)
-      .filter(Boolean);
+    const { index: contentIndex, ok } = await getContentIndex();
 
-    // Fetch başarılı — içerik yoksa da 0 değil, gerçek sayıyı ver
-    const contentIndex = contentItems.map((f) => JSON.stringify(f.content)).join(" ");
-    orphanedCount = mediaFiles.filter(
-      (f) => !contentIndex.includes(f.key.split("/").pop() ?? ""),
-    ).length;
+    if (ok) {
+      orphanedCount = mediaFiles.filter((f) =>
+        isMediaOrphaned(contentIndex, f.key.split("/").pop() ?? ""),
+      ).length;
+    }
   } catch {
-    orphanedCount = null; // Fetch başarısız → bilinmiyor
+    orphanedCount = null;
   }
 
   return {

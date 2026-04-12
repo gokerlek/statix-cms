@@ -1,39 +1,8 @@
 import { NextResponse } from "next/server";
 
-import { getGitHubCMS } from "@/lib/github-cms";
+import { getContentIndex, isMediaOrphaned } from "@/lib/content-index";
 import { listR2Media } from "@/lib/r2";
 import { requireAdmin } from "@/lib/session";
-import { statixConfig } from "@/statix.config";
-
-async function buildContentIndex(): Promise<{ index: string; ok: boolean }> {
-  try {
-    const github = getGitHubCMS();
-
-    const collectionResults = await Promise.allSettled(
-      statixConfig.collections.map(async (col) => {
-        const files = await github.getCollection(col.path);
-        const fileContents = await Promise.allSettled(
-          files.map((f) => github.getFile(f.path)),
-        );
-        return fileContents
-          .filter((r) => r.status === "fulfilled" && r.value?.content)
-          .map((r) =>
-            JSON.stringify((r as PromiseFulfilledResult<{ content: unknown }>).value.content),
-          );
-      }),
-    );
-
-    const index = collectionResults
-      .filter((r) => r.status === "fulfilled")
-      .flatMap((r) => (r as PromiseFulfilledResult<string[]>).value)
-      .join(" ");
-
-    return { index, ok: true };
-  } catch (err) {
-    console.error("buildContentIndex error:", err);
-    return { index: "", ok: false };
-  }
-}
 
 export async function GET() {
   try {
@@ -41,7 +10,7 @@ export async function GET() {
 
     const [files, { index: contentIndex, ok: contentFetched }] = await Promise.all([
       listR2Media("uploads/"),
-      buildContentIndex(),
+      getContentIndex(),
     ]);
 
     const filtered = files.filter(
@@ -57,7 +26,7 @@ export async function GET() {
       lastModified: file.lastModified,
       // contentFetched=false → GitHub'a ulaşılamadı, orphaned bilinmiyor (false)
       // contentFetched=true → içerik başarıyla alındı, URL yoksa orphaned
-      isOrphaned: contentFetched ? !contentIndex.includes(file.url) : false,
+      isOrphaned: contentFetched ? isMediaOrphaned(contentIndex, file.key.split("/").pop() ?? "") : false,
     }));
 
     return NextResponse.json(result);

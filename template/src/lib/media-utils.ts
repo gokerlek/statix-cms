@@ -1,47 +1,22 @@
+import { getContentIndex, isMediaOrphaned } from "@/lib/content-index";
 import { getGitHubCMS, GitHubFile } from "@/lib/github-cms";
 import { statixConfig } from "@/statix.config";
 
 /**
  * Scans all content in the CMS and identifies which media files are orphaned (unused).
- * Returns a Set of orphaned file paths (relative to the project root, e.g., "public/uploads/image.png").
+ * Returns a Set of orphaned file paths.
  */
 export async function getOrphanedMediaPaths(
   mediaFiles: GitHubFile[],
 ): Promise<Set<string>> {
-  const github = getGitHubCMS();
+  const { index, ok } = await getContentIndex();
 
-  // 1. Get all content files
-  const allContentFiles = await Promise.all(
-    statixConfig.collections.map(async (collection) => {
-      const collectionFiles = await github.getCollection(collection.path);
+  if (!ok) return new Set<string>();
 
-      return Promise.all(collectionFiles.map((f) => github.getFile(f.path)));
-    }),
-  );
-
-  // Flatten and extract content strings
-  const contentStrings: string[] = [];
-
-  allContentFiles.flat().forEach((file) => {
-    if (file && file.content) {
-      const contentStr = JSON.stringify(file.content);
-
-      contentStrings.push(contentStr);
-    }
-  });
-
-  // 2. Check each media file for usage
   const orphanedPaths = new Set<string>();
 
   mediaFiles.forEach((mediaFile) => {
-    // We check if the filename exists in any content
-    // This is a simple check, but effective for most cases
-    const filename = mediaFile.name;
-
-    // Check if any content string contains the filename
-    const isUsed = contentStrings.some((content) => content.includes(filename));
-
-    if (!isUsed) {
+    if (isMediaOrphaned(index, mediaFile.name)) {
       orphanedPaths.add(mediaFile.path);
     }
   });
