@@ -1,7 +1,8 @@
 import { IconActivity, IconDatabase, IconGitBranch, IconServer } from "@tabler/icons-react";
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
+
+import { CMSCard } from "./shared/CMSCard";
 
 interface SystemStats {
   rateLimit: {
@@ -31,19 +32,14 @@ export function SystemHealth({ stats }: { stats: SystemStats }) {
     return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + " " + sizes[i];
   };
 
-  // Convert KB to Bytes for repo size (GitHub API returns size in KB)
   const repoSizeBytes = stats.repoDetails.size * 1024;
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <IconActivity className="h-5 w-5" />
-          System Health
-        </CardTitle>
-      </CardHeader>
-
-      <CardContent className="space-y-6">
+    <CMSCard
+      icon={<IconActivity className="h-5 w-5" />}
+      title="System Health"
+    >
+      <div className="space-y-6">
         <div className="space-y-2">
           <div className="flex items-center justify-between text-sm">
             <span className="flex items-center gap-2 text-muted-foreground">
@@ -83,7 +79,7 @@ export function SystemHealth({ stats }: { stats: SystemStats }) {
             </span>
           </div>
         </div>
-      </CardContent>
-    </Card>
+      </div>
+    </CMSCard>
   );
 }

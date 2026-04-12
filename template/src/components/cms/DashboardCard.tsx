@@ -7,17 +7,11 @@ import { IconPlus } from "@tabler/icons-react";
 
 import { DonutChart } from "@/components/cms/DonutChart";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
 import ui from "@/content/ui.json";
 import { ROUTES } from "@/lib/constants";
 
 import { CollectionIcon } from "./CollectionIcon";
+import { CMSCard } from "./shared/CMSCard";
 
 interface Stat {
   count: number;
@@ -68,46 +62,21 @@ export function DashboardCard({ stat }: DashboardCardProps) {
     : "Items";
 
   return (
-    <Card className=" group hover:border-primary transition-colors ease-in-out duration-300 flex flex-col h-full gap-0 row-span-2">
-      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-        <CardTitle>
-          {stat.label}
-        </CardTitle>
-
+    <CMSCard
+      title={stat.label}
+      action={
         <CollectionIcon
           icon={stat.icon}
           className="h-5 w-5 text-muted-foreground"
         />
-      </CardHeader>
-
-      <CardContent className="flex-1 flex flex-col justify-between p-0">
-        {stat.count === 0 ? (
-          <div className="flex flex-col items-center justify-center h-full p-6 text-center text-muted-foreground space-y-2">
-            <p className="text-sm">
-              {ui.collectionList.noEntriesDescription.replace(
-                "{label}",
-                stat.label,
-              )}
-            </p>
-          </div>
-        ) : (
-          <DonutChart
-            data={chartData}
-            dataKey="count"
-            nameKey="status"
-            total={total}
-            totalLabel={lastUpdatedText}
-            config={chartConfig}
-          />
-        )}
-      </CardContent>
-
-      <CardFooter className="flex flex-col items-center justify-center gap-4">
-        {stat.count === 0 ? (
+      }
+      className="group gap-0 row-span-2"
+      contentClassName="flex-1 flex flex-col justify-between p-0"
+      footer={
+        stat.count === 0 ? (
           <Button className="w-full" asChild>
             <Link href={addLink}>
               <IconPlus className="mr-2 h-4 w-4" />
-
               {ui.collectionList.createFirstEntry}
             </Link>
           </Button>
@@ -120,13 +89,32 @@ export function DashboardCard({ stat }: DashboardCardProps) {
                 </Link>
               </Button>
             )}
-
             <Button className="flex-1" variant="outline" asChild>
               <Link href={viewLink}>{ui.common.viewAll}</Link>
             </Button>
           </div>
-        )}
-      </CardFooter>
-    </Card>
+        )
+      }
+    >
+      {stat.count === 0 ? (
+        <div className="flex flex-col items-center justify-center h-full p-6 text-center text-muted-foreground space-y-2">
+          <p className="text-sm">
+            {ui.collectionList.noEntriesDescription.replace(
+              "{label}",
+              stat.label,
+            )}
+          </p>
+        </div>
+      ) : (
+        <DonutChart
+          data={chartData}
+          dataKey="count"
+          nameKey="status"
+          total={total}
+          totalLabel={lastUpdatedText}
+          config={chartConfig}
+        />
+      )}
+    </CMSCard>
   );
 }

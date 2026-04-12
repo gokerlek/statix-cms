@@ -37,7 +37,7 @@ export default async function AdminDashboard({ searchParams }: AdminDashboardPro
 
   const isAdmin = user.role === "admin";
 
-  const [collectionStats, localizationStats, monitorSummary] =
+  const [collectionStats, localizationStats, , monitorSummary] =
     await Promise.all([
       getCollectionStats(),
       getLocalizationStats(),
