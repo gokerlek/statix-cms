@@ -1,11 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 
-import { mediaMoveSchema, r2KeySchema } from "@/lib/api-schemas";
-import { handleApiError } from "@/lib/api-response";
-import { writeAudit, getIp } from "@/lib/audit";
-import { getGitHubCMS } from "@/lib/github-cms";
-import { extractR2Key, getPublicUrl, moveR2 } from "@/lib/r2";
-import { requireAdmin } from "@/lib/session";
+import { mediaMoveSchema, r2KeySchema } from "@/statix/lib/api-schemas";
+import { handleApiError } from "@/statix/lib/api-response";
+import { writeAudit, getIp } from "@/statix/lib/audit";
+import { getGitHubCMS } from "@/statix/lib/github-cms";
+import { extractR2Key, getPublicUrl, moveR2 } from "@/statix/lib/r2";
+import { requireAdmin } from "@/statix/lib/session";
 
 export async function POST(request: NextRequest) {
   try {

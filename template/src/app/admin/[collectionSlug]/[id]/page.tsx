@@ -6,19 +6,19 @@ import { useRouter } from "next/navigation";
 
 import { toast } from "sonner";
 
-import { EditorHeader } from "@/components/cms/editor/EditorHeader";
-import { LocalizedFieldsSection } from "@/components/cms/editor/LocalizedFieldsSection";
-import { SharedFieldsSection } from "@/components/cms/editor/SharedFieldsSection";
-import { PageTitleUpdater } from "@/components/cms/PageTitleUpdater";
-import { Card, CardContent } from "@/components/ui/card";
-import { PageLoading } from "@/components/ui/loading";
-import ui from "@/content/ui.json";
-import { useContent } from "@/hooks/use-content";
-import { useEditorForm } from "@/hooks/use-editor-form";
-import { ROUTES } from "@/lib/constants";
-import { resolveContentTitle } from "@/lib/content-utils";
+import { EditorHeader } from "@/statix/components/editor/EditorHeader";
+import { LocalizedFieldsSection } from "@/statix/components/editor/LocalizedFieldsSection";
+import { SharedFieldsSection } from "@/statix/components/editor/SharedFieldsSection";
+import { PageTitleUpdater } from "@/statix/components/layout/PageTitleUpdater";
+import { Card, CardContent } from "@/statix/components/ui/card";
+import { PageLoading } from "@/statix/components/ui/loading";
+import ui from "@/statix/content/ui.json";
+import { useContent } from "@/statix/hooks/use-content";
+import { useEditorForm } from "@/statix/hooks/use-editor-form";
+import { ROUTES } from "@/statix/lib/constants";
+import { resolveContentTitle } from "@/statix/lib/content-utils";
 import { statixConfig } from "@/statix.config";
-import { ContentFormValues } from "@/types/content";
+import { ContentFormValues } from "@/statix/types/content";
 
 interface EditorPageProps {
   params: Promise<{ collectionSlug: string; id: string }>;

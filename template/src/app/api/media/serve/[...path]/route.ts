@@ -1,9 +1,9 @@
 import { GetObjectCommand } from "@aws-sdk/client-s3";
 import { NextRequest, NextResponse } from "next/server";
 
-import { getR2Client } from "@/lib/r2";
-import { getSession } from "@/lib/session";
-import { env } from "@/lib/env";
+import { getR2Client } from "@/statix/lib/r2";
+import { getSession } from "@/statix/lib/session";
+import { env } from "@/statix/lib/env";
 
 // R2'den S3 API ile proxy — public URL engellendiğinde çalışır
 export async function GET(

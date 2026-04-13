@@ -2,11 +2,11 @@
 
 import { useState } from "react";
 
-import { TrashList } from "@/components/cms/TrashList";
-import { TrashToolbar } from "@/components/cms/TrashToolbar";
-import { PageLoading } from "@/components/ui/loading";
-import { useTranslation } from "@/hooks/use-translation";
-import { TrashItem, useDeleteTrash, useRestoreTrash, useTrash } from "@/hooks/use-trash";
+import { TrashList } from "@/statix/components/trash/TrashList";
+import { TrashToolbar } from "@/statix/components/trash/TrashToolbar";
+import { PageLoading } from "@/statix/components/ui/loading";
+import { useTranslation } from "@/statix/hooks/use-translation";
+import { TrashItem, useDeleteTrash, useRestoreTrash, useTrash } from "@/statix/hooks/use-trash";
 
 export default function TrashPage() {
   const { t } = useTranslation();

@@ -1,10 +1,10 @@
 import { and, desc, eq } from "drizzle-orm";
 import { NextRequest, NextResponse } from "next/server";
 
-import { auditLog } from "@/db/schema";
-import { handleApiError } from "@/lib/api-response";
-import { db } from "@/lib/db";
-import { requireAdmin } from "@/lib/session";
+import { auditLog } from "@/statix/db/schema";
+import { handleApiError } from "@/statix/lib/api-response";
+import { db } from "@/statix/lib/db";
+import { requireAdmin } from "@/statix/lib/session";
 
 export async function GET(request: NextRequest) {
   try {

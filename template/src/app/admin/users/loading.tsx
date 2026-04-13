@@ -1,5 +1,5 @@
-import { Card, CardContent } from "@/components/ui/card";
-import { Skeleton } from "@/components/ui/skeleton";
+import { Card, CardContent } from "@/statix/components/ui/card";
+import { Skeleton } from "@/statix/components/ui/skeleton";
 
 export default function UsersLoading() {
   return (

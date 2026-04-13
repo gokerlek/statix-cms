@@ -1,8 +1,8 @@
 "use client";
 
-import { MediaLibrary } from "@/components/cms/MediaLibrary";
-import { UploadSection } from "@/components/cms/UploadSection";
-import ui from "@/content/ui.json";
+import { MediaLibrary } from "@/statix/components/media/MediaLibrary";
+import { UploadSection } from "@/statix/components/media/UploadSection";
+import ui from "@/statix/content/ui.json";
 
 export default function MediaPage() {
   return (

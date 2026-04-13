@@ -5,10 +5,10 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { IconBrandGithub, IconMail, IconArrowLeft, IconLoader2 } from "@tabler/icons-react";
 
-import { authClient } from "@/lib/auth-client";
-import { ROUTES } from "@/lib/constants";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { authClient } from "@/statix/lib/auth-client";
+import { ROUTES } from "@/statix/lib/constants";
+import { Button } from "@/statix/components/ui/button";
+import { Input } from "@/statix/components/ui/input";
 
 type Step = "email" | "otp";
 

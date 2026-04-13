@@ -1,15 +1,15 @@
 import { revalidatePath } from "next/cache";
 import { NextRequest, NextResponse } from "next/server";
 
-import { contentSaveSchema } from "@/lib/api-schemas";
-import { handleApiError } from "@/lib/api-response";
-import { CONTENT_STATUSES, DEFAULT_STATUS, resolveStatus } from "@/lib/content-status";
-import { requireAdmin } from "@/lib/session";
-import { ROUTES } from "@/lib/constants";
-import { getGitHubCMS } from "@/lib/github-cms";
-import { slugify } from "@/lib/utils";
+import { contentSaveSchema } from "@/statix/lib/api-schemas";
+import { handleApiError } from "@/statix/lib/api-response";
+import { CONTENT_STATUSES, DEFAULT_STATUS, resolveStatus } from "@/statix/lib/content-status";
+import { requireAdmin } from "@/statix/lib/session";
+import { ROUTES } from "@/statix/lib/constants";
+import { getGitHubCMS } from "@/statix/lib/github-cms";
+import { slugify } from "@/statix/lib/utils";
 import { statixConfig } from "@/statix.config";
-import { writeAudit, getIp } from "@/lib/audit";
+import { writeAudit, getIp } from "@/statix/lib/audit";
 
 interface RouteContext {
   params: Promise<{ collectionSlug: string; id: string }>;

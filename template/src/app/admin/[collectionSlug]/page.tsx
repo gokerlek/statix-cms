@@ -3,15 +3,15 @@ import { notFound } from "next/navigation";
 
 import { IconPlus } from "@tabler/icons-react";
 
-import { CollectionList } from "@/components/cms/CollectionList";
-import { Button } from "@/components/ui/button";
-import ui from "@/content/ui.json";
-import { resolveStatus } from "@/lib/content-status";
-import { ROUTES } from "@/lib/constants";
-import { resolveContentTitle } from "@/lib/content-utils";
-import { getGitHubCMS } from "@/lib/github-cms";
+import { CollectionList } from "@/statix/components/collections/CollectionList";
+import { Button } from "@/statix/components/ui/button";
+import ui from "@/statix/content/ui.json";
+import { resolveStatus } from "@/statix/lib/content-status";
+import { ROUTES } from "@/statix/lib/constants";
+import { resolveContentTitle } from "@/statix/lib/content-utils";
+import { getGitHubCMS } from "@/statix/lib/github-cms";
 import { statixConfig } from "@/statix.config";
-import { ContentData } from "@/types/content";
+import { ContentData } from "@/statix/types/content";
 
 interface PageProps {
   params: Promise<{ collectionSlug: string }>;

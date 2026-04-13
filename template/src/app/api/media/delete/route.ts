@@ -1,10 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 
-import { mediaDeleteSchema, r2KeySchema } from "@/lib/api-schemas";
-import { handleApiError } from "@/lib/api-response";
-import { writeAudit, getIp } from "@/lib/audit";
-import { extractR2Key, softDeleteR2 } from "@/lib/r2";
-import { requireAdmin } from "@/lib/session";
+import { mediaDeleteSchema, r2KeySchema } from "@/statix/lib/api-schemas";
+import { handleApiError } from "@/statix/lib/api-response";
+import { writeAudit, getIp } from "@/statix/lib/audit";
+import { extractR2Key, softDeleteR2 } from "@/statix/lib/r2";
+import { requireAdmin } from "@/statix/lib/session";
 
 export async function POST(request: NextRequest) {
   try {

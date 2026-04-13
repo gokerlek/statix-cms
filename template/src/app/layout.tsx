@@ -1,11 +1,5 @@
 import { Geist, Geist_Mono } from "next/font/google";
 
-import { Toaster } from "sonner";
-
-import { ErrorBoundary } from "@/components/ErrorBoundary";
-import { QueryProvider } from "@/components/providers/query-provider";
-import { TooltipProvider } from "@/components/ui/tooltip";
-
 import type { Metadata } from "next";
 
 import "./globals.css";
@@ -38,14 +32,7 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <QueryProvider>
-          <TooltipProvider>
-            <div className="contents">
-              <ErrorBoundary>{children}</ErrorBoundary>
-              <Toaster richColors position="top-center" />
-            </div>
-          </TooltipProvider>
-        </QueryProvider>
+        {children}
       </body>
     </html>
   );

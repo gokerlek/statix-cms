@@ -6,8 +6,8 @@ import { useSearchParams } from "next/navigation";
 
 import { IconAlertCircle } from "@tabler/icons-react";
 
-import { SectionLoading } from "@/components/ui/loading";
-import ui from "@/content/ui.json";
+import { SectionLoading } from "@/statix/components/ui/loading";
+import ui from "@/statix/content/ui.json";
 
 function ErrorContent() {
   const searchParams = useSearchParams();

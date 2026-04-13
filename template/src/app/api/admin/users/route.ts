@@ -5,14 +5,14 @@ import { and, count, eq, isNull, not, sql } from "drizzle-orm";
 import { z } from "zod";
 import { Resend } from "resend";
 
-import { db } from "@/lib/db";
-import { handleApiError } from "@/lib/api-response";
-import { user, userInvites } from "@/db/schema";
-import { writeAudit, getIp } from "@/lib/audit";
-import { auth } from "@/lib/auth";
-import { requireAdmin } from "@/lib/session";
-import { checkRateLimit } from "@/lib/rate-limit";
-import { env } from "@/lib/env";
+import { db } from "@/statix/lib/db";
+import { handleApiError } from "@/statix/lib/api-response";
+import { user, userInvites } from "@/statix/db/schema";
+import { writeAudit, getIp } from "@/statix/lib/audit";
+import { auth } from "@/statix/lib/auth";
+import { requireAdmin } from "@/statix/lib/session";
+import { checkRateLimit } from "@/statix/lib/rate-limit";
+import { env } from "@/statix/lib/env";
 
 export const runtime = "nodejs";
 

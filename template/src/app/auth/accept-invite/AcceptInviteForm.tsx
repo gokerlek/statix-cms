@@ -3,7 +3,7 @@
 import { useFormStatus } from "react-dom";
 import { IconLoader2, IconUserCheck } from "@tabler/icons-react";
 
-import { Button } from "@/components/ui/button";
+import { Button } from "@/statix/components/ui/button";
 
 function SubmitButton() {
   const { pending } = useFormStatus();

@@ -1,11 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 
-import { resolveStatus } from "@/lib/content-status";
-import { resolveContentTitle } from "@/lib/content-utils";
-import { getGitHubCMS } from "@/lib/github-cms";
-import { requireAdmin } from "@/lib/session";
+import { resolveStatus } from "@/statix/lib/content-status";
+import { resolveContentTitle } from "@/statix/lib/content-utils";
+import { getGitHubCMS } from "@/statix/lib/github-cms";
+import { requireAdmin } from "@/statix/lib/session";
 import { statixConfig } from "@/statix.config";
-import { ContentData } from "@/types/content";
+import { ContentData } from "@/statix/types/content";
 
 export const dynamic = "force-dynamic";
 

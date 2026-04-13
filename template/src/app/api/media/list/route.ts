@@ -1,9 +1,9 @@
 import { NextResponse } from "next/server";
 
-import { getContentIndex, isMediaOrphaned } from "@/lib/content-index";
-import { handleApiError } from "@/lib/api-response";
-import { listR2Media } from "@/lib/r2";
-import { requireAdmin } from "@/lib/session";
+import { getContentIndex, isMediaOrphaned } from "@/statix/lib/content-index";
+import { handleApiError } from "@/statix/lib/api-response";
+import { listR2Media } from "@/statix/lib/r2";
+import { requireAdmin } from "@/statix/lib/session";
 
 export async function GET() {
   try {

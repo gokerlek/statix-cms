@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 
-import { getMediaStats } from "@/lib/dashboard-data";
-import { requireAdmin } from "@/lib/session";
+import { getMediaStats } from "@/statix/lib/dashboard-data";
+import { requireAdmin } from "@/statix/lib/session";
 
 export async function GET() {
   try {

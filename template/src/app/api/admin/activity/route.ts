@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 
-import { handleApiError } from "@/lib/api-response";
-import { requireAdmin } from "@/lib/session";
-import { getUnifiedActivity } from "@/lib/activity-feed";
+import { handleApiError } from "@/statix/lib/api-response";
+import { requireAdmin } from "@/statix/lib/session";
+import { getUnifiedActivity } from "@/statix/lib/activity-feed";
 
 export const runtime = "nodejs";
 

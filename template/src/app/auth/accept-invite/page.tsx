@@ -4,11 +4,11 @@ import { redirect } from "next/navigation";
 import { headers } from "next/headers";
 import { and, eq, isNull } from "drizzle-orm";
 
-import { db } from "@/lib/db";
-import { userInvites } from "@/db/schema";
-import { auth } from "@/lib/auth";
-import { writeAudit } from "@/lib/audit";
-import { checkRateLimit } from "@/lib/rate-limit";
+import { db } from "@/statix/lib/db";
+import { userInvites } from "@/statix/db/schema";
+import { auth } from "@/statix/lib/auth";
+import { writeAudit } from "@/statix/lib/audit";
+import { checkRateLimit } from "@/statix/lib/rate-limit";
 import { AcceptInviteForm } from "./AcceptInviteForm";
 
 export const runtime = "nodejs";

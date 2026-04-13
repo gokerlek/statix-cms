@@ -1,12 +1,12 @@
 import { revalidatePath } from "next/cache";
 import { NextRequest, NextResponse } from "next/server";
 
-import { CONTENT_STATUSES } from "@/lib/content-status";
-import { requireAdmin } from "@/lib/session";
-import { ROUTES } from "@/lib/constants";
-import { getGitHubCMS } from "@/lib/github-cms";
+import { CONTENT_STATUSES } from "@/statix/lib/content-status";
+import { requireAdmin } from "@/statix/lib/session";
+import { ROUTES } from "@/statix/lib/constants";
+import { getGitHubCMS } from "@/statix/lib/github-cms";
 import { statixConfig } from "@/statix.config";
-import { writeAudit, getIp } from "@/lib/audit";
+import { writeAudit, getIp } from "@/statix/lib/audit";
 
 interface RouteContext {
   params: Promise<{ collectionSlug: string; id: string }>;

@@ -2,8 +2,8 @@ import Link from "next/link";
 
 import { IconArrowRight, IconFileText, IconBrandGithub, IconLock, IconUpload } from "@tabler/icons-react";
 
-import ui from "@/content/ui.json";
-import { ROUTES } from "@/lib/constants";
+import ui from "@/statix/content/ui.json";
+import { ROUTES } from "@/statix/lib/constants";
 
 export default function Home() {
   return (

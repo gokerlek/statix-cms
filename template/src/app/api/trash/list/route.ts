@@ -1,9 +1,9 @@
 import { NextResponse } from "next/server";
 
-import { handleApiError } from "@/lib/api-response";
-import { getGitHubCMS } from "@/lib/github-cms";
-import { listR2Trash } from "@/lib/r2";
-import { requireAdmin } from "@/lib/session";
+import { handleApiError } from "@/statix/lib/api-response";
+import { getGitHubCMS } from "@/statix/lib/github-cms";
+import { listR2Trash } from "@/statix/lib/r2";
+import { requireAdmin } from "@/statix/lib/session";
 
 export async function GET() {
   try {

@@ -1,4 +1,4 @@
-import { StatixConfig } from "@/types";
+import { StatixConfig } from "@/statix/types";
 
 export const statixConfig: StatixConfig = {
   github: {

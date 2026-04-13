@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 
-import { env } from "@/lib/env";
-import { handleApiError } from "@/lib/api-response";
-import { requireAdmin } from "@/lib/session";
+import { env } from "@/statix/lib/env";
+import { handleApiError } from "@/statix/lib/api-response";
+import { requireAdmin } from "@/statix/lib/session";
 
 interface RouteContext {
   params: Promise<{ filename: string }>;

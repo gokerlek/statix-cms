@@ -4,9 +4,9 @@ import { useEffect } from "react";
 
 import { IconAlertCircle, IconRefresh } from "@tabler/icons-react";
 
-import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-import ui from "@/content/ui.json";
+import { Button } from "@/statix/components/ui/button";
+import { Card, CardContent } from "@/statix/components/ui/card";
+import ui from "@/statix/content/ui.json";
 
 interface ErrorProps {
   error: Error & { digest?: string };

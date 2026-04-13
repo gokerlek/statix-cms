@@ -1,12 +1,12 @@
 import { Suspense } from "react";
 import { and, eq, inArray, sql } from "drizzle-orm";
 
-import { db } from "@/lib/db";
-import { auditLog } from "@/db/schema";
-import { requireAdminOrRedirect } from "@/lib/session";
-import { auth } from "@/lib/auth";
+import { db } from "@/statix/lib/db";
+import { auditLog } from "@/statix/db/schema";
+import { requireAdminOrRedirect } from "@/statix/lib/session";
+import { auth } from "@/statix/lib/auth";
 import { headers } from "next/headers";
-import { PageLoading } from "@/components/ui/loading";
+import { PageLoading } from "@/statix/components/ui/loading";
 import { UsersClientPage } from "./UsersClientPage";
 
 export const dynamic = "force-dynamic";

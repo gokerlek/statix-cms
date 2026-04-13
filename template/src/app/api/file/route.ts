@@ -1,11 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 
-import { fileDeleteSchema } from "@/lib/api-schemas";
-import { handleApiError } from "@/lib/api-response";
-import { getMaxUploadSize, sanitizeFilename, validateFileUpload } from "@/lib/file-validation";
-import { deleteFromR2, uploadToR2 } from "@/lib/r2";
-import { requireAdmin } from "@/lib/session";
-import { formatFileSize } from "@/lib/utils";
+import { fileDeleteSchema } from "@/statix/lib/api-schemas";
+import { handleApiError } from "@/statix/lib/api-response";
+import { getMaxUploadSize, sanitizeFilename, validateFileUpload } from "@/statix/lib/file-validation";
+import { deleteFromR2, uploadToR2 } from "@/statix/lib/r2";
+import { requireAdmin } from "@/statix/lib/session";
+import { formatFileSize } from "@/statix/lib/utils";
 
 export async function POST(request: NextRequest) {
   try {

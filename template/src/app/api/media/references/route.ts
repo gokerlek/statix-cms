@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 
-import { requireAdmin } from "@/lib/session";
-import { getMediaReferences } from "@/lib/media-utils";
+import { requireAdmin } from "@/statix/lib/session";
+import { getMediaReferences } from "@/statix/lib/media-utils";
 
 export async function GET(request: NextRequest) {
   try {

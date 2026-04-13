@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 
-import { ROUTES } from "@/lib/constants";
-import { checkRateLimit, getClientIp } from "@/lib/rate-limit";
+import { ROUTES } from "@/statix/lib/constants";
+import { checkRateLimit, getClientIp } from "@/statix/lib/rate-limit";
 
 import type { NextRequest } from "next/server";
 

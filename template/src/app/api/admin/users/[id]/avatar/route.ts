@@ -1,12 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import { eq } from "drizzle-orm";
 
-import { db } from "@/lib/db";
-import { handleApiError } from "@/lib/api-response";
-import { user } from "@/db/schema";
-import { requireSelfOrAdmin } from "@/lib/session";
-import { uploadToR2, deleteFromR2, extractR2Key } from "@/lib/r2";
-import { writeAudit, getIp } from "@/lib/audit";
+import { db } from "@/statix/lib/db";
+import { handleApiError } from "@/statix/lib/api-response";
+import { user } from "@/statix/db/schema";
+import { requireSelfOrAdmin } from "@/statix/lib/session";
+import { uploadToR2, deleteFromR2, extractR2Key } from "@/statix/lib/r2";
+import { writeAudit, getIp } from "@/statix/lib/audit";
 
 export const runtime = "nodejs";
 

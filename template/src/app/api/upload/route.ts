@@ -1,10 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 
-import { sanitizeFilename, validateFileUpload } from "@/lib/file-validation";
-import { handleApiError } from "@/lib/api-response";
-import { writeAudit, getIp } from "@/lib/audit";
-import { uploadToR2 } from "@/lib/r2";
-import { requireAdmin } from "@/lib/session";
+import { sanitizeFilename, validateFileUpload } from "@/statix/lib/file-validation";
+import { handleApiError } from "@/statix/lib/api-response";
+import { writeAudit, getIp } from "@/statix/lib/audit";
+import { uploadToR2 } from "@/statix/lib/r2";
+import { requireAdmin } from "@/statix/lib/session";
 
 // Only alphanumeric, hyphens, underscores — no path separators
 const VALID_FOLDER = /^[a-zA-Z0-9_-]+$/;

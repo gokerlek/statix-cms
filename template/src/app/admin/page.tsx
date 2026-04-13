@@ -1,25 +1,25 @@
 import { redirect } from "next/navigation";
 
-import ui from "@/content/ui.json";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { DashboardCard } from "@/components/cms/DashboardCard";
-import { DashboardUnsavedAlert } from "@/components/cms/DashboardUnsavedAlert";
-import { LocalizationStats } from "@/components/cms/LocalizationStats";
-import { MediaOverview } from "@/components/cms/MediaOverview";
-import { MonitorSummaryCard } from "@/components/cms/MonitorSummaryCard";
-import { SingletonDashboardCard } from "@/components/cms/SingletonDashboardCard";
-import { TrashCard } from "@/components/cms/TrashCard";
-import { UsersCard } from "@/components/cms/UsersCard";
-import { UserProfileCard } from "@/components/cms/UserProfileCard";
+import ui from "@/statix/content/ui.json";
+import { Alert, AlertDescription } from "@/statix/components/ui/alert";
+import { DashboardCard } from "@/statix/components/dashboard/DashboardCard";
+import { DashboardUnsavedAlert } from "@/statix/components/dashboard/DashboardUnsavedAlert";
+import { LocalizationStats } from "@/statix/components/dashboard/LocalizationStats";
+import { MediaOverview } from "@/statix/components/media/MediaOverview";
+import { MonitorSummaryCard } from "@/statix/components/monitor/MonitorSummaryCard";
+import { SingletonDashboardCard } from "@/statix/components/dashboard/SingletonDashboardCard";
+import { TrashCard } from "@/statix/components/trash/TrashCard";
+import { UsersCard } from "@/statix/components/users/UsersCard";
+import { UserProfileCard } from "@/statix/components/users/UserProfileCard";
 import type { CMSUser } from "@/app/admin/users/page";
-import { cleanupOldAuditLogs } from "@/lib/audit";
+import { cleanupOldAuditLogs } from "@/statix/lib/audit";
 import {
   getCollectionStats,
   getLocalizationStats,
   getSystemStats,
-} from "@/lib/dashboard-data";
-import { getMonitorSummary } from "@/lib/monitor-data";
-import { getSession } from "@/lib/session";
+} from "@/statix/lib/dashboard-data";
+import { getMonitorSummary } from "@/statix/lib/monitor-data";
+import { getSession } from "@/statix/lib/session";
 
 interface AdminDashboardProps {
   searchParams: Promise<{ error?: string }>;

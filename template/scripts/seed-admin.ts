@@ -1,4 +1,4 @@
-import { auth } from "../src/lib/auth";
+import { auth } from "@/statix/lib/auth";
 
 async function seedAdmin() {
   const email = process.env.INITIAL_ADMIN_EMAIL;

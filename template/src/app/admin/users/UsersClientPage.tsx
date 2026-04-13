@@ -4,14 +4,14 @@ import { useEffect, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { IconUserPlus } from "@tabler/icons-react";
 
-import { useUsers } from "@/hooks/use-users";
+import { useUsers } from "@/statix/hooks/use-users";
 
-import { Button } from "@/components/ui/button";
-import { UserDetailDrawer } from "@/components/cms/UserDetailDrawer";
-import { InviteDialog } from "@/components/cms/InviteDialog";
-import { UserListItem } from "@/components/cms/UserListItem";
+import { Button } from "@/statix/components/ui/button";
+import { UserDetailDrawer } from "@/statix/components/users/UserDetailDrawer";
+import { InviteDialog } from "@/statix/components/users/InviteDialog";
+import { UserListItem } from "@/statix/components/users/UserListItem";
 import type { CMSUser } from "./page";
-import ui from "@/content/ui.json";
+import ui from "@/statix/content/ui.json";
 
 // ─── Component ───────────────────────────────────────────────────────────────
 

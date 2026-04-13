@@ -1,18 +1,18 @@
-import { ActivityTrendChart } from "@/components/cms/monitor/ActivityTrendChart";
-import { CollectionCountsCard } from "@/components/cms/monitor/CollectionCountsCard";
-import { TopUsersCard } from "@/components/cms/monitor/TopUsersCard";
-import { SystemStatusCards } from "@/components/cms/monitor/SystemStatusCards";
-import { CMSCard } from "@/components/cms/shared/CMSCard";
-import { UnifiedFeed } from "@/components/cms/activity/UnifiedFeed";
-import ui from "@/content/ui.json";
+import { ActivityTrendChart } from "@/statix/components/monitor/ActivityTrendChart";
+import { CollectionCountsCard } from "@/statix/components/monitor/CollectionCountsCard";
+import { TopUsersCard } from "@/statix/components/monitor/TopUsersCard";
+import { SystemStatusCards } from "@/statix/components/monitor/SystemStatusCards";
+import { CMSCard } from "@/statix/components/shared/CMSCard";
+import { UnifiedFeed } from "@/statix/components/activity/UnifiedFeed";
+import ui from "@/statix/content/ui.json";
 import {
   getActivityByUser,
   getActivityTrend,
   getContentChangesByCollection,
   getSystemStatus,
-} from "@/lib/monitor-data";
-import { getUnifiedActivity } from "@/lib/activity-feed";
-import { requireAdminOrRedirect } from "@/lib/session";
+} from "@/statix/lib/monitor-data";
+import { getUnifiedActivity } from "@/statix/lib/activity-feed";
+import { requireAdminOrRedirect } from "@/statix/lib/session";
 
 export default async function MonitorPage() {
   await requireAdminOrRedirect();

@@ -1,13 +1,13 @@
 import { revalidatePath } from "next/cache";
 import { NextRequest, NextResponse } from "next/server";
 
-import { trashActionSchema } from "@/lib/api-schemas";
-import { handleApiError } from "@/lib/api-response";
-import { writeAudit, getIp } from "@/lib/audit";
-import { ROUTES } from "@/lib/constants";
-import { getGitHubCMS } from "@/lib/github-cms";
-import { restoreR2 } from "@/lib/r2";
-import { requireAdmin } from "@/lib/session";
+import { trashActionSchema } from "@/statix/lib/api-schemas";
+import { handleApiError } from "@/statix/lib/api-response";
+import { writeAudit, getIp } from "@/statix/lib/audit";
+import { ROUTES } from "@/statix/lib/constants";
+import { getGitHubCMS } from "@/statix/lib/github-cms";
+import { restoreR2 } from "@/statix/lib/r2";
+import { requireAdmin } from "@/statix/lib/session";
 
 export async function POST(request: NextRequest) {
   try {
