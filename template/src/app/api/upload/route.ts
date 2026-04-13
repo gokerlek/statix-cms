@@ -4,14 +4,15 @@ import { sanitizeFilename, validateFileUpload } from "@/statix/lib/file-validati
 import { handleApiError } from "@/statix/lib/api-response";
 import { writeAudit, getIp } from "@/statix/lib/audit";
 import { uploadToR2 } from "@/statix/lib/r2";
-import { requireAdmin } from "@/statix/lib/session";
+import { requirePermission } from "@/statix/lib/session";
+import { P } from "@/statix/types/permissions";
 
 // Only alphanumeric, hyphens, underscores — no path separators
 const VALID_FOLDER = /^[a-zA-Z0-9_-]+$/;
 
 export async function POST(request: NextRequest) {
   try {
-    const session = await requireAdmin();
+    const { session } = await requirePermission(P.MANAGE_MEDIA);
 
     const formData = await request.formData();
     const file = formData.get("file") as File;

@@ -4,11 +4,12 @@ import { mediaDeleteSchema, r2KeySchema } from "@/statix/lib/api-schemas";
 import { handleApiError } from "@/statix/lib/api-response";
 import { writeAudit, getIp } from "@/statix/lib/audit";
 import { extractR2Key, softDeleteR2 } from "@/statix/lib/r2";
-import { requireAdmin } from "@/statix/lib/session";
+import { requirePermission } from "@/statix/lib/session";
+import { P } from "@/statix/types/permissions";
 
 export async function POST(request: NextRequest) {
   try {
-    const session = await requireAdmin();
+    const { session } = await requirePermission(P.MANAGE_MEDIA);
 
     const body = await request.json();
     const parsed = mediaDeleteSchema.safeParse(body);

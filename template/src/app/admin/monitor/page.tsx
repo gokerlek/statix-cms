@@ -12,10 +12,11 @@ import {
   getSystemStatus,
 } from "@/statix/lib/monitor-data";
 import { getUnifiedActivity } from "@/statix/lib/activity-feed";
-import { requireAdminOrRedirect } from "@/statix/lib/session";
+import { requirePermissionOrRedirect } from "@/statix/lib/session";
+import { P } from "@/statix/types/permissions";
 
 export default async function MonitorPage() {
-  await requireAdminOrRedirect();
+  await requirePermissionOrRedirect(P.VIEW_MONITOR);
 
   const [
     systemStatus,

@@ -36,7 +36,10 @@ export function useContent({ collectionSlug, id }: UseContentOptions) {
         body: JSON.stringify(data),
       });
 
-      if (!res.ok) throw new Error("Failed to save content");
+      if (!res.ok) {
+        const body = await res.json().catch(() => ({})) as { error?: string };
+        throw new Error(body.error ?? "Failed to save content");
+      }
 
       return res.json();
     },
@@ -45,9 +48,9 @@ export function useContent({ collectionSlug, id }: UseContentOptions) {
       queryClient.invalidateQueries({ queryKey: ["content", collectionSlug] }); // prefix match
       // If it was new, we might want to redirect or update the URL, but that's handled in the component usually
     },
-    onError: (error) => {
-      console.error("Save error:", error);
-      toast.error("Failed to save content");
+    onError: (err: Error) => {
+      console.error("Save error:", err);
+      toast.error("Save failed", { description: err.message });
     },
   });
 

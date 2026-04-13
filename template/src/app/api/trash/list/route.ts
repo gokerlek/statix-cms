@@ -3,11 +3,12 @@ import { NextResponse } from "next/server";
 import { handleApiError } from "@/statix/lib/api-response";
 import { getGitHubCMS } from "@/statix/lib/github-cms";
 import { listR2Trash } from "@/statix/lib/r2";
-import { requireAdmin } from "@/statix/lib/session";
+import { requirePermission } from "@/statix/lib/session";
+import { P } from "@/statix/types/permissions";
 
 export async function GET() {
   try {
-    await requireAdmin();
+    await requirePermission(P.MANAGE_TRASH);
 
     const github = getGitHubCMS();
 

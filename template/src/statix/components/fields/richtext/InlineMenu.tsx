@@ -23,8 +23,11 @@ export function RichTextInlineMenu() {
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const cmds = editor.commands as any;
-  const state = editor.view.state;
-  const markActive = (name: string) => isMarkActive(state, name);
+  const state = editor.view?.state;
+  if (!state) return null;
+  const markActive = (name: string) => {
+    try { return isMarkActive(state, name); } catch { return false; }
+  };
 
   // expected: editor state guard
   const nodeActive = (nodeName: string, attrs?: Record<string, unknown>) => {

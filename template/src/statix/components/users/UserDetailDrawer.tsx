@@ -21,6 +21,7 @@ interface UserDetailDrawerProps {
   open: boolean;
   onClose: () => void;
   isSelf: boolean;
+  currentUserRole: string | null;
 }
 
 export function UserDetailDrawer({
@@ -28,6 +29,7 @@ export function UserDetailDrawer({
   open,
   onClose,
   isSelf,
+  currentUserRole,
 }: UserDetailDrawerProps) {
   const { resetUser } = useUserDetailStore();
 
@@ -56,7 +58,7 @@ export function UserDetailDrawer({
 
           {/* Role — non-self only */}
           {!isSelf && (
-            <UserRoleSection user={user} anyLoading={false} />
+            <UserRoleSection user={user} anyLoading={false} currentUserRole={currentUserRole} />
           )}
 
           {/* Ban / Unban — non-self only */}

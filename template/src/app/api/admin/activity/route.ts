@@ -1,14 +1,15 @@
 import { NextRequest, NextResponse } from "next/server";
 
 import { handleApiError } from "@/statix/lib/api-response";
-import { requireAdmin } from "@/statix/lib/session";
+import { requirePermission } from "@/statix/lib/session";
 import { getUnifiedActivity } from "@/statix/lib/activity-feed";
+import { P } from "@/statix/types/permissions";
 
 export const runtime = "nodejs";
 
 export async function GET(request: NextRequest) {
   try {
-    await requireAdmin();
+    await requirePermission(P.VIEW_MONITOR);
 
     const cursor = request.nextUrl.searchParams.get("cursor") ?? undefined;
     const limit = Math.min(

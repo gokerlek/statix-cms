@@ -1,11 +1,12 @@
 import { NextResponse } from "next/server";
 
 import { getMediaStats } from "@/statix/lib/dashboard-data";
-import { requireAdmin } from "@/statix/lib/session";
+import { requirePermission } from "@/statix/lib/session";
+import { P } from "@/statix/types/permissions";
 
 export async function GET() {
   try {
-    await requireAdmin();
+    await requirePermission(P.MANAGE_MEDIA);
 
     const stats = await getMediaStats();
 

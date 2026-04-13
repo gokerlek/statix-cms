@@ -5,7 +5,7 @@ import { headers } from "next/headers";
 import { and, eq, isNull } from "drizzle-orm";
 
 import { db } from "@/statix/lib/db";
-import { userInvites } from "@/statix/db/schema";
+import { userInvites, user } from "@/statix/db/schema";
 import { auth } from "@/statix/lib/auth";
 import { writeAudit } from "@/statix/lib/audit";
 import { checkRateLimit } from "@/statix/lib/rate-limit";
@@ -96,15 +96,20 @@ export default async function AcceptInvitePage({
 
     // Create user — name defaults to email prefix; can be updated from the drawer later
     const defaultName = freshInvite.email.split("@")[0];
-    const password = crypto.randomUUID();
-    await auth.api.createUser({
-      headers: reqHeaders,
-      body: {
-        email: freshInvite.email,
-        name: defaultName,
-        password,
-        role: freshInvite.role as "user" | "admin",
-      },
+    const newUserId = crypto.randomUUID();
+    // Set default permissions based on invited role
+    const { SYSTEM_ROLES, DEFAULT_ROLE_PERMISSIONS } = await import("@/statix/types/permissions");
+    const roleLabel = freshInvite.role === "admin" ? SYSTEM_ROLES.ADMIN : SYSTEM_ROLES.EDITOR;
+    const defaultPerms = DEFAULT_ROLE_PERMISSIONS[roleLabel];
+    await db.insert(user).values({
+      id: newUserId,
+      email: freshInvite.email,
+      name: defaultName,
+      emailVerified: true,
+      role: freshInvite.role, // legacy label
+      permissions: JSON.stringify(defaultPerms),
+      createdAt: new Date(),
+      updatedAt: new Date(),
     });
 
     // Send OTP for immediate sign-in

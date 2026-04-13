@@ -13,9 +13,6 @@ interface UserDetailStoreState {
   // Name inline edit
   editingName: boolean;
   nameValue: string;
-  // Role staged change
-  pendingRole: "admin" | "user";
-  demoteConfirmOpen: boolean;
   // Ban form visibility
   banFormOpen: boolean;
   // Delete dialog
@@ -27,8 +24,6 @@ interface UserDetailStoreActions {
   setCurrentImage: (url: string | null) => void;
   setEditingName: (v: boolean) => void;
   setNameValue: (v: string) => void;
-  setPendingRole: (role: "admin" | "user") => void;
-  setDemoteConfirm: (v: boolean) => void;
   setBanFormOpen: (v: boolean) => void;
   setDeleteDialog: (v: boolean) => void;
 }
@@ -41,8 +36,6 @@ const useUserDetailStoreBase = create<UserDetailStore>()(
     currentImage: null,
     editingName: false,
     nameValue: "",
-    pendingRole: "user",
-    demoteConfirmOpen: false,
     banFormOpen: false,
     deleteDialogOpen: false,
 
@@ -52,8 +45,6 @@ const useUserDetailStoreBase = create<UserDetailStore>()(
         state.currentImage = user.image;
         state.editingName = false;
         state.nameValue = user.name ?? "";
-        state.pendingRole = user.role ?? "user";
-        state.demoteConfirmOpen = false;
         state.banFormOpen = false;
         state.deleteDialogOpen = false;
       }),
@@ -68,14 +59,6 @@ const useUserDetailStoreBase = create<UserDetailStore>()(
     setNameValue: (v) =>
       set((state) => {
         state.nameValue = v;
-      }),
-    setPendingRole: (role) =>
-      set((state) => {
-        state.pendingRole = role;
-      }),
-    setDemoteConfirm: (v) =>
-      set((state) => {
-        state.demoteConfirmOpen = v;
       }),
     setBanFormOpen: (v) =>
       set((state) => {

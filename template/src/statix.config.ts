@@ -1,4 +1,5 @@
 import { StatixConfig } from "@/statix/types";
+import type { RolePermissions } from "@/statix/types/permissions";
 
 export const statixConfig: StatixConfig = {
   github: {
@@ -11,6 +12,28 @@ export const statixConfig: StatixConfig = {
     locales: ["en", "tr"],
     defaultLocale: "en",
   },
+  // Custom role presets (shown alongside Admin/Editor in user drawer)
+  roles: [
+    {
+      name: "Translator",
+      description: "Can view and edit content for translation purposes",
+      permissions: {
+        canManageUsers: false,
+        canViewMonitor: false,
+        canManageMedia: false,
+        canManageTrash: false,
+        collections: {
+          "*": {
+            canView: true,
+            canCreate: false,
+            canEdit: true,
+            canDelete: false,
+            canPublish: false,
+          },
+        },
+      } satisfies RolePermissions,
+    },
+  ],
   collections: [
     // ═══════════════════════════════════════════════════════════
     // SINGLETONS - Single pages with unique content

@@ -5,11 +5,12 @@ import { handleApiError } from "@/statix/lib/api-response";
 import { writeAudit, getIp } from "@/statix/lib/audit";
 import { getGitHubCMS } from "@/statix/lib/github-cms";
 import { extractR2Key, getPublicUrl, moveR2 } from "@/statix/lib/r2";
-import { requireAdmin } from "@/statix/lib/session";
+import { requirePermission } from "@/statix/lib/session";
+import { P } from "@/statix/types/permissions";
 
 export async function POST(request: NextRequest) {
   try {
-    const session = await requireAdmin();
+    const { session } = await requirePermission(P.MANAGE_MEDIA);
 
     const body = await request.json();
     const parsed = mediaMoveSchema.safeParse(body);

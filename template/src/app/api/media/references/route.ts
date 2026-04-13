@@ -1,11 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 
-import { requireAdmin } from "@/statix/lib/session";
+import { requirePermission } from "@/statix/lib/session";
 import { getMediaReferences } from "@/statix/lib/media-utils";
+import { P } from "@/statix/types/permissions";
 
 export async function GET(request: NextRequest) {
   try {
-    await requireAdmin();
+    await requirePermission(P.MANAGE_MEDIA);
 
     const searchParams = request.nextUrl.searchParams;
     const filename = searchParams.get("filename");

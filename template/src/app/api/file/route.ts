@@ -4,12 +4,13 @@ import { fileDeleteSchema } from "@/statix/lib/api-schemas";
 import { handleApiError } from "@/statix/lib/api-response";
 import { getMaxUploadSize, sanitizeFilename, validateFileUpload } from "@/statix/lib/file-validation";
 import { deleteFromR2, uploadToR2 } from "@/statix/lib/r2";
-import { requireAdmin } from "@/statix/lib/session";
+import { requirePermission } from "@/statix/lib/session";
 import { formatFileSize } from "@/statix/lib/utils";
+import { P } from "@/statix/types/permissions";
 
 export async function POST(request: NextRequest) {
   try {
-    await requireAdmin();
+    await requirePermission(P.MANAGE_MEDIA);
 
     const formData = await request.formData();
     const file = formData.get("file") as File;
@@ -48,7 +49,7 @@ export async function POST(request: NextRequest) {
 
 export async function DELETE(request: NextRequest) {
   try {
-    await requireAdmin();
+    await requirePermission(P.MANAGE_MEDIA);
 
     const body = await request.json();
     const parsed = fileDeleteSchema.safeParse(body);

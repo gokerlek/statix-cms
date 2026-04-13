@@ -5,11 +5,12 @@ import { handleApiError } from "@/statix/lib/api-response";
 import { writeAudit, getIp, cleanupOldAuditLogs } from "@/statix/lib/audit";
 import { getGitHubCMS } from "@/statix/lib/github-cms";
 import { deleteFromR2 } from "@/statix/lib/r2";
-import { requireAdmin } from "@/statix/lib/session";
+import { requirePermission } from "@/statix/lib/session";
+import { P } from "@/statix/types/permissions";
 
 export async function POST(request: NextRequest) {
   try {
-    const session = await requireAdmin();
+    const { session } = await requirePermission(P.MANAGE_TRASH);
 
     const body = await request.json();
     const parsed = trashActionSchema.safeParse(body);

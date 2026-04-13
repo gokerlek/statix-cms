@@ -4,11 +4,12 @@ import { NextRequest, NextResponse } from "next/server";
 import { auditLog } from "@/statix/db/schema";
 import { handleApiError } from "@/statix/lib/api-response";
 import { db } from "@/statix/lib/db";
-import { requireAdmin } from "@/statix/lib/session";
+import { requirePermission } from "@/statix/lib/session";
+import { P } from "@/statix/types/permissions";
 
 export async function GET(request: NextRequest) {
   try {
-    await requireAdmin();
+    await requirePermission(P.VIEW_MONITOR);
 
     const { searchParams } = new URL(request.url);
     const limit = Math.min(Number(searchParams.get("limit") ?? "50"), 200);

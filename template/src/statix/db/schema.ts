@@ -1,5 +1,6 @@
 import { index, integer, sqliteTable, text } from "drizzle-orm/sqlite-core";
 
+// ─── Users ───────────────────────────────────────────────────────────────────
 export const user = sqliteTable("user", {
   id: text("id").primaryKey(),
   name: text("name").notNull(),
@@ -8,10 +9,11 @@ export const user = sqliteTable("user", {
   image: text("image"),
   createdAt: integer("createdAt", { mode: "timestamp" }).notNull(),
   updatedAt: integer("updatedAt", { mode: "timestamp" }).notNull(),
-  role: text("role"),
+  role: text("role"), // legacy label: "owner" | "admin" | "editor"
   banned: integer("banned", { mode: "boolean" }),
   banReason: text("banReason"),
   banExpires: integer("banExpires", { mode: "timestamp" }),
+  permissions: text("permissions"), // JSON string (RolePermissions) - THE authority
 });
 
 export const session = sqliteTable("session", {
@@ -77,7 +79,7 @@ export const userInvites = sqliteTable("user_invite", {
   id: text("id").primaryKey(),
   email: text("email").notNull(),
   tokenHash: text("token_hash").notNull().unique(),
-  role: text("role").notNull().default("user"),
+  role: text("role").notNull().default("editor"), // legacy label for invited user
   invitedBy: text("invited_by").notNull(),
   expiresAt: integer("expires_at", { mode: "timestamp" }).notNull(),
   usedAt: integer("used_at", { mode: "timestamp" }),

@@ -7,11 +7,12 @@ import { writeAudit, getIp } from "@/statix/lib/audit";
 import { ROUTES } from "@/statix/lib/constants";
 import { getGitHubCMS } from "@/statix/lib/github-cms";
 import { restoreR2 } from "@/statix/lib/r2";
-import { requireAdmin } from "@/statix/lib/session";
+import { requirePermission } from "@/statix/lib/session";
+import { P } from "@/statix/types/permissions";
 
 export async function POST(request: NextRequest) {
   try {
-    const session = await requireAdmin();
+    const { session } = await requirePermission(P.MANAGE_TRASH);
 
     const body = await request.json();
     const parsed = trashActionSchema.safeParse(body);

@@ -135,6 +135,16 @@ export interface StatixConfig {
     defaultLocale: string;
   };
   collections: Collection[];
+  /** Custom role presets shown in user drawer alongside Admin/Editor */
+  roles?: RolePreset[];
+}
+
+/** Custom role preset defined in statix.config.ts */
+export interface RolePreset {
+  /** Display name, e.g. "Translator", "Reviewer" */
+  name: string;
+  description?: string;
+  permissions: import("./permissions").RolePermissions;
 }
 
 // Block data structure

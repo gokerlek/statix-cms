@@ -38,8 +38,11 @@ export function RichTextToolbar({
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const cmds = editor.commands as any;
-  const state = editor.view.state;
-  const markActive = (markName: string) => isMarkActive(state, markName);
+  const state = editor.view?.state;
+  if (!state) return null;
+  const markActive = (markName: string) => {
+    try { return isMarkActive(state, markName); } catch { return false; }
+  };
 
   // expected: editor state guard — ProseMirror throws on invalid selection state
   const nodeActive = (nodeName: string, attrs?: Record<string, unknown>) => {

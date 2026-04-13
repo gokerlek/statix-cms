@@ -2,11 +2,12 @@ import { revalidatePath } from "next/cache";
 import { NextRequest, NextResponse } from "next/server";
 
 import { CONTENT_STATUSES } from "@/statix/lib/content-status";
-import { requireAdmin } from "@/statix/lib/session";
+import { requireCollectionPermission } from "@/statix/lib/session";
 import { ROUTES } from "@/statix/lib/constants";
 import { getGitHubCMS } from "@/statix/lib/github-cms";
 import { statixConfig } from "@/statix.config";
 import { writeAudit, getIp } from "@/statix/lib/audit";
+import { CP } from "@/statix/types/permissions";
 
 interface RouteContext {
   params: Promise<{ collectionSlug: string; id: string }>;
@@ -14,15 +15,15 @@ interface RouteContext {
 
 export async function POST(request: NextRequest, context: RouteContext) {
   try {
-    let session: Awaited<ReturnType<typeof requireAdmin>>;
+    const { collectionSlug, id } = await context.params;
+
+    let session: Awaited<ReturnType<typeof requireCollectionPermission>>["session"];
     try {
-      session = await requireAdmin();
+      ({ session } = await requireCollectionPermission(collectionSlug, CP.DELETE));
     } catch (e) {
       const msg = e instanceof Error ? e.message : "Forbidden";
       return NextResponse.json({ error: msg }, { status: msg === "Unauthorized" ? 401 : 403 });
     }
-
-    const { collectionSlug, id } = await context.params;
     const collection = statixConfig.collections.find(
       (c) => c.slug === collectionSlug,
     );

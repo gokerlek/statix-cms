@@ -3,11 +3,12 @@ import { NextResponse } from "next/server";
 import { getContentIndex, isMediaOrphaned } from "@/statix/lib/content-index";
 import { handleApiError } from "@/statix/lib/api-response";
 import { listR2Media } from "@/statix/lib/r2";
-import { requireAdmin } from "@/statix/lib/session";
+import { requirePermission } from "@/statix/lib/session";
+import { P } from "@/statix/types/permissions";
 
 export async function GET() {
   try {
-    await requireAdmin();
+    await requirePermission(P.MANAGE_MEDIA);
 
     const [files, { index: contentIndex, ok: contentFetched }] = await Promise.all([
       listR2Media("uploads/"),

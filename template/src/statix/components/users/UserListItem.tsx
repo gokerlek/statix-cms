@@ -50,8 +50,8 @@ export function UserListItem({ user, lastLogin, isSelf, onClick }: UserListItemP
 
         {/* Role + status */}
         <div className="flex items-center gap-2">
-          <Badge variant={user.role === "admin" ? "default" : "secondary"}>
-            {user.role === "admin" ? ui.users.roles.admin : ui.users.roles.user}
+          <Badge variant={user.role === "owner" || user.role === "admin" ? "default" : "secondary"}>
+            {(user.role ?? "editor").charAt(0).toUpperCase() + (user.role ?? "editor").slice(1)}
           </Badge>
           {user.banned ? (
             <span className="text-xs text-destructive font-medium">

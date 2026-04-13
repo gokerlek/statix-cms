@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { resolveStatus } from "@/statix/lib/content-status";
 import { resolveContentTitle } from "@/statix/lib/content-utils";
 import { getGitHubCMS } from "@/statix/lib/github-cms";
-import { requireAdmin } from "@/statix/lib/session";
+import { requireAuthenticated } from "@/statix/lib/session";
 import { statixConfig } from "@/statix.config";
 import { ContentData } from "@/statix/types/content";
 
@@ -14,7 +14,7 @@ export async function GET(
   { params }: { params: Promise<{ slug: string }> },
 ) {
   try {
-    await requireAdmin();
+    await requireAuthenticated();
 
     const { slug } = await params;
     const collection = statixConfig.collections.find((c) => c.slug === slug);

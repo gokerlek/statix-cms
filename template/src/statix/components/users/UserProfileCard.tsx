@@ -56,6 +56,7 @@ export function UserProfileCard({ user }: UserProfileCardProps) {
         open={drawerOpen}
         onClose={() => setDrawerOpen(false)}
         isSelf={true}
+        currentUserRole={user.role ?? null}
       />
     </>
   );

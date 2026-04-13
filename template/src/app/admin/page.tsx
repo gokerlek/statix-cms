@@ -19,7 +19,8 @@ import {
   getSystemStats,
 } from "@/statix/lib/dashboard-data";
 import { getMonitorSummary } from "@/statix/lib/monitor-data";
-import { getSession } from "@/statix/lib/session";
+import { getSession, getUserPermissions } from "@/statix/lib/session";
+import { hasGlobalPermission, hasCollectionPermission, P, CP } from "@/statix/types/permissions";
 
 interface AdminDashboardProps {
   searchParams: Promise<{ error?: string }>;
@@ -35,15 +36,14 @@ export default async function AdminDashboard({ searchParams }: AdminDashboardPro
   const { error } = await searchParams;
   const user = session.user;
 
-
-  const isAdmin = user.role === "admin";
+  const permissions = await getUserPermissions(user.id);
 
   const [collectionStats, localizationStats, , monitorSummary] =
     await Promise.all([
       getCollectionStats(),
       getLocalizationStats(),
       getSystemStats(),
-      isAdmin ? getMonitorSummary() : Promise.resolve(null),
+      hasGlobalPermission(permissions, P.VIEW_MONITOR) ? getMonitorSummary() : Promise.resolve(null),
     ]);
 
   // Opportunistic cleanup — runs on every dashboard load, fire-and-forget
@@ -69,33 +69,37 @@ export default async function AdminDashboard({ searchParams }: AdminDashboardPro
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
         <div className="flex flex-col gap-4">
-          <UserProfileCard user={user as CMSUser} />
+          <UserProfileCard user={user as unknown as CMSUser} />
 
           <div className="flex gap-4  h-full">
-            <TrashCard />
-            {isAdmin && <UsersCard />}
+            {hasGlobalPermission(permissions, P.MANAGE_TRASH) && <TrashCard />}
+            {hasGlobalPermission(permissions, P.MANAGE_USERS) && <UsersCard />}
           </div>
         </div>
 
-        {isAdmin && monitorSummary && (
+        {hasGlobalPermission(permissions, P.VIEW_MONITOR) && monitorSummary && (
           <MonitorSummaryCard summary={monitorSummary} />
         )}
 
-        {regularCollections.length > 0 &&
-          regularCollections.map((collection) => (
+        {regularCollections
+          .filter((c) => hasCollectionPermission(permissions, c.slug, CP.VIEW))
+          .map((collection) => (
             <DashboardCard stat={collection} key={collection.slug} />
           ))}
 
         {/* Singleton Cards */}
-        {singletonCollections.length > 0 &&
-          singletonCollections.map((collection) => (
+        {singletonCollections
+          .filter((c) => hasCollectionPermission(permissions, c.slug, CP.VIEW))
+          .map((collection) => (
             <SingletonDashboardCard stat={collection} key={collection.slug} />
           ))}
       </div>
 
-      <MediaOverview />
+      {hasGlobalPermission(permissions, P.MANAGE_MEDIA) && <MediaOverview />}
 
-      <LocalizationStats stats={localizationStats} />
+      {collectionStats.some((c) => hasCollectionPermission(permissions, c.slug, CP.VIEW)) && (
+        <LocalizationStats stats={localizationStats} />
+      )}
     </div>
   );
 }

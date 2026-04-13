@@ -4,6 +4,7 @@ import { toast } from "sonner";
 import ui from "@/statix/content/ui.json";
 import type { CMSUser } from "@/app/admin/users/page";
 import { QUERY_KEYS } from "@/statix/lib/query-keys";
+import type { RolePermissions } from "@/statix/types/permissions";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -118,20 +119,18 @@ export function useUpdateUserName(userId: string) {
   });
 }
 
-// ─── Role ─────────────────────────────────────────────────────────────────────
+// ─── Permissions ──────────────────────────────────────────────────────────────
 
-export function useSetUserRole(userId: string) {
+export function useSetUserPermissions(userId: string) {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async (role: "admin" | "user") =>
-      userPost({ action: "setRole", userId, role }),
+    mutationFn: (permissions: Partial<RolePermissions>) =>
+      userPost({ action: "setPermissions", userId, permissions }),
     onSuccess: async () => {
-      toast.success(ui.users.toasts.roleUpdated);
+      toast.success("Permissions updated");
       await queryClient.invalidateQueries({ queryKey: QUERY_KEYS.users });
     },
-    onError: () => {
-      toast.error(ui.users.toasts.roleUpdateFailed);
-    },
+    onError: (err: Error) => toast.error("Permission update failed", { description: err.message }),
   });
 }
 

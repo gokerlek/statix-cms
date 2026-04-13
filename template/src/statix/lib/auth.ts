@@ -1,6 +1,6 @@
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
-import { admin, emailOTP } from "better-auth/plugins";
+import { emailOTP } from "better-auth/plugins";
 import { Resend } from "resend";
 import { db } from "./db";
 import * as schema from "@/statix/db/schema";
@@ -11,6 +11,16 @@ const resend = new Resend(env.RESEND_API_KEY);
 
 export const auth = betterAuth({
   database: drizzleAdapter(db, { provider: "sqlite", schema }),
+
+  user: {
+    additionalFields: {
+      role: { type: "string", required: false },
+      banned: { type: "boolean", required: false },
+      banReason: { type: "string", required: false },
+      banExpires: { type: "number", required: false },
+      permissions: { type: "string", required: false },
+    },
+  },
 
   databaseHooks: {
     session: {
@@ -53,7 +63,6 @@ export const auth = betterAuth({
         });
       },
     }),
-    admin(),
   ],
 
   socialProviders: {

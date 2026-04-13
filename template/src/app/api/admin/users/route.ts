@@ -1,5 +1,4 @@
 import { createHash, randomBytes } from "node:crypto";
-import { headers } from "next/headers";
 import { NextRequest, NextResponse } from "next/server";
 import { and, count, eq, isNull, not, sql } from "drizzle-orm";
 import { z } from "zod";
@@ -7,10 +6,23 @@ import { Resend } from "resend";
 
 import { db } from "@/statix/lib/db";
 import { handleApiError } from "@/statix/lib/api-response";
-import { user, userInvites } from "@/statix/db/schema";
+import {
+  user,
+  userInvites,
+  session as sessionTable,
+  account,
+} from "@/statix/db/schema";
 import { writeAudit, getIp } from "@/statix/lib/audit";
-import { auth } from "@/statix/lib/auth";
-import { requireAdmin } from "@/statix/lib/session";
+import { requirePermission, isOwner, getUserPermissions } from "@/statix/lib/session";
+import {
+  hasGlobalPermission,
+  P,
+  GLOBAL_PERMISSION_KEYS,
+  SYSTEM_ROLES,
+  DEFAULT_ROLE_PERMISSIONS,
+  type RolePermissions,
+} from "@/statix/types/permissions";
+import { statixConfig } from "@/statix.config";
 import { checkRateLimit } from "@/statix/lib/rate-limit";
 import { env } from "@/statix/lib/env";
 
@@ -27,16 +39,49 @@ const banSchema = z.object({
     .optional(),
 });
 
+/** Derive legacy role string from permissions object */
+function deriveRoleLabel(perms: RolePermissions): string {
+  const adminPreset = DEFAULT_ROLE_PERMISSIONS[SYSTEM_ROLES.ADMIN];
+  const editorPreset = DEFAULT_ROLE_PERMISSIONS[SYSTEM_ROLES.EDITOR];
+
+  // Check built-in presets
+  const matchesGlobal = (preset: RolePermissions) =>
+    GLOBAL_PERMISSION_KEYS.every((key) => !!perms[key] === !!preset[key]);
+
+  if (matchesGlobal(adminPreset)) return "admin";
+  if (matchesGlobal(editorPreset)) return "editor";
+
+  // Check config-defined role presets
+  for (const role of statixConfig.roles ?? []) {
+    if (matchesGlobal(role.permissions)) {
+      return role.name.toLowerCase().replace(/\s+/g, "-");
+    }
+  }
+
+  return "custom";
+}
+
 export async function GET() {
   try {
-    await requireAdmin();
+    await requirePermission(P.MANAGE_USERS);
 
-    const result = await auth.api.listUsers({
-      headers: await headers(),
-      query: { limit: 100 },
-    });
+    const users = await db
+      .select({
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+        banned: user.banned,
+        banReason: user.banReason,
+        banExpires: user.banExpires,
+        image: user.image,
+        createdAt: user.createdAt,
+        permissions: user.permissions,
+      })
+      .from(user)
+      .limit(100);
 
-    return NextResponse.json(result);
+    return NextResponse.json({ users });
   } catch (error) {
     return handleApiError(error, "Failed to list users");
   }
@@ -44,11 +89,10 @@ export async function GET() {
 
 export async function POST(request: NextRequest) {
   try {
-    const session = await requireAdmin();
+    const { session } = await requirePermission(P.MANAGE_USERS);
     const body = await request.json();
     const { action, userId, email, role, banReason, banExpiresAt } = body;
 
-    const reqHeaders = await headers();
 
     // Self-mutation guard — block destructive ops on own account, allow profile updates
     const selfAllowed = ["create", "invite", "updateName", "updateAvatar"];
@@ -61,48 +105,15 @@ export async function POST(request: NextRequest) {
     }
 
     switch (action) {
-      case "setRole": {
-        // Last admin guard for demotion
-        if (role !== "admin") {
-          await db.transaction(
-            async (tx) => {
-              const [{ adminCount }] = await tx
-                .select({ adminCount: count() })
-                .from(user)
-                .where(
-                  and(
-                    eq(user.role, "admin"),
-                    not(eq(user.banned, true)),
-                    not(eq(user.id, userId)),
-                  ),
-                );
-              if (adminCount === 0) throw new Error("LastAdmin");
-              await auth.api.setRole({
-                headers: reqHeaders,
-                body: { userId, role },
-              });
-            },
-            { behavior: "immediate" },
-          );
-        } else {
-          await auth.api.setRole({
-            headers: reqHeaders,
-            body: { userId, role },
-          });
-        }
-        writeAudit({
-          userId: session.user.id,
-          userEmail: session.user.email,
-          action: "user.role_change",
-          entityType: "user",
-          entityId: userId,
-          metadata: { role },
-          ipAddress: getIp(request),
-        }).catch(console.error);
-        break;
-      }
-
       case "ban": {
+        // Owner protection
+        if (await isOwner(userId)) {
+          return NextResponse.json(
+            { error: "Owner kullanıcısı banlanamaz." },
+            { status: 403 },
+          );
+        }
+
         const banParsed = banSchema.safeParse({ reason: banReason, expiresAt: banExpiresAt });
         if (!banParsed.success) {
           return NextResponse.json(
@@ -126,16 +137,15 @@ export async function POST(request: NextRequest) {
               );
             if (adminCount === 0) throw new Error("LastAdmin");
 
-            await auth.api.banUser({
-              headers: reqHeaders,
-              body: {
-                userId,
-                ...(banParsed.data.reason ? { banReason: banParsed.data.reason } : {}),
-                ...(banParsed.data.expiresAt
-                  ? { banExpiresAt: new Date(banParsed.data.expiresAt).getTime() }
-                  : {}),
-              },
-            });
+            await tx
+              .update(user)
+              .set({
+                banned: true,
+                banReason: banParsed.data.reason ?? null,
+                banExpires: banParsed.data.expiresAt ? new Date(banParsed.data.expiresAt) : null,
+                updatedAt: new Date(),
+              })
+              .where(eq(user.id, userId));
           },
           { behavior: "immediate" },
         );
@@ -153,10 +163,10 @@ export async function POST(request: NextRequest) {
       }
 
       case "unban": {
-        await auth.api.unbanUser({
-          headers: reqHeaders,
-          body: { userId },
-        });
+        await db
+          .update(user)
+          .set({ banned: false, banReason: null, banExpires: null, updatedAt: new Date() })
+          .where(eq(user.id, userId));
         writeAudit({
           userId: session.user.id,
           userEmail: session.user.email,
@@ -169,6 +179,14 @@ export async function POST(request: NextRequest) {
       }
 
       case "delete": {
+        // Owner protection
+        if (await isOwner(userId)) {
+          return NextResponse.json(
+            { error: "Owner kullanıcısı silinemez." },
+            { status: 403 },
+          );
+        }
+
         // Last admin guard
         await db.transaction(
           async (tx) => {
@@ -185,10 +203,9 @@ export async function POST(request: NextRequest) {
             if (adminCount === 0) throw new Error("LastAdmin");
 
             const targetEmail = email ?? null;
-            await auth.api.removeUser({
-              headers: reqHeaders,
-              body: { userId },
-            });
+            await tx.delete(sessionTable).where(eq(sessionTable.userId, userId));
+            await tx.delete(account).where(eq(account.userId, userId));
+            await tx.delete(user).where(eq(user.id, userId));
             writeAudit({
               userId: session.user.id,
               userEmail: session.user.email,
@@ -209,9 +226,12 @@ export async function POST(request: NextRequest) {
         if (!trimmedName || trimmedName.length < 2 || trimmedName.length > 100) {
           return NextResponse.json({ error: "Geçersiz isim" }, { status: 400 });
         }
-        // Self OR admin can update name
-        if (userId !== session.user.id && session.user.role !== "admin") {
-          return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+        // Self OR user with canManageUsers permission can update name
+        if (userId !== session.user.id) {
+          const permissions = await getUserPermissions(session.user.id);
+          if (!hasGlobalPermission(permissions, P.MANAGE_USERS)) {
+            return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+          }
         }
         await db
           .update(user)
@@ -231,18 +251,30 @@ export async function POST(request: NextRequest) {
 
       case "create": {
         const name = email ? email.split("@")[0] : "user";
-        const password = randomBytes(24).toString("base64url");
-        const newUser = await auth.api.createUser({
-          headers: reqHeaders,
-          body: { email, name, password, role: role ?? "user" },
+        const newId = crypto.randomUUID();
+        const roleLabel = role ?? "editor";
+        const defaultPerms = DEFAULT_ROLE_PERMISSIONS[
+          roleLabel === "admin" ? SYSTEM_ROLES.ADMIN : SYSTEM_ROLES.EDITOR
+        ];
+
+        await db.insert(user).values({
+          id: newId,
+          email,
+          name,
+          emailVerified: false,
+          role: roleLabel,
+          permissions: JSON.stringify(defaultPerms),
+          createdAt: new Date(),
+          updatedAt: new Date(),
         });
+
         writeAudit({
           userId: session.user.id,
           userEmail: session.user.email,
           action: "user.create",
           entityType: "user",
-          entityId: (newUser as { user?: { id?: string } })?.user?.id ?? userId,
-          metadata: { email, role: role ?? "user" },
+          entityId: newId,
+          metadata: { email, role: roleLabel },
           ipAddress: getIp(request),
         }).catch(console.error);
         break;
@@ -301,7 +333,7 @@ export async function POST(request: NextRequest) {
           id: crypto.randomUUID(),
           email: normalizedEmail,
           tokenHash,
-          role: role ?? "user",
+          role: role ?? "editor",
           invitedBy: session.user.id,
           expiresAt,
           createdAt: new Date(),
@@ -321,7 +353,105 @@ export async function POST(request: NextRequest) {
           userEmail: session.user.email,
           action: "user.invite",
           entityType: "user",
-          metadata: { email: normalizedEmail, role: role ?? "user" },
+          metadata: { email: normalizedEmail, role: role ?? "editor" },
+          ipAddress: getIp(request),
+        }).catch(console.error);
+        break;
+      }
+
+      case "setPermissions": {
+        // Owner protection
+        if (await isOwner(userId)) {
+          return NextResponse.json(
+            { error: "Owner kullanıcısının izinleri değiştirilemez." },
+            { status: 403 },
+          );
+        }
+
+        const perms = body.permissions as RolePermissions;
+        if (!perms || typeof perms !== "object") {
+          return NextResponse.json({ error: "Invalid permissions" }, { status: 400 });
+        }
+
+        // Derive legacy role label from permissions
+        const roleLabel = deriveRoleLabel(perms);
+
+        await db
+          .update(user)
+          .set({
+            permissions: JSON.stringify(perms),
+            role: roleLabel,
+            updatedAt: new Date(),
+          })
+          .where(eq(user.id, userId));
+
+        writeAudit({
+          userId: session.user.id,
+          userEmail: session.user.email,
+          action: "user.permissions_change",
+          entityType: "user",
+          entityId: userId,
+          metadata: { permissions: perms, role: roleLabel },
+          ipAddress: getIp(request),
+        }).catch(console.error);
+        break;
+      }
+
+      case "transferOwnership": {
+        // Only owner can transfer
+        if (!(await isOwner(session.user.id))) {
+          return NextResponse.json(
+            { error: "Sadece owner sahipliği devredebilir" },
+            { status: 403 },
+          );
+        }
+
+        if (!userId) {
+          return NextResponse.json({ error: "userId zorunludur" }, { status: 400 });
+        }
+
+        if (userId === session.user.id) {
+          return NextResponse.json(
+            { error: "Sahipliği kendinize devredemezsiniz" },
+            { status: 400 },
+          );
+        }
+
+        const ownerPerms = DEFAULT_ROLE_PERMISSIONS[SYSTEM_ROLES.OWNER];
+        const adminPerms = DEFAULT_ROLE_PERMISSIONS[SYSTEM_ROLES.ADMIN];
+
+        await db.transaction(
+          async (tx) => {
+            // Set target user to owner
+            await tx
+              .update(user)
+              .set({
+                role: SYSTEM_ROLES.OWNER,
+                permissions: JSON.stringify(ownerPerms),
+                updatedAt: new Date(),
+              })
+              .where(eq(user.id, userId));
+
+            // Demote current user to admin
+            await tx
+              .update(user)
+              .set({
+                role: SYSTEM_ROLES.ADMIN,
+                permissions: JSON.stringify(adminPerms),
+                updatedAt: new Date(),
+              })
+              .where(eq(user.id, session.user.id));
+          },
+          { behavior: "immediate" },
+        );
+
+        writeAudit({
+          userId: session.user.id,
+          userEmail: session.user.email,
+          action: "role.ownership_transferred",
+          entityType: "user",
+          entityId: userId,
+          metadata: { fromUserId: session.user.id, toUserId: userId },
           ipAddress: getIp(request),
         }).catch(console.error);
         break;

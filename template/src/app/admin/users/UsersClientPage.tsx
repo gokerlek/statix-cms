@@ -27,6 +27,8 @@ export function UsersClientPage({
   currentUserId,
 }: UsersClientPageProps) {
   const router = useRouter();
+  const currentUserRole =
+    initialUsers.find((u) => u.id === currentUserId)?.role ?? null;
   const searchParams = useSearchParams();
   const { data: users = [] } = useUsers(initialUsers);
 
@@ -116,6 +118,7 @@ export function UsersClientPage({
           open={drawerOpen}
           onClose={closeDrawer}
           isSelf={drawerUser.id === currentUserId}
+          currentUserRole={currentUserRole}
         />
       )}
     </>

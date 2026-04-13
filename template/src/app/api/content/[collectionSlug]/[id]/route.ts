@@ -4,12 +4,13 @@ import { NextRequest, NextResponse } from "next/server";
 import { contentSaveSchema } from "@/statix/lib/api-schemas";
 import { handleApiError } from "@/statix/lib/api-response";
 import { CONTENT_STATUSES, DEFAULT_STATUS, resolveStatus } from "@/statix/lib/content-status";
-import { requireAdmin } from "@/statix/lib/session";
+import { requireCollectionPermission, getUserPermissions } from "@/statix/lib/session";
 import { ROUTES } from "@/statix/lib/constants";
 import { getGitHubCMS } from "@/statix/lib/github-cms";
 import { slugify } from "@/statix/lib/utils";
 import { statixConfig } from "@/statix.config";
 import { writeAudit, getIp } from "@/statix/lib/audit";
+import { CP, hasCollectionPermission } from "@/statix/types/permissions";
 
 interface RouteContext {
   params: Promise<{ collectionSlug: string; id: string }>;
@@ -17,9 +18,8 @@ interface RouteContext {
 
 export async function GET(request: NextRequest, context: RouteContext) {
   try {
-    await requireAdmin();
-
     const { collectionSlug, id } = await context.params;
+    await requireCollectionPermission(collectionSlug, CP.VIEW);
     const collection = statixConfig.collections.find(
       (c) => c.slug === collectionSlug,
     );
@@ -78,9 +78,8 @@ export async function GET(request: NextRequest, context: RouteContext) {
 
 export async function POST(request: NextRequest, context: RouteContext) {
   try {
-    const session = await requireAdmin();
-
     const { collectionSlug, id } = await context.params;
+    const { session } = await requireCollectionPermission(collectionSlug, CP.EDIT);
     const collection = statixConfig.collections.find(
       (c) => c.slug === collectionSlug,
     );
@@ -101,6 +100,8 @@ export async function POST(request: NextRequest, context: RouteContext) {
       );
     }
     const data = parsed.data as Record<string, unknown>;
+
+    const newStatus = (data as { status?: string }).status;
 
     const github = getGitHubCMS();
 
@@ -151,6 +152,36 @@ export async function POST(request: NextRequest, context: RouteContext) {
             break;
           }
         }
+      }
+    }
+
+    // Check publish permission — only when setting status TO published
+    if (newStatus === "published") {
+      const userPerms = await getUserPermissions(session.user.id);
+      if (!hasCollectionPermission(userPerms, collectionSlug, CP.PUBLISH)) {
+        return NextResponse.json(
+          { error: "You don't have permission to publish in this collection" },
+          { status: 403 },
+        );
+      }
+    }
+
+    // Check publish permission — block unpublishing (changing published content to another status)
+    if (newStatus && newStatus !== "published" && oldPath) {
+      const existingFile = await github.getFile(oldPath);
+      if (existingFile) {
+        try {
+          const existing = JSON.parse(existingFile.content as string) as { status?: string; _meta?: { status?: string } };
+          if (existing.status === "published" || existing._meta?.status === "published") {
+            const userPerms = await getUserPermissions(session.user.id);
+            if (!hasCollectionPermission(userPerms, collectionSlug, CP.PUBLISH)) {
+              return NextResponse.json(
+                { error: "You don't have permission to change the status of published content" },
+                { status: 403 },
+              );
+            }
+          }
+        } catch { /* not JSON, skip */ }
       }
     }
 

@@ -2,7 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 
 import { env } from "@/statix/lib/env";
 import { handleApiError } from "@/statix/lib/api-response";
-import { requireAdmin } from "@/statix/lib/session";
+import { requirePermission } from "@/statix/lib/session";
+import { P } from "@/statix/types/permissions";
 
 interface RouteContext {
   params: Promise<{ filename: string }>;
@@ -11,7 +12,7 @@ interface RouteContext {
 // R2 trash'teki medyayı R2 URL'e yönlendir
 export async function GET(_request: NextRequest, context: RouteContext) {
   try {
-    await requireAdmin();
+    await requirePermission(P.MANAGE_TRASH);
 
     const { filename } = await context.params;
 

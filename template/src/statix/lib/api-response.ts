@@ -5,14 +5,13 @@ import { NextResponse } from "next/server";
  * Extracts auth errors (Unauthorized/Forbidden) and returns proper status codes.
  */
 export function handleApiError(error: unknown, fallbackMessage: string) {
-  if (
-    error instanceof Error &&
-    (error.message === "Unauthorized" || error.message === "Forbidden")
-  ) {
-    return NextResponse.json(
-      { error: error.message },
-      { status: error.message === "Unauthorized" ? 401 : 403 },
-    );
+  if (error instanceof Error) {
+    if (error.message === "Unauthorized") {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+    if (error.message === "Forbidden" || error.message.startsWith("Forbidden:")) {
+      return NextResponse.json({ error: error.message }, { status: 403 });
+    }
   }
 
   console.error(fallbackMessage, error);
