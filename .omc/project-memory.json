@@ -69,8 +69,8 @@
   "hotPaths": [
     {
       "path": "template/src/app/api/content/[collectionSlug]/[id]/route.ts",
-      "accessCount": 15,
-      "lastAccessed": 1776105103235,
+      "accessCount": 19,
+      "lastAccessed": 1776118285029,
       "type": "file"
     },
     {
@@ -98,10 +98,22 @@
       "type": "file"
     },
     {
+      "path": "template/src/statix/lib/dashboard-data.ts",
+      "accessCount": 7,
+      "lastAccessed": 1776118841646,
+      "type": "directory"
+    },
+    {
       "path": "template/src/statix/lib/session.ts",
       "accessCount": 6,
       "lastAccessed": 1776101404360,
       "type": "file"
+    },
+    {
+      "path": "template/src/statix/hooks/use-editor-form.ts",
+      "accessCount": 6,
+      "lastAccessed": 1776118353116,
+      "type": "directory"
     },
     {
       "path": "template/src/app/admin",
@@ -134,6 +146,12 @@
       "type": "file"
     },
     {
+      "path": "template/src/app/admin/[collectionSlug]/page.tsx",
+      "accessCount": 4,
+      "lastAccessed": 1776118829528,
+      "type": "file"
+    },
+    {
       "path": "template/src/statix/components/users/UserListItem.tsx",
       "accessCount": 3,
       "lastAccessed": 1776086312204,
@@ -155,6 +173,12 @@
       "path": "template/src/statix/hooks/use-content.ts",
       "accessCount": 3,
       "lastAccessed": 1776105119652,
+      "type": "file"
+    },
+    {
+      "path": "template/src/app/admin/[collectionSlug]/[id]/page.tsx",
+      "accessCount": 3,
+      "lastAccessed": 1776118093316,
       "type": "file"
     },
     {
@@ -182,22 +206,22 @@
       "type": "file"
     },
     {
-      "path": "template/src/statix/lib/dashboard-data.ts",
+      "path": "template/src/statix/lib/github-cms.ts",
       "accessCount": 2,
-      "lastAccessed": 1776105151042,
+      "lastAccessed": 1776118304739,
       "type": "directory"
     },
     {
-      "path": "template/src/app/admin/[collectionSlug]/page.tsx",
-      "accessCount": 1,
-      "lastAccessed": 1776087310294,
-      "type": "file"
+      "path": "template/src/statix/components/dashboard/SingletonDashboardCard.tsx",
+      "accessCount": 2,
+      "lastAccessed": 1776118378979,
+      "type": "directory"
     },
     {
-      "path": "template/src/app/admin/[collectionSlug]/[id]/page.tsx",
-      "accessCount": 1,
-      "lastAccessed": 1776087311138,
-      "type": "file"
+      "path": "template/src/statix/lib/constants.ts",
+      "accessCount": 2,
+      "lastAccessed": 1776118780454,
+      "type": "directory"
     },
     {
       "path": "template/src/app/admin/trash/page.tsx",
@@ -240,12 +264,6 @@
       "accessCount": 1,
       "lastAccessed": 1776105137186,
       "type": "file"
-    },
-    {
-      "path": "template/src/statix/components/dashboard/SingletonDashboardCard.tsx",
-      "accessCount": 1,
-      "lastAccessed": 1776105144055,
-      "type": "directory"
     }
   ],
   "userDirectives": []

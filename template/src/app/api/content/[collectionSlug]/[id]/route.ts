@@ -155,33 +155,41 @@ export async function POST(request: NextRequest, context: RouteContext) {
       }
     }
 
-    // Check publish permission — only when setting status TO published
-    if (newStatus === "published") {
-      const userPerms = await getUserPermissions(session.user.id);
-      if (!hasCollectionPermission(userPerms, collectionSlug, CP.PUBLISH)) {
-        return NextResponse.json(
-          { error: "You don't have permission to publish in this collection" },
-          { status: 403 },
-        );
-      }
-    }
-
-    // Check publish permission — block unpublishing (changing published content to another status)
-    if (newStatus && newStatus !== "published" && oldPath) {
-      const existingFile = await github.getFile(oldPath);
-      if (existingFile) {
-        try {
+    // ─── Publish permission check ─────────────────────────────────────────
+    // Only enforced when status CHANGES to/from published.
+    // Editing content without changing status does NOT require canPublish.
+    if (newStatus && oldPath) {
+      let oldStatus: string | undefined;
+      try {
+        const existingFile = await github.getFile(oldPath);
+        if (existingFile) {
           const existing = JSON.parse(existingFile.content as string) as { status?: string; _meta?: { status?: string } };
-          if (existing.status === "published" || existing._meta?.status === "published") {
-            const userPerms = await getUserPermissions(session.user.id);
-            if (!hasCollectionPermission(userPerms, collectionSlug, CP.PUBLISH)) {
-              return NextResponse.json(
-                { error: "You don't have permission to change the status of published content" },
-                { status: 403 },
-              );
-            }
+          oldStatus = existing.status ?? existing._meta?.status;
+        }
+      } catch { /* not JSON, skip */ }
+
+      const statusChanged = oldStatus !== newStatus;
+
+      if (statusChanged) {
+        const userPerms = await getUserPermissions(session.user.id);
+        const canPublish = hasCollectionPermission(userPerms, collectionSlug, CP.PUBLISH);
+
+        if (!canPublish) {
+          // Block: draft/archived → published
+          if (newStatus === "published") {
+            return NextResponse.json(
+              { error: "You don't have permission to publish in this collection" },
+              { status: 403 },
+            );
           }
-        } catch { /* not JSON, skip */ }
+          // Block: published → draft/archived (unpublish)
+          if (oldStatus === "published") {
+            return NextResponse.json(
+              { error: "You don't have permission to unpublish content in this collection" },
+              { status: 403 },
+            );
+          }
+        }
       }
     }
 

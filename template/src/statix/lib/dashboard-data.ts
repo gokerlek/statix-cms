@@ -26,31 +26,41 @@ export async function getCollectionStats() {
       const statusBreakdown: Record<string, number> = {};
       let singletonContent: Record<string, unknown> | null = null;
 
-      if (collection.type === "singleton" && files.length > 0) {
-        // For singletons, we want the content of the first (and only) file
-        const file = await github.getFile(files[0].path);
+      if (collection.type === "singleton") {
+        // Singletons always use index.json as their canonical file
+        const singletonPath = `${collection.path}/index.json`;
+        const file = await github.getFile(singletonPath);
 
         if (file && file.content && typeof file.content === "object") {
           singletonContent = file.content as Record<string, unknown>;
         }
       }
 
-      // Always read file contents to check actual status
-      const fileContents = await Promise.all(
-        files.map((f) => github.getFile(f.path)),
-      );
-
-      fileContents.forEach((file) => {
-        if (file && file.content && typeof file.content === "object") {
+      // Read file contents to check actual status
+      if (collection.type === "singleton") {
+        // Singleton: only count the canonical index.json
+        if (singletonContent) {
           const status = resolveStatus(
-            (file.content as { status?: string }).status,
+            (singletonContent as { status?: string }).status,
           );
-          const formattedStatus = formatStatus(status);
-
-          statusBreakdown[formattedStatus] =
-            (statusBreakdown[formattedStatus] || 0) + 1;
+          statusBreakdown[formatStatus(status)] = 1;
         }
-      });
+      } else {
+        // Collection: count all files
+        const fileContents = await Promise.all(
+          files.map((f) => github.getFile(f.path)),
+        );
+
+        fileContents.forEach((file) => {
+          if (file && file.content && typeof file.content === "object") {
+            const status = resolveStatus(
+              (file.content as { status?: string }).status,
+            );
+            statusBreakdown[formatStatus(status)] =
+              (statusBreakdown[formatStatus(status)] || 0) + 1;
+          }
+        });
+      }
 
       return {
         ...collection,
