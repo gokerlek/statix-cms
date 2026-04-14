@@ -31,7 +31,7 @@ export function CMSIconCard({
   const card = (
     <Card
       className={cn(
-        "hover:bg-muted/50 transition-colors cursor-pointer h-full items-center justify-center relative flex-1",
+        "hover:bg-muted/50 transition-colors cursor-pointer h-full items-center justify-center relative",
         className,
       )}
     >
@@ -78,7 +78,7 @@ export function CMSIconCard({
   if (tooltip) {
     return (
       <Tooltip>
-        <TooltipTrigger>{card}</TooltipTrigger>
+        <TooltipTrigger className='grow'>{card}</TooltipTrigger>
         <TooltipContent>
           <p>{tooltip}</p>
         </TooltipContent>
