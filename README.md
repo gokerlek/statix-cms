@@ -1,120 +1,772 @@
 # Statix CMS
 
-A modern, Git-based headless CMS built with Next.js 15, React 19, and Tailwind CSS 4.
+A modern, Git-based headless CMS built with Next.js, React 19, and Tailwind CSS 4.
 
 [![npm version](https://badge.fury.io/js/create-statix-cms.svg)](https://www.npmjs.com/package/create-statix-cms)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-## ✨ Features
+---
+
+## Table of Contents
+
+- [What is Statix CMS?](#what-is-statix-cms)
+- [How It Works](#how-it-works)
+- [Features](#features)
+- [Quick Start](#quick-start)
+- [Prerequisites](#prerequisites)
+- [Environment Variables](#environment-variables)
+- [Configuration](#configuration)
+- [Content Modeling](#content-modeling)
+- [Roles & Permissions](#roles--permissions)
+- [Admin Panel](#admin-panel)
+- [Project Structure](#project-structure)
+- [API Reference](#api-reference)
+- [Tech Stack](#tech-stack)
+- [Deployment](#deployment)
+- [Scripts](#scripts)
+- [Contributing](#contributing)
+- [License](#license)
+
+---
+
+## What is Statix CMS?
+
+Statix CMS is a **free, lightweight content management system** that uses GitHub as its content database, Cloudflare R2 for media storage, and Turso for user/auth data.
+
+### Not a Dependency — It's Your Code
+
+Unlike traditional CMS packages, Statix CMS is **not installed as a dependency**. When you run `npx create-statix-cms`, you get a complete, standalone Next.js application that you fully own and control.
+
+- **Full Control** — Modify any file, component, or feature
+- **No Vendor Lock-in** — The code is yours, forever
+- **No Breaking Updates** — You decide when and what to update
+- **Learn & Customize** — Understand exactly how everything works
+
+---
+
+## How It Works
+
+Statix CMS uses a unique architecture that separates concerns across three services:
+
+```
+┌─────────────────────────────────────────────────────┐
+│                   Admin Panel                       │
+│              (Next.js App Router)                   │
+└──────┬──────────────┬──────────────┬────────────────┘
+       │              │              │
+       ▼              ▼              ▼
+┌──────────┐   ┌──────────┐   ┌──────────┐
+│  GitHub  │   │    R2    │   │  Turso   │
+│  (JSON)  │   │ (Media)  │   │ (Users)  │
+│          │   │          │   │          │
+│ Content  │   │ Images   │   │ Sessions │
+│ Version  │   │ Files    │   │ Audit    │
+│ History  │   │ Uploads  │   │ Invites  │
+└──────────┘   └──────────┘   └──────────┘
+```
+
+### Content Storage — GitHub
+
+All content is stored as **JSON files** in a GitHub repository. Every save creates a Git commit, giving you full version history for free. Commit messages include metadata:
+
+```
+Update content/blog/my-post.json
+
+statix-user: editor@example.com
+statix-name: Jane Editor
+statix-action: update
+statix-time: 2025-04-14T12:30:00Z
+```
+
+### Media Storage — Cloudflare R2
+
+Images and files are uploaded to **Cloudflare R2** (S3-compatible object storage) and served via a public URL. Media can be organized into folders, moved, and tracked for references across content.
+
+### User Database — Turso
+
+User accounts, sessions, audit logs, and invitations are stored in **Turso** (serverless SQLite). This keeps auth data separate from content and supports edge-compatible session validation.
+
+### Authentication — Better Auth
+
+Login is handled by **Better Auth** with three methods:
+- **Email OTP** — One-time password sent via Resend
+- **GitHub OAuth** — Sign in with GitHub (optional)
+- **Google OAuth** — Sign in with Google (optional)
+
+---
+
+## Features
 
 ### Content Management
 
-- 📝 **Block Editor** - Drag-and-drop content blocks (Markdown, Images, Rich Text)
-- 🌍 **Multi-language** - Built-in i18n with per-field localization
-- � **Flexible Fields** - Text, images, files, lists, selects, dates, and more
-- 🔖 **Singletons & Collections** - Manage both single pages and repeatable content
+- **Singletons & Collections** — Single pages (home, about) and repeatable content (blog posts, team members)
+- **Block Editor** — Drag-and-drop content blocks (Markdown, Image, Quote, Text) with custom block definitions
+- **Rich Text Editor** — ProseKit-based WYSIWYG with toolbar (bold, italic, underline, links, font size, text align, lists, blockquote) and slash command menu
+- **12 Field Types** — text, textarea, richtext, image, file, number, select, blocks, date, checkbox, switch, list
+- **Multi-language (i18n)** — Per-field localization with locale selector in the editor, admin panel UI translations via `ui.json`
 
-### Media & Storage
+### Media Library
 
-- 🖼️ **Media Library** - Upload, organize, and browse images with folder support
-- ⚡ **Vercel CDN Ready** - Images stored in `/public` for automatic CDN optimization
-- 📁 **GitHub as Database** - Content stored as JSON files, media as actual files
+- Upload images and files with drag-and-drop
+- Organize media into folders
+- Track file references across content (which content uses which file)
+- View storage statistics
+- Cloudflare R2 integration with public URL serving
 
 ### Safety & Recovery
 
-- 🗑️ **Trash System** - Soft delete with restore functionality for content and media
-- � **Local Drafts** - Unsaved changes stored locally, never lose your work
-- ⚠️ **Unsaved Warnings** - Alerts before navigating away with pending changes
-- ↩️ **Discard Changes** - Easily revert to the last saved version
+- **Soft Delete (Trash)** — Deleted content and media are moved to trash, not permanently removed
+- **One-click Restore** — Recover any trashed item instantly
+- **Local Drafts** — Unsaved changes are stored in localStorage and survive browser crashes
+- **Unsaved Warnings** — Alerts before navigating away with pending changes
+- **Discard Changes** — Revert to the last saved version at any time
 
-### Security & Access
+### Authentication & Authorization
 
-- 🔐 **GitHub OAuth** - Secure authentication with NextAuth.js v5
-- 📧 **Email Whitelist** - Control who can access the admin panel
-- 🛡️ **Rate Limiting** - Built-in API protection
+- **Better Auth** — Email OTP, GitHub OAuth, Google OAuth
+- **Role-Based Access Control** — Owner, Admin, Editor system roles + custom roles
+- **Fine-grained Permissions** — Global permissions (manage users, view monitor, manage media/trash) and per-collection permissions (view, create, edit, delete, publish)
+- **User Invitations** — Invite users by email with a specific role, token-based acceptance
+- **Ban System** — Ban/unban users with reason and optional expiration
 
-### Developer Experience
+### Monitoring & Audit
 
-- ⚡ **Next.js 15** - Latest App Router with React 19
-- 🎨 **Modern UI** - Beautiful interface with Tailwind CSS 4 + shadcn/ui
-- 📱 **Responsive** - Works perfectly on desktop and mobile
+- **Audit Logs** — Every change tracked with user, action, entity, timestamp, and IP address
+- **Activity Feed** — Unified timeline of content, media, and user changes
+- **Dashboard** — Collection statistics, localization progress (donut chart), recent activity
+- **Commit Timeline** — Visual chart of recent GitHub commits
+- **System Health** — GitHub API rate limit status, repository size
 
-## 💡 Not a Dependency — It's Your Code
+### Security
 
-Unlike traditional npm packages, **Statix CMS is not installed as a dependency**. When you run `npx create-statix-cms`, you get a complete, standalone codebase that you fully own and control.
+- **CSRF Protection** — Origin header validation on all mutation requests
+- **Rate Limiting** — 100 requests per minute per IP (auth routes excluded)
+- **Security Headers** — HSTS, X-Frame-Options: DENY, X-Content-Type-Options: nosniff, strict Referrer-Policy, Permissions-Policy (camera/microphone/geolocation disabled)
+- **Environment Validation** — All environment variables validated with Zod at startup; missing or invalid values throw clear error messages
 
-This approach means:
+---
 
-- ✅ **Full Control** - Modify any file, component, or feature
-- ✅ **No Vendor Lock-in** - The code is yours, forever
-- ✅ **No Breaking Updates** - You decide when and what to update
-- ✅ **Learn & Customize** - Understand exactly how everything works
+## Quick Start
 
-## 🚀 Quick Start
-
-### Create a new project
-
-```bash
-npx create-statix-cms
-```
-
-Or with a project name:
+### 1. Create a new project
 
 ```bash
 npx create-statix-cms my-cms
+cd my-cms
 ```
 
-### Configure your project
+### 2. Set up required services
 
-1. **Edit collections** - Configure your content types in `src/statix.config.ts`
-2. **Set environment variables** - Fill in `.env` with your GitHub credentials
-3. **Start developing** - Run `npm run dev` or `bun run dev`
+You need three services before starting (see [Prerequisites](#prerequisites) for step-by-step guides):
 
-## 📋 Environment Variables
+| Service | Purpose | Free Tier |
+|---------|---------|-----------|
+| [GitHub](https://github.com) | Content storage (JSON files) | Yes |
+| [Turso](https://turso.tech) | User database (SQLite) | Yes |
+| [Resend](https://resend.com) | Email OTP authentication | Yes (100 emails/day) |
 
-Create a `.env` file with the following variables:
+Optional services:
+
+| Service | Purpose | Free Tier |
+|---------|---------|-----------|
+| [Cloudflare R2](https://www.cloudflare.com/r2/) | Media storage | Yes (10 GB) |
+| GitHub OAuth | Social login | Yes |
+| Google OAuth | Social login | Yes |
+
+### 3. Configure environment
+
+Fill in `.env` with your credentials (created automatically from `.env.example`):
 
 ```env
-# GitHub Configuration
-GITHUB_TOKEN=your_github_token
-GITHUB_OWNER=your_username
-GITHUB_REPO=your_repo_name
-GITHUB_BRANCH=main
-
-# NextAuth Configuration
-AUTH_SECRET=generate_with_openssl_rand_base64_32
-AUTH_GITHUB_ID=your_github_oauth_app_id
-AUTH_GITHUB_SECRET=your_github_oauth_app_secret
-
-# Admin Access Control
-ADMIN_EMAILS=your@email.com
-
-# Next.js
-NEXTAUTH_URL=http://localhost:3000
-
-# Media URL
-NEXT_PUBLIC_MEDIA_BASE_URL=https://raw.githubusercontent.com/username/repo/main
+GITHUB_TOKEN=ghp_xxxxxxxxxxxx
+GITHUB_OWNER=your-username
+GITHUB_REPO=my-cms-content
+BETTER_AUTH_SECRET=your-secret-here
+BETTER_AUTH_URL=http://localhost:3000
+TURSO_DATABASE_URL=libsql://your-db.turso.io
+TURSO_AUTH_TOKEN=your-turso-token
+RESEND_API_KEY=re_xxxxxxxxxxxx
+RESEND_FROM_EMAIL=cms@yourdomain.com
 ```
 
-## 🛠️ Tech Stack
+### 4. Start the dev server
 
-- **Framework**: Next.js 15 (App Router)
-- **UI**: React 19 + Tailwind CSS 4 + shadcn/ui
-- **Authentication**: NextAuth.js v5
-- **State Management**: Zustand + TanStack Query
-- **Database**: GitHub Repository (JSON files)
-- **Language**: TypeScript
+```bash
+npm run dev
+# or
+bun run dev
+```
 
-## 📖 Documentation
+### 5. Create your admin account
 
-For detailed documentation and configuration options, see the [full documentation](./template/README.md) in the generated project.
+1. Open `http://localhost:3000/auth/signin`
+2. Enter your email and sign in with OTP
+3. Add your email to `.env`:
+   ```env
+   INITIAL_ADMIN_EMAIL=your@email.com
+   ```
+4. Run the seed script:
+   ```bash
+   npm run seed:admin
+   ```
+5. Open `http://localhost:3000/admin` — you're now the Owner
 
-## 🤝 Contributing
+> **Important:** The seed script promotes an **existing** user to Owner. You must create an account first (step 2), then run the script.
+
+### 6. Configure your content
+
+Edit `src/statix.config.ts` to define your collections and fields. See [Configuration](#configuration) for details.
+
+---
+
+## Prerequisites
+
+### GitHub Personal Access Token
+
+1. Go to [github.com/settings/tokens](https://github.com/settings/tokens)
+2. Click **Generate new token (classic)**
+3. Select the `repo` scope (full control of private repositories)
+4. Copy the token → set as `GITHUB_TOKEN`
+
+Create a **separate repository** for your content (can be public or private):
+
+1. Go to [github.com/new](https://github.com/new)
+2. Create an empty repository (no README needed)
+3. Use the repo name as `GITHUB_REPO` and your username as `GITHUB_OWNER`
+
+### Turso Database
+
+1. Sign up at [turso.tech](https://turso.tech)
+2. Install the CLI: `brew install tursodatabase/tap/turso` (or see [docs](https://docs.turso.tech/cli/installation))
+3. Create a database:
+   ```bash
+   turso db create my-cms
+   ```
+4. Get the connection URL:
+   ```bash
+   turso db show my-cms --url
+   # → libsql://my-cms-username.turso.io
+   ```
+5. Create an auth token:
+   ```bash
+   turso db tokens create my-cms
+   ```
+6. Set `TURSO_DATABASE_URL` and `TURSO_AUTH_TOKEN`
+
+### Resend (Email OTP)
+
+1. Sign up at [resend.com](https://resend.com)
+2. Go to **API Keys** → Create a new key
+3. Set `RESEND_API_KEY`
+4. Set `RESEND_FROM_EMAIL` to your verified sender (e.g., `cms@yourdomain.com`)
+5. (Optional) Verify your domain under **Domains** for better deliverability
+
+### Cloudflare R2 (Optional — Media Storage)
+
+1. Sign up at [cloudflare.com](https://www.cloudflare.com) and enable R2
+2. Create a bucket (e.g., `my-cms-media`)
+3. Go to **R2** → **Manage R2 API Tokens** → Create token with Object Read & Write
+4. Set `R2_ACCOUNT_ID`, `R2_ACCESS_KEY_ID`, `R2_SECRET_ACCESS_KEY`, `R2_BUCKET_NAME`
+5. Enable **Public Access** on the bucket and set `NEXT_PUBLIC_MEDIA_BASE_URL` to the public URL
+
+### GitHub OAuth (Optional — Social Login)
+
+1. Go to [github.com/settings/developers](https://github.com/settings/developers)
+2. Click **New OAuth App**
+3. Set the callback URL to: `{BETTER_AUTH_URL}/api/auth/callback/github`
+4. Copy Client ID and Client Secret → set `GITHUB_CLIENT_ID` and `GITHUB_CLIENT_SECRET`
+
+### Google OAuth (Optional — Social Login)
+
+1. Go to [Google Cloud Console](https://console.cloud.google.com/apis/credentials)
+2. Create an **OAuth 2.0 Client ID** (Web application)
+3. Add authorized redirect URI: `{BETTER_AUTH_URL}/api/auth/callback/google`
+4. Copy Client ID and Client Secret → set `GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET`
+
+---
+
+## Environment Variables
+
+All variables are validated at startup using Zod. The app will not start if required variables are missing.
+
+| Variable | Required | Description |
+|----------|----------|-------------|
+| `GITHUB_TOKEN` | **Yes** | GitHub Personal Access Token with `repo` scope |
+| `GITHUB_OWNER` | **Yes** | GitHub username or organization |
+| `GITHUB_REPO` | **Yes** | Repository name for content storage |
+| `GITHUB_BRANCH` | No | Branch to use (default: `main`) |
+| `BETTER_AUTH_SECRET` | **Yes** | Auth secret — generate with `openssl rand -base64 32` |
+| `BETTER_AUTH_URL` | **Yes** | Full site URL (e.g., `http://localhost:3000`) |
+| `TURSO_DATABASE_URL` | **Yes** | Turso connection URL (`libsql://...turso.io`) |
+| `TURSO_AUTH_TOKEN` | **Yes** | Turso authentication token |
+| `RESEND_API_KEY` | **Yes** | Resend API key for sending OTP emails |
+| `RESEND_FROM_EMAIL` | **Yes** | Sender email address (must be verified in Resend) |
+| `GITHUB_CLIENT_ID` | No | GitHub OAuth app Client ID |
+| `GITHUB_CLIENT_SECRET` | No | GitHub OAuth app Client Secret |
+| `GOOGLE_CLIENT_ID` | No | Google OAuth Client ID |
+| `GOOGLE_CLIENT_SECRET` | No | Google OAuth Client Secret |
+| `R2_ACCOUNT_ID` | No | Cloudflare account ID |
+| `R2_ACCESS_KEY_ID` | No | R2 API token access key |
+| `R2_SECRET_ACCESS_KEY` | No | R2 API token secret key |
+| `R2_BUCKET_NAME` | No | R2 bucket name |
+| `NEXT_PUBLIC_MEDIA_BASE_URL` | No | Public URL for R2 bucket (e.g., `https://pub-xxx.r2.dev`) |
+| `INITIAL_ADMIN_EMAIL` | No | Email to promote to Owner via `npm run seed:admin` |
+
+---
+
+## Configuration
+
+All content modeling is done in `src/statix.config.ts`. This is the single source of truth for your CMS structure.
+
+```ts
+import { StatixConfig } from "@/statix/types";
+
+export const statixConfig: StatixConfig = {
+  github: {
+    owner: process.env.GITHUB_OWNER || "",
+    repo: process.env.GITHUB_REPO || "",
+    branch: process.env.GITHUB_BRANCH || "main",
+  },
+  mediaFolder: "uploads",
+  i18n: {
+    locales: ["en", "tr"],
+    defaultLocale: "en",
+  },
+  roles: [
+    // Custom roles (see Roles & Permissions)
+  ],
+  collections: [
+    // Your content types (see below)
+  ],
+};
+```
+
+### Defining Collections
+
+There are two types of content:
+
+**Singletons** — Single pages with unique content (e.g., Home, About, Contact):
+
+```ts
+{
+  slug: "home",
+  label: "Home Page",
+  type: "singleton",
+  path: "content/home",
+  icon: "Home",
+  fields: [
+    { name: "title", label: "Page Title", type: "text", required: true, localized: true },
+    { name: "heroImage", label: "Hero Image", type: "image" },
+    { name: "ctaText", label: "Button Text", type: "text" },
+  ],
+}
+```
+
+**Collections** — Repeatable items (e.g., Blog Posts, Team Members):
+
+```ts
+{
+  slug: "blog",
+  label: "Blog Posts",
+  path: "content/blog",
+  icon: "FileText",
+  titleField: "title",
+  fields: [
+    { name: "title", label: "Title", type: "text", required: true, localized: true },
+    { name: "date", label: "Publish Date", type: "date", required: true },
+    { name: "featuredImage", label: "Featured Image", type: "image" },
+    { name: "content", label: "Content", type: "blocks", localized: true, blocks: [
+      { type: "markdown", label: "Markdown", fields: [
+        { name: "content", label: "Content", type: "textarea", rows: 10 },
+      ]},
+      { type: "image", label: "Image", fields: [
+        { name: "image", label: "Image", type: "image", required: true },
+        { name: "caption", label: "Caption", type: "text" },
+      ]},
+    ]},
+  ],
+}
+```
+
+### i18n Configuration
+
+Define supported locales and the default:
+
+```ts
+i18n: {
+  locales: ["en", "tr", "de", "fr"],
+  defaultLocale: "en",
+}
+```
+
+Fields with `localized: true` will show a locale selector in the editor. Admin panel UI translations are stored in `src/statix/content/ui.json`.
+
+---
+
+## Content Modeling
+
+### Field Types
+
+| Type | Description | Key Options |
+|------|-------------|-------------|
+| `text` | Single-line text input | `placeholder`, `localized` |
+| `textarea` | Multi-line text input | `rows`, `placeholder`, `localized` |
+| `richtext` | WYSIWYG rich text editor | `placeholder`, `localized` |
+| `image` | Image picker (opens media library) | — |
+| `file` | File upload | — |
+| `number` | Numeric input | — |
+| `select` | Dropdown selection | `options: [{ label, value }]` |
+| `date` | Date picker | — |
+| `checkbox` | Checkbox toggle | — |
+| `switch` | Toggle switch | — |
+| `list` | Repeatable group of fields | `fields: Field[]` |
+| `blocks` | Drag-and-drop content blocks | `blocks: [{ type, label, fields }]` |
+
+### List Fields (Repeatable Groups)
+
+Use `list` for repeatable structured data like social links:
+
+```ts
+{
+  name: "socialLinks",
+  label: "Social Links",
+  type: "list",
+  fields: [
+    { name: "platform", label: "Platform", type: "select", required: true,
+      options: [
+        { label: "Twitter / X", value: "twitter" },
+        { label: "LinkedIn", value: "linkedin" },
+        { label: "GitHub", value: "github" },
+      ]
+    },
+    { name: "url", label: "URL", type: "text", required: true },
+  ],
+}
+```
+
+### Block Editor
+
+Use `blocks` for flexible, composable content:
+
+```ts
+{
+  name: "content",
+  label: "Content",
+  type: "blocks",
+  localized: true,
+  blocks: [
+    {
+      type: "markdown",
+      label: "Markdown",
+      fields: [
+        { name: "content", label: "Content", type: "textarea", rows: 10 },
+      ],
+    },
+    {
+      type: "image",
+      label: "Image",
+      fields: [
+        { name: "image", label: "Image", type: "image", required: true },
+        { name: "caption", label: "Caption", type: "text" },
+        { name: "alt", label: "Alt Text", type: "text" },
+      ],
+    },
+    {
+      type: "quote",
+      label: "Quote",
+      fields: [
+        { name: "text", label: "Quote", type: "textarea", rows: 3 },
+        { name: "author", label: "Author", type: "text" },
+      ],
+    },
+  ],
+}
+```
+
+Blocks can be reordered via drag-and-drop in the editor.
+
+---
+
+## Roles & Permissions
+
+### System Roles
+
+| Role | Manage Users | View Monitor | Manage Media | Manage Trash | Content |
+|------|:------------:|:------------:|:------------:|:------------:|:-------:|
+| **Owner** | Yes | Yes | Yes | Yes | Full |
+| **Admin** | Yes | Yes | Yes | Yes | Full |
+| **Editor** | No | No | No | No | View, Create, Edit |
+
+### Custom Roles
+
+Define custom roles in `statix.config.ts` with granular permissions:
+
+```ts
+roles: [
+  {
+    name: "Translator",
+    description: "Can view and edit content for translation purposes",
+    permissions: {
+      canManageUsers: false,
+      canViewMonitor: false,
+      canManageMedia: false,
+      canManageTrash: false,
+      collections: {
+        "*": {                    // "*" applies to all collections
+          canView: true,
+          canCreate: false,
+          canEdit: true,
+          canDelete: false,
+          canPublish: false,
+        },
+      },
+    },
+  },
+],
+```
+
+### Permission Types
+
+**Global Permissions:**
+- `canManageUsers` — Create, edit, ban, invite users
+- `canViewMonitor` — Access audit logs and system health
+- `canManageMedia` — Upload, move, delete media files
+- `canManageTrash` — View and manage soft-deleted items
+
+**Collection Permissions (per collection or `*` for all):**
+- `canView` — View collection items
+- `canCreate` — Create new items
+- `canEdit` — Edit existing items
+- `canDelete` — Soft-delete items
+- `canPublish` — Publish draft content
+
+---
+
+## Admin Panel
+
+### Dashboard (`/admin`)
+
+Overview of your CMS with collection statistics, localization progress (donut chart), and recent activity feed.
+
+### Collections (`/admin/[collectionSlug]`)
+
+List view for collection items with search, pagination, and status indicators. Click any item to open the editor.
+
+### Content Editor (`/admin/[collectionSlug]/[id]`)
+
+Field-based editing form with block editor, locale switching, and draft/publish workflow. Unsaved changes are preserved in localStorage.
+
+### Media Library (`/admin/media`)
+
+Upload, browse, organize, search, move, and delete media files. View storage statistics and track which content references each file.
+
+### Users (`/admin/users`)
+
+Create and invite users, assign roles with custom permissions, ban/unban users, and view per-user audit logs.
+
+### Trash (`/admin/trash`)
+
+Browse soft-deleted content and media. Restore items with one click or permanently delete them.
+
+### Monitor (`/admin/monitor`)
+
+Audit logs with filtering, activity charts by user and action type, commit timeline, and GitHub API rate limit status.
+
+---
+
+## Project Structure
+
+```
+src/
+├── app/                          # Next.js App Router
+│   ├── (statix)/
+│   │   ├── admin/                # Admin panel pages
+│   │   │   ├── page.tsx          # Dashboard
+│   │   │   ├── [collectionSlug]/ # Collection list + editor
+│   │   │   ├── media/            # Media library
+│   │   │   ├── users/            # User management
+│   │   │   ├── trash/            # Trash management
+│   │   │   └── monitor/          # Audit & monitoring
+│   │   ├── auth/                 # Sign-in, invite acceptance
+│   │   └── api/                  # API routes (20 endpoints)
+│   ├── layout.tsx                # Root layout
+│   └── page.tsx                  # Public home page
+│
+├── statix/                       # CMS core library
+│   ├── components/               # React components
+│   │   ├── ui/                   # shadcn/ui base components
+│   │   ├── editor/               # Rich text & block editor
+│   │   ├── fields/               # Field type renderers
+│   │   ├── collections/          # Collection list views
+│   │   ├── dashboard/            # Dashboard widgets
+│   │   ├── media/                # Media library UI
+│   │   ├── users/                # User management UI
+│   │   ├── trash/                # Trash UI
+│   │   ├── monitor/              # Monitoring charts
+│   │   ├── activity/             # Activity feed
+│   │   ├── layout/               # Navigation, breadcrumbs
+│   │   ├── shared/               # Reusable components
+│   │   └── skeletons/            # Loading placeholders
+│   ├── hooks/                    # 18 custom React hooks
+│   ├── lib/                      # Core utilities
+│   │   ├── github-cms.ts         # GitHub API integration
+│   │   ├── r2.ts                 # Cloudflare R2 integration
+│   │   ├── auth.ts               # Better Auth configuration
+│   │   ├── session.ts            # Session & permission guards
+│   │   ├── db.ts                 # Drizzle ORM client
+│   │   ├── audit.ts              # Audit log writer
+│   │   ├── rate-limit.ts         # Rate limiting
+│   │   ├── env.ts                # Zod environment validation
+│   │   └── ...                   # Content utils, dashboard data, etc.
+│   ├── stores/                   # Zustand state stores
+│   ├── types/                    # TypeScript type definitions
+│   ├── db/                       # Drizzle ORM schema
+│   └── content/                  # ui.json (admin panel translations)
+│
+├── statix.config.ts              # Content model configuration
+├── middleware.ts                 # CSRF, rate limiting, auth guard
+└── lib/
+    └── utils.ts                  # General utilities
+```
+
+---
+
+## API Reference
+
+### Authentication
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| `*` | `/api/auth/[...all]` | Better Auth handler (login, logout, OTP, OAuth callbacks) |
+
+### Content
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| `GET` | `/api/content/[collectionSlug]/[id]` | Get content item |
+| `POST` | `/api/content/[collectionSlug]/[id]` | Create or update content |
+| `DELETE` | `/api/delete/[collectionSlug]/[id]` | Soft-delete content |
+| `GET` | `/api/collections/[slug]` | Get collection items list |
+
+### Media
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| `POST` | `/api/upload` | Upload a file |
+| `GET` | `/api/media/list` | List media files |
+| `POST` | `/api/media/delete` | Soft-delete media |
+| `POST` | `/api/media/move` | Move media between folders |
+| `GET` | `/api/media/references` | Find content using a media file |
+| `GET` | `/api/media/stats` | Storage statistics |
+| `GET` | `/api/media/serve/[...path]` | Serve media files (public) |
+
+### Trash
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| `GET` | `/api/trash/list` | List soft-deleted items |
+| `POST` | `/api/trash/restore` | Restore item from trash |
+| `DELETE` | `/api/trash/delete` | Permanently delete item |
+| `GET` | `/api/trash/media/[filename]` | Get trashed media metadata |
+
+### Admin
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| `GET` | `/api/admin/users` | List users |
+| `POST` | `/api/admin/users` | Create or update user |
+| `POST` | `/api/admin/users/[id]/avatar` | Upload user avatar |
+| `GET` | `/api/admin/activity` | Activity feed |
+| `GET` | `/api/admin/audit` | Audit logs |
+
+All API routes (except `/api/auth` and `/api/media/serve`) require authentication. Mutation requests are protected by CSRF validation and rate limiting (100 req/min per IP).
+
+---
+
+## Tech Stack
+
+| Category | Technology | Version |
+|----------|-----------|---------|
+| **Framework** | Next.js (App Router) | 16.x |
+| **UI** | React | 19.x |
+| **Styling** | Tailwind CSS | 4.x |
+| **Language** | TypeScript | 5.x |
+| **Auth** | Better Auth | 1.x |
+| **Database ORM** | Drizzle ORM | 0.45.x |
+| **Database** | Turso (libsql) | — |
+| **GitHub API** | Octokit | 5.x |
+| **Object Storage** | AWS SDK S3 (Cloudflare R2) | 3.x |
+| **State** | Zustand | 5.x |
+| **Data Fetching** | TanStack React Query | 5.x |
+| **Forms** | React Hook Form | 7.x |
+| **Validation** | Zod | 4.x |
+| **Rich Text** | ProseKit | 0.19.x |
+| **Drag & Drop** | dnd-kit | 6.x |
+| **Charts** | Recharts | 2.x |
+| **Email** | Resend | 6.x |
+| **Toasts** | Sonner | 2.x |
+| **Icons** | Tabler Icons React | 3.x |
+| **Components** | shadcn/ui + Base UI | — |
+
+---
+
+## Deployment
+
+### Vercel (Recommended)
+
+1. Push your project to GitHub
+2. Import the repository in [Vercel Dashboard](https://vercel.com/new)
+3. Set all [environment variables](#environment-variables)
+4. Deploy
+
+**Post-deploy checklist:**
+- Update `BETTER_AUTH_URL` to your production domain
+- Update OAuth callback URLs (GitHub, Google) to use production domain
+- Generate a new `BETTER_AUTH_SECRET` for production
+
+**Smart Deployments:** The included `vercel.json` has an ignore command that skips rebuilds when only content files change (content is stored in a separate GitHub repo, not in the app repo).
+
+### Other Platforms
+
+Statix CMS works on any platform that supports Next.js:
+
+- [Netlify](https://netlify.com)
+- [Railway](https://railway.app)
+- [DigitalOcean App Platform](https://www.digitalocean.com/products/app-platform)
+- Self-hosted with `npm run build && npm start`
+
+### Production Checklist
+
+- [ ] All required environment variables are set
+- [ ] `BETTER_AUTH_SECRET` generated fresh for production
+- [ ] `BETTER_AUTH_URL` set to production domain
+- [ ] OAuth callback URLs updated to production domain
+- [ ] Turso database created for production
+- [ ] R2 bucket configured with public access (if using media)
+- [ ] First admin user seeded via `npm run seed:admin`
+
+---
+
+## Scripts
+
+| Command | Description |
+|---------|-------------|
+| `npm run dev` | Start the development server |
+| `npm run build` | Create a production build |
+| `npm start` | Start the production server |
+| `npm run lint` | Run ESLint |
+| `npm run seed:admin` | Promote `INITIAL_ADMIN_EMAIL` to Owner role |
+
+---
+
+## Contributing
 
 Contributions are welcome! Please feel free to submit a Pull Request.
 
-## 📄 License
+## License
 
 MIT © [gokerlek](https://github.com/gokerlek)
+
+---
 
 [Buy me a coffee](https://buymeacoffee.com/gokerlek)
