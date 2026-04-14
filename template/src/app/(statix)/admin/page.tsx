@@ -11,7 +11,7 @@ import { SingletonDashboardCard } from "@/statix/components/dashboard/SingletonD
 import { TrashCard } from "@/statix/components/trash/TrashCard";
 import { UsersCard } from "@/statix/components/users/UsersCard";
 import { UserProfileCard } from "@/statix/components/users/UserProfileCard";
-import type { CMSUser } from "@/app/admin/users/page";
+import type { CMSUser } from "@/app/(statix)/admin/users/page";
 import { cleanupOldAuditLogs } from "@/statix/lib/audit";
 import {
   getCollectionStats,

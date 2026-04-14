@@ -13,7 +13,7 @@ import { UserAvatarSection } from "./UserAvatarSection";
 import { UserRoleSection } from "./UserRoleSection";
 import { UserBanSection } from "./UserBanSection";
 import { UserDangerZone } from "./UserDangerZone";
-import type { CMSUser } from "@/app/admin/users/page";
+import type { CMSUser } from "@/app/(statix)/admin/users/page";
 import ui from "@/statix/content/ui.json";
 
 interface UserDetailDrawerProps {

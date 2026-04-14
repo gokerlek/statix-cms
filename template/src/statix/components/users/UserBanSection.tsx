@@ -18,7 +18,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/statix/components/ui/select";
-import type { CMSUser } from "@/app/admin/users/page";
+import type { CMSUser } from "@/app/(statix)/admin/users/page";
 import ui from "@/statix/content/ui.json";
 
 const banSchema = z.object({

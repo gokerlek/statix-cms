@@ -22,7 +22,7 @@ import {
   type GlobalPermissionKey,
 } from "@/statix/types/permissions";
 import { statixConfig } from "@/statix.config";
-import type { CMSUser } from "@/app/admin/users/page";
+import type { CMSUser } from "@/app/(statix)/admin/users/page";
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 

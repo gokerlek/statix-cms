@@ -7,7 +7,7 @@ import { SignOutButton } from "@/statix/components/layout/SignOutButton";
 import { UserAvatar } from "@/statix/components/shared/UserAvatar";
 import { Card, CardContent, CardHeader } from "@/statix/components/ui/card";
 import { UserDetailDrawer } from "@/statix/components/users/UserDetailDrawer";
-import type { CMSUser } from "@/app/admin/users/page";
+import type { CMSUser } from "@/app/(statix)/admin/users/page";
 
 interface UserProfileCardProps {
   user: CMSUser;

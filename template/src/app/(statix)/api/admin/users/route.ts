@@ -18,6 +18,7 @@ import {
   hasGlobalPermission,
   P,
   GLOBAL_PERMISSION_KEYS,
+  COLLECTION_PERMISSION_KEYS,
   SYSTEM_ROLES,
   DEFAULT_ROLE_PERMISSIONS,
   type RolePermissions,
@@ -43,17 +44,34 @@ const banSchema = z.object({
 function deriveRoleLabel(perms: RolePermissions): string {
   const adminPreset = DEFAULT_ROLE_PERMISSIONS[SYSTEM_ROLES.ADMIN];
   const editorPreset = DEFAULT_ROLE_PERMISSIONS[SYSTEM_ROLES.EDITOR];
+  const collSlugs = statixConfig.collections.map((c) => c.slug);
 
-  // Check built-in presets
-  const matchesGlobal = (preset: RolePermissions) =>
-    GLOBAL_PERMISSION_KEYS.every((key) => !!perms[key] === !!preset[key]);
+  // Full match: global + collection permissions
+  const matchesFull = (preset: RolePermissions) => {
+    // Check globals
+    for (const key of GLOBAL_PERMISSION_KEYS) {
+      if (!!perms[key] !== !!preset[key]) return false;
+    }
+    // Check collections
+    const wildcard = preset.collections?.["*"];
+    for (const slug of collSlugs) {
+      const cur = perms.collections?.[slug] ?? perms.collections?.["*"];
+      const pre = preset.collections?.[slug] ?? wildcard;
+      if (!cur && !pre) continue;
+      if (!cur || !pre) return false;
+      for (const k of COLLECTION_PERMISSION_KEYS) {
+        if (!!cur[k] !== !!pre[k]) return false;
+      }
+    }
+    return true;
+  };
 
-  if (matchesGlobal(adminPreset)) return "admin";
-  if (matchesGlobal(editorPreset)) return "editor";
+  if (matchesFull(adminPreset)) return "admin";
+  if (matchesFull(editorPreset)) return "editor";
 
   // Check config-defined role presets
   for (const role of statixConfig.roles ?? []) {
-    if (matchesGlobal(role.permissions)) {
+    if (matchesFull(role.permissions)) {
       return role.name.toLowerCase().replace(/\s+/g, "-");
     }
   }

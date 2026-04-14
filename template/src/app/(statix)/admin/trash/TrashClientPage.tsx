@@ -72,6 +72,7 @@ export function TrashClientPage() {
 
       <TrashToolbar
         selectedCount={selectedPaths.length}
+        totalCount={items?.length ?? 0}
         onRestore={handleRestore}
         onDelete={handleDelete}
         onEmptyTrash={handleEmptyTrash}

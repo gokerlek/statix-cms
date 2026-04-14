@@ -1,6 +1,6 @@
 "use client";
 
-import { Controller, useForm } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { IconLoader2 } from "@tabler/icons-react";
@@ -15,18 +15,10 @@ import {
 } from "@/statix/components/ui/dialog";
 import { Field, FieldError, FieldGroup } from "@/statix/components/ui/field";
 import { Input } from "@/statix/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/statix/components/ui/select";
 import ui from "@/statix/content/ui.json";
 
 const inviteSchema = z.object({
   email: z.string().email(),
-  role: z.enum(["admin", "user"]),
 });
 
 type InviteFormValues = z.infer<typeof inviteSchema>;
@@ -41,13 +33,12 @@ export function InviteDialog({ open, onOpenChange }: InviteDialogProps) {
 
   const {
     register,
-    control,
     handleSubmit,
     reset,
     formState: { errors },
   } = useForm<InviteFormValues>({
     resolver: zodResolver(inviteSchema),
-    defaultValues: { email: "", role: "user" },
+    defaultValues: { email: "" },
   });
 
   function handleOpenChange(nextOpen: boolean) {
@@ -56,7 +47,8 @@ export function InviteDialog({ open, onOpenChange }: InviteDialogProps) {
   }
 
   function handleFormSubmit(values: InviteFormValues) {
-    inviteUser.mutate(values, {
+    // Always invite with editor (minimum) permissions
+    inviteUser.mutate({ ...values, role: "editor" }, {
       onSuccess: () => {
         reset();
         onOpenChange(false);
@@ -87,35 +79,9 @@ export function InviteDialog({ open, onOpenChange }: InviteDialogProps) {
                 disabled={inviteUser.isPending}
               />
               <FieldError errors={[errors.email]} />
-            </Field>
-
-            <Field>
-              <label
-                htmlFor="invite-role"
-                className="text-sm font-medium leading-snug"
-              >
-                {ui.users.inviteDialog.roleLabel}
-              </label>
-              <Controller
-                control={control}
-                name="role"
-                render={({ field }) => (
-                  <Select
-                    value={field.value}
-                    onValueChange={(v) => field.onChange(v as "admin" | "user")}
-                    disabled={inviteUser.isPending}
-                  >
-                    <SelectTrigger id="invite-role">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="user">{ui.users.roles.user}</SelectItem>
-                      <SelectItem value="admin">{ui.users.roles.admin}</SelectItem>
-                    </SelectContent>
-                  </Select>
-                )}
-              />
-              <FieldError errors={[errors.role]} />
+              <p className="text-xs text-muted-foreground">
+                User will be invited with Editor permissions. You can customize their permissions after they join.
+              </p>
             </Field>
 
             <Field>

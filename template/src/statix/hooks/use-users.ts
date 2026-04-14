@@ -2,7 +2,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 
 import ui from "@/statix/content/ui.json";
-import type { CMSUser } from "@/app/admin/users/page";
+import type { CMSUser } from "@/app/(statix)/admin/users/page";
 import { QUERY_KEYS } from "@/statix/lib/query-keys";
 import type { RolePermissions } from "@/statix/types/permissions";
 
@@ -41,7 +41,7 @@ export function useUsers(initialData?: CMSUser[]) {
 
 // ─── Invite ───────────────────────────────────────────────────────────────────
 
-export type InvitePayload = { email: string; role: "admin" | "user" };
+export type InvitePayload = { email: string; role: string };
 
 export function useInviteUser() {
   const queryClient = useQueryClient();

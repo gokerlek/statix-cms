@@ -16,6 +16,7 @@ import { useTranslation } from "@/statix/hooks/use-translation";
 
 interface TrashToolbarProps {
   selectedCount: number;
+  totalCount: number;
   onRestore: () => void;
   onDelete: () => void;
   onEmptyTrash: () => void;
@@ -25,6 +26,7 @@ interface TrashToolbarProps {
 
 export function TrashToolbar({
   selectedCount,
+  totalCount,
   onRestore,
   onDelete,
   onEmptyTrash,
@@ -32,6 +34,9 @@ export function TrashToolbar({
   isDeleting,
 }: TrashToolbarProps) {
   const { t } = useTranslation();
+
+  // Don't show toolbar when trash is empty
+  if (totalCount === 0) return null;
 
   return (
     <div className="flex items-center justify-between mb-4 p-2 bg-muted/30 rounded-lg border">

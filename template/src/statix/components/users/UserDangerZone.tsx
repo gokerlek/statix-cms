@@ -6,7 +6,7 @@ import { useDeleteUser } from "@/statix/hooks/use-users";
 import { useUserDetailStore } from "@/statix/stores/useUserDetailStore";
 import { AreYouSureDialog } from "@/statix/components/ui/are-you-sure-dialog";
 import { Button } from "@/statix/components/ui/button";
-import type { CMSUser } from "@/app/admin/users/page";
+import type { CMSUser } from "@/app/(statix)/admin/users/page";
 import ui from "@/statix/content/ui.json";
 
 interface UserDangerZoneProps {

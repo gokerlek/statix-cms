@@ -46,7 +46,7 @@ export const mediaMoveSchema = z
   );
 
 export const trashItemSchema = z.object({
-  type: z.enum(["content", "media"]),
+  type: z.enum(["content", "media", "collection_item"]),
   path: safePath,
 });
 

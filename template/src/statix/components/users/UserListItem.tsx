@@ -4,7 +4,7 @@ import { UserAvatar } from "@/statix/components/shared/UserAvatar";
 import { Badge } from "@/statix/components/ui/badge";
 import { Card, CardContent } from "@/statix/components/ui/card";
 import ui from "@/statix/content/ui.json";
-import type { CMSUser } from "@/app/admin/users/page";
+import type { CMSUser } from "@/app/(statix)/admin/users/page";
 
 
 interface UserListItemProps {

@@ -8,7 +8,7 @@ import { useUserDetailStore } from "@/statix/stores/useUserDetailStore";
 import { Avatar, AvatarFallback, AvatarImage } from "@/statix/components/ui/avatar";
 import { Button } from "@/statix/components/ui/button";
 import { Input } from "@/statix/components/ui/input";
-import type { CMSUser } from "@/app/admin/users/page";
+import type { CMSUser } from "@/app/(statix)/admin/users/page";
 import ui from "@/statix/content/ui.json";
 
 const MEDIA_BASE = process.env.NEXT_PUBLIC_MEDIA_BASE_URL ?? "";

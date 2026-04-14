@@ -1,7 +1,7 @@
 import { createSelectorFunctions } from "auto-zustand-selectors-hook";
 import { create } from "zustand";
 import { immer } from "zustand/middleware/immer";
-import type { CMSUser } from "@/app/admin/users/page";
+import type { CMSUser } from "@/app/(statix)/admin/users/page";
 
 // ─── State ────────────────────────────────────────────────────────────────────
 // Loading states are managed by React Query (isPending).
