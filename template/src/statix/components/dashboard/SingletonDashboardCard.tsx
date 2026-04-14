@@ -3,7 +3,7 @@
 import Link from "next/link";
 
 import { resolveStatus } from "@/statix/lib/content-status";
-import { Button } from "@/statix/components/ui/button";
+import { buttonVariants} from "@/statix/components/ui/button";
 import ui from "@/statix/content/ui.json";
 import { ROUTES } from "@/statix/lib/constants";
 
@@ -11,6 +11,7 @@ import { CollectionIcon } from "@/statix/components/collections/CollectionIcon";
 import { LastUpdated } from "@/statix/components/editor/LastUpdated";
 import { CMSCard } from "@/statix/components/shared/CMSCard";
 import { StatusBadge } from "@/statix/components/collections/StatusBadge";
+import { cn } from "@/statix/lib/utils";
 
 interface Stat {
   count: number;
@@ -43,9 +44,7 @@ export function SingletonDashboardCard({ stat }: SingletonDashboardCardProps) {
       contentClassName="flex-1 flex flex-col justify-end gap-4 relative z-10"
       footerClassName="relative z-10 pt-0"
       footer={
-        <Button className="w-full group/btn" variant="outline" asChild>
-          <Link href={editLink}>{ui.common.edit}</Link>
-        </Button>
+          <Link href={editLink} className={cn(buttonVariants({ variant: "outline" }),'w-full group/btn')}>{ui.common.edit}</Link>
       }
     >
       <div className="flex items-center justify-between text-sm">

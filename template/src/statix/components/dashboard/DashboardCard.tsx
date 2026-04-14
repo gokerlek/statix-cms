@@ -6,13 +6,14 @@ import { formatDistanceToNow } from "date-fns";
 import { IconPlus } from "@tabler/icons-react";
 
 import { DonutChart } from "@/statix/components/dashboard/DonutChart";
-import { Button } from "@/statix/components/ui/button";
+import { buttonVariants } from "@/statix/components/ui/button";
 import ui from "@/statix/content/ui.json";
 import { STATUS_CHART_CONFIG } from "@/statix/lib/content-status";
 import { ROUTES } from "@/statix/lib/constants";
 
 import { CollectionIcon } from "@/statix/components/collections/CollectionIcon";
 import { CMSCard } from "@/statix/components/shared/CMSCard";
+import { cn } from "@/statix/lib/utils";
 
 interface Stat {
   count: number;
@@ -62,24 +63,18 @@ export function DashboardCard({ stat }: DashboardCardProps) {
       contentClassName="flex-1 flex flex-col justify-between p-0"
       footer={
         stat.count === 0 ? (
-          <Button className="w-full" asChild>
-            <Link href={addLink}>
+            <Link href={addLink} className={cn(buttonVariants({ variant: "default" }), "w-full")}>
               <IconPlus className="mr-2 h-4 w-4" />
               {ui.collectionList.createFirstEntry}
             </Link>
-          </Button>
         ) : (
           <div className="flex items-center gap-2 w-full">
             {addLink && (
-              <Button variant="outline" size="icon" asChild>
-                <Link href={addLink} title={ui.common.createNew}>
+                <Link href={addLink} title={ui.common.createNew} className={cn(buttonVariants({ variant: "outline", size:"icon" }))}>
                   <IconPlus className="size-7" />
                 </Link>
-              </Button>
             )}
-            <Button className="flex-1" variant="outline" asChild>
-              <Link href={viewLink}>{ui.common.viewAll}</Link>
-            </Button>
+              <Link href={viewLink} className={cn(buttonVariants({ variant: "outline" }), "flex-1")}>{ui.common.viewAll}</Link>
           </div>
         )
       }

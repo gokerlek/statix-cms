@@ -1,13 +1,14 @@
 import Link from "next/link";
 
 import { formatDistanceToNow } from "date-fns";
-import { IconActivity, IconArrowRight, IconDatabase, IconServer } from "@tabler/icons-react";
+import { IconActivity, IconDatabase, IconServer } from "@tabler/icons-react";
 
-import { Button } from "@/statix/components/ui/button";
+import { buttonVariants } from "@/statix/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/statix/components/ui/card";
 import { Progress } from "@/statix/components/ui/progress";
 import ui from "@/statix/content/ui.json";
 import { MonitorSummary } from "@/statix/lib/monitor-data";
+import { cn } from "@/statix/lib/utils";
 
 interface MonitorSummaryCardProps {
   summary: MonitorSummary;
@@ -68,12 +69,9 @@ export function MonitorSummaryCard({ summary }: MonitorSummaryCardProps) {
       </CardContent>
 
       <CardFooter>
-        <Button variant="outline" className="w-full" asChild>
-          <Link href="/admin/monitor">
+          <Link href="/admin/monitor" className={cn(buttonVariants({ variant: "outline" }), "w-full")}>
             {ui.monitor.summaryCard.goToMonitor}
-            <IconArrowRight className="h-4 w-4 ml-1" />
           </Link>
-        </Button>
       </CardFooter>
     </Card>
   );

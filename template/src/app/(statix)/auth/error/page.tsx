@@ -20,7 +20,7 @@ function ErrorContent() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-900 via-red-900 to-slate-900">
+    <div className="min-h-screen flex items-center justify-center bg-linear-to-br from-slate-900 via-red-900 to-slate-900">
       <div className="max-w-md w-full mx-4">
         <div className="bg-white/10 backdrop-blur-lg rounded-2xl shadow-2xl p-8 border border-red-500/20">
           <div className="text-center mb-8">
@@ -51,7 +51,7 @@ export default function AuthErrorPage() {
   return (
     <Suspense
       fallback={
-        <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-900 via-red-900 to-slate-900">
+        <div className="min-h-screen flex items-center justify-center bg-linear-to-br from-slate-900 via-red-900 to-slate-900">
           <SectionLoading className="text-white" />
         </div>
       }

@@ -1,6 +1,6 @@
 {
   "version": "1.0.0",
-  "lastScanned": 1776085232279,
+  "lastScanned": 1776176296809,
   "projectRoot": "/Volumes/projects/statix-cms",
   "techStack": {
     "languages": [
@@ -47,7 +47,7 @@
       "path": "bin",
       "purpose": "Executable scripts",
       "fileCount": 1,
-      "lastAccessed": 1776085232263,
+      "lastAccessed": 1776176296798,
       "keyFiles": [
         "index.js"
       ]
@@ -56,7 +56,7 @@
       "path": "template",
       "purpose": null,
       "fileCount": 16,
-      "lastAccessed": 1776085232263,
+      "lastAccessed": 1776176296798,
       "keyFiles": [
         "README.md",
         "components.json",
@@ -68,201 +68,9 @@
   },
   "hotPaths": [
     {
-      "path": "template/src/app/api/content/[collectionSlug]/[id]/route.ts",
-      "accessCount": 19,
-      "lastAccessed": 1776118285029,
-      "type": "file"
-    },
-    {
-      "path": "template/src/statix/types/permissions.ts",
-      "accessCount": 14,
-      "lastAccessed": 1776104820303,
-      "type": "file"
-    },
-    {
-      "path": "template/src",
-      "accessCount": 9,
-      "lastAccessed": 1776103851138,
-      "type": "directory"
-    },
-    {
-      "path": "template/src/app/api/admin/users/route.ts",
-      "accessCount": 7,
-      "lastAccessed": 1776086289833,
-      "type": "file"
-    },
-    {
-      "path": "template/src/statix/components/users/UserRoleSection.tsx",
-      "accessCount": 7,
-      "lastAccessed": 1776103882454,
-      "type": "file"
-    },
-    {
-      "path": "template/src/statix/lib/dashboard-data.ts",
-      "accessCount": 7,
-      "lastAccessed": 1776118841646,
-      "type": "directory"
-    },
-    {
-      "path": "template/src/statix/lib/session.ts",
-      "accessCount": 6,
-      "lastAccessed": 1776101404360,
-      "type": "file"
-    },
-    {
-      "path": "template/src/statix/hooks/use-editor-form.ts",
-      "accessCount": 6,
-      "lastAccessed": 1776118353116,
-      "type": "directory"
-    },
-    {
-      "path": "template/src/app/admin",
-      "accessCount": 5,
-      "lastAccessed": 1776101285406,
-      "type": "directory"
-    },
-    {
-      "path": "template/src/app/admin/page.tsx",
-      "accessCount": 5,
-      "lastAccessed": 1776101440061,
-      "type": "file"
-    },
-    {
-      "path": "template/src/statix.config.ts",
-      "accessCount": 4,
-      "lastAccessed": 1776103848017,
-      "type": "file"
-    },
-    {
-      "path": "template/src/statix/components/fields/richtext/RichTextToolbar.tsx",
-      "accessCount": 4,
-      "lastAccessed": 1776104537640,
-      "type": "file"
-    },
-    {
-      "path": "template/src/statix/components/fields/richtext/InlineMenu.tsx",
-      "accessCount": 4,
-      "lastAccessed": 1776104551643,
-      "type": "file"
-    },
-    {
-      "path": "template/src/app/admin/[collectionSlug]/page.tsx",
-      "accessCount": 4,
-      "lastAccessed": 1776118829528,
-      "type": "file"
-    },
-    {
-      "path": "template/src/statix/components/users/UserListItem.tsx",
-      "accessCount": 3,
-      "lastAccessed": 1776086312204,
-      "type": "directory"
-    },
-    {
-      "path": "template/src/statix/lib/api-response.ts",
-      "accessCount": 3,
-      "lastAccessed": 1776103819012,
-      "type": "file"
-    },
-    {
-      "path": "template/src/statix/components/fields/richtext",
-      "accessCount": 3,
-      "lastAccessed": 1776104558845,
-      "type": "directory"
-    },
-    {
-      "path": "template/src/statix/hooks/use-content.ts",
-      "accessCount": 3,
-      "lastAccessed": 1776105119652,
-      "type": "file"
-    },
-    {
-      "path": "template/src/app/admin/[collectionSlug]/[id]/page.tsx",
-      "accessCount": 3,
-      "lastAccessed": 1776118093316,
-      "type": "file"
-    },
-    {
-      "path": "template/src/app/admin/media/page.tsx",
+      "path": "template/src/statix/components/ui/alert.tsx",
       "accessCount": 2,
-      "lastAccessed": 1776087322762,
-      "type": "file"
-    },
-    {
-      "path": "template/src/app/api/admin/audit/route.ts",
-      "accessCount": 2,
-      "lastAccessed": 1776101415746,
-      "type": "file"
-    },
-    {
-      "path": "template/src/app/api/admin/activity/route.ts",
-      "accessCount": 2,
-      "lastAccessed": 1776101416465,
-      "type": "file"
-    },
-    {
-      "path": "template/src/statix/hooks/use-users.ts",
-      "accessCount": 2,
-      "lastAccessed": 1776103925102,
-      "type": "file"
-    },
-    {
-      "path": "template/src/statix/lib/github-cms.ts",
-      "accessCount": 2,
-      "lastAccessed": 1776118304739,
-      "type": "directory"
-    },
-    {
-      "path": "template/src/statix/components/dashboard/SingletonDashboardCard.tsx",
-      "accessCount": 2,
-      "lastAccessed": 1776118378979,
-      "type": "directory"
-    },
-    {
-      "path": "template/src/statix/lib/constants.ts",
-      "accessCount": 2,
-      "lastAccessed": 1776118780454,
-      "type": "directory"
-    },
-    {
-      "path": "template/src/app/admin/trash/page.tsx",
-      "accessCount": 1,
-      "lastAccessed": 1776087311953,
-      "type": "file"
-    },
-    {
-      "path": "template/src/app/admin/access-denied/page.tsx",
-      "accessCount": 1,
-      "lastAccessed": 1776101460808,
-      "type": "file"
-    },
-    {
-      "path": "template/src/statix/hooks",
-      "accessCount": 1,
-      "lastAccessed": 1776103763115,
-      "type": "directory"
-    },
-    {
-      "path": "template/src/statix/components/fields/richtext/toolbar-items.ts",
-      "accessCount": 1,
-      "lastAccessed": 1776104517905,
-      "type": "file"
-    },
-    {
-      "path": "template/src/statix",
-      "accessCount": 1,
-      "lastAccessed": 1776105112646,
-      "type": "directory"
-    },
-    {
-      "path": "template/src/statix/lib",
-      "accessCount": 1,
-      "lastAccessed": 1776105113528,
-      "type": "directory"
-    },
-    {
-      "path": "template/src/statix/lib/content-status.ts",
-      "accessCount": 1,
-      "lastAccessed": 1776105137186,
+      "lastAccessed": 1776182799142,
       "type": "file"
     }
   ],

@@ -30,7 +30,7 @@ export function LocalizedFieldsSection({
 
       <CardContent>
         <Tabs defaultValue={defaultLocale} className="w-full">
-          <TabsList className="mb-6">
+          <TabsList className="mb-6 w-fit">
             {locales.map((locale) => (
               <TabsTrigger
                 key={locale}
@@ -46,7 +46,6 @@ export function LocalizedFieldsSection({
             <TabsContent
               key={locale}
               value={locale}
-              forceMount={true}
               className="space-y-6 mt-0 data-[state=inactive]:hidden"
             >
               {fields.map((field) => (

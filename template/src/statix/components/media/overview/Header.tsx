@@ -2,10 +2,11 @@ import Link from "next/link";
 
 import { IconPhoto } from "@tabler/icons-react";
 
-import { Button } from "@/statix/components/ui/button";
+import { buttonVariants } from "@/statix/components/ui/button";
 import { CardHeader, CardTitle } from "@/statix/components/ui/card";
 import ui from "@/statix/content/ui.json";
 import { ROUTES } from "@/statix/lib/constants";
+import { cn } from "@/statix/lib/utils";
 
 export function Header() {
   return (
@@ -16,9 +17,7 @@ export function Header() {
         {ui.mediaOverview.title}
       </CardTitle>
 
-      <Button variant="outline" size="sm" asChild>
-        <Link href={ROUTES.ADMIN.MEDIA}>{ui.common.viewAll}</Link>
-      </Button>
+        <Link href={ROUTES.ADMIN.MEDIA} className={cn(buttonVariants({ variant: "outline" }))}>{ui.common.viewAll}</Link>
     </CardHeader>
   );
 }

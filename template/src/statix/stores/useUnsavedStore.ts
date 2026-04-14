@@ -3,7 +3,7 @@ import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import { immer } from "zustand/middleware/immer";
 
-interface UnsavedItem {
+export interface UnsavedItem {
   collectionSlug: string;
   id: string;
   title: string;

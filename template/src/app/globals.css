@@ -25,6 +25,9 @@
   --color-input: var(--input);
   --color-border: var(--border);
   --color-destructive: var(--destructive);
+  --color-warning: var(--warning);
+  --color-warning-foreground: var(--warning-foreground);
+  --color-warning-border: var(--warning-border);
   --color-accent-foreground: var(--accent-foreground);
   --color-accent: var(--accent);
   --color-muted-foreground: var(--muted-foreground);
@@ -210,7 +213,7 @@
   h4 {
     @apply scroll-m-20 text-xl font-semibold tracking-tight;
   }
- 
+
   blockquote {
     @apply mt-6 border-l-2 pl-6 italic;
   }

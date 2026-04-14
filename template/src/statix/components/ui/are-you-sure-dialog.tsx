@@ -102,7 +102,7 @@ export function AreYouSureDialog({
     // Controlled mode - open/onOpenChange managed externally
     return (
       <AlertDialog open={open} onOpenChange={onOpenChange}>
-        {trigger && <AlertDialogTrigger asChild>{trigger}</AlertDialogTrigger>}
+        {trigger && <AlertDialogTrigger>{trigger}</AlertDialogTrigger>}
 
         {dialogContent}
       </AlertDialog>
@@ -112,7 +112,7 @@ export function AreYouSureDialog({
   // Uncontrolled mode with trigger
   return (
     <AlertDialog>
-      <AlertDialogTrigger asChild>{trigger || children}</AlertDialogTrigger>
+      <AlertDialogTrigger>{trigger || children}</AlertDialogTrigger>
 
       {dialogContent}
     </AlertDialog>

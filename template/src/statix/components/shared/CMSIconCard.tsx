@@ -78,7 +78,7 @@ export function CMSIconCard({
   if (tooltip) {
     return (
       <Tooltip>
-        <TooltipTrigger asChild>{card}</TooltipTrigger>
+        <TooltipTrigger>{card}</TooltipTrigger>
         <TooltipContent>
           <p>{tooltip}</p>
         </TooltipContent>

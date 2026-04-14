@@ -63,7 +63,7 @@ export function TrashToolbar({
             </Button>
 
             <AlertDialog>
-              <AlertDialogTrigger asChild>
+              <AlertDialogTrigger>
                 <Button
                   variant="destructive"
                   size="sm"
@@ -99,7 +99,7 @@ export function TrashToolbar({
           </>
         ) : (
           <AlertDialog>
-            <AlertDialogTrigger asChild>
+            <AlertDialogTrigger>
               <Button
                 variant="outline"
                 size="sm"

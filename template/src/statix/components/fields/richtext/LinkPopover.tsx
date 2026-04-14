@@ -72,7 +72,7 @@ export function LinkPopover({
 
   return (
     <Popover open={isOpen} onOpenChange={setIsOpen}>
-      <PopoverTrigger asChild>
+      <PopoverTrigger>
         <Button
           type="button"
           variant={btnVariant(isLinkActive)}

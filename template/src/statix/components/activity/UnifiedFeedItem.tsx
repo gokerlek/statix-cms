@@ -7,9 +7,10 @@ import { IconArrowRight, IconExternalLink } from "@tabler/icons-react";
 
 import { UserAvatar } from "@/statix/components/shared/UserAvatar";
 import { Badge } from "@/statix/components/ui/badge";
-import { Button } from "@/statix/components/ui/button";
+import { buttonVariants } from "@/statix/components/ui/button";
 import { Card, CardContent } from "@/statix/components/ui/card";
 import type { UnifiedActivityItem } from "@/statix/lib/activity-feed";
+import { cn } from "@/statix/lib/utils";
 
 interface UnifiedFeedItemProps {
   item: UnifiedActivityItem;
@@ -62,8 +63,8 @@ export function UnifiedFeedItem({ item }: UnifiedFeedItemProps) {
               {/* GitHub link */}
             </Badge>
             {item.externalUrl && (
-                <Button variant="ghost" size="icon" className="shrink-0  p-1 size-fit" asChild>
                   <Link
+                      className={cn(buttonVariants({variant: "ghost", size: 'icon'})," shrink-0  p-1 size-fit hover:text-primary")}
                       href={item.externalUrl}
                       target="_blank"
                       rel="noopener noreferrer"
@@ -71,7 +72,6 @@ export function UnifiedFeedItem({ item }: UnifiedFeedItemProps) {
                   >
                     <IconExternalLink className="h-4 w-4" />
                   </Link>
-                </Button>
             )}
             </div>
           </div>

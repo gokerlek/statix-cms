@@ -3,10 +3,12 @@
 import { useState } from "react";
 import Link from "next/link";
 
-import { IconAlertCircle, IconFileText } from "@tabler/icons-react";
+import { IconAlertSquareRoundedFilled, IconFileText } from "@tabler/icons-react";
 
+import { Alert, AlertTitle, AlertDescription } from "@/statix/components/ui/alert";
 import { Badge } from "@/statix/components/ui/badge";
-import { Button } from "@/statix/components/ui/button";
+import { Button, buttonVariants } from "@/statix/components/ui/button";
+import { Card } from "@/statix/components/ui/card";
 import {
   Dialog,
   DialogContent,
@@ -17,6 +19,7 @@ import {
 import ui from "@/statix/content/ui.json";
 import { ROUTES } from "@/statix/lib/constants";
 import { useUnsavedStore } from "@/statix/stores/useUnsavedStore";
+import {cn} from "@/statix/lib/utils";
 
 export function DashboardUnsavedAlert() {
   const unsavedItems = useUnsavedStore((state) => state.unsavedItems);
@@ -33,39 +36,24 @@ export function DashboardUnsavedAlert() {
 
   const collectionText = "collection • last_updated_at last_updated_Time";
 
+
   return (
-    <div
-      className="mb-6 rounded-lg border p-4 bg-orange-50 border-orange-200 dark:bg-orange-950/20 dark:border-orange-900 text-orange-800 dark:text-orange-200 relative w-full"
-      role="alert"
-    >
-      <div className="flex items-center gap-2 mb-1">
-        <IconAlertCircle className="h-4 w-4 text-orange-600 dark:text-orange-400" />
-
-        <h5 className="font-medium leading-none tracking-tight flex items-center gap-2">
-          {ui.dashboard.alert.title}
-
-          <Badge
-            variant="outline"
-            className="ml-2 border-orange-300 text-orange-700 dark:border-orange-700 dark:text-orange-300"
-          >
-            {ui.dashboard.alert.subtitle.replace("{count}", count.toString())}
-          </Badge>
-        </h5>
-      </div>
-
-      <div className="text-sm [&_p]:leading-relaxed flex items-center justify-between">
+    <Alert>
+      <IconAlertSquareRoundedFilled className="fill-warning w-12 h-12"/>
+      <div className="flex-1 flex flex-col gap-1">
+      <AlertTitle className="flex items-center gap-2">
+        {ui.dashboard.alert.title}
+        <Badge variant="outline">
+          {ui.dashboard.alert.subtitle.replace("{count}", count.toString())}
+        </Badge>
+      </AlertTitle>
+      <AlertDescription className="flex items-center justify-between flex-wrap gap-5 ">
         <span>{ui.dashboard.alert.description}</span>
 
         <div className="flex items-center gap-2 ml-4">
           <Dialog open={open} onOpenChange={setOpen}>
-            <DialogTrigger asChild>
-              <Button
-                variant="outline"
-                size="sm"
-                className="bg-white dark:bg-background border-orange-200 hover:bg-orange-100 hover:text-orange-900 dark:border-orange-800 dark:hover:bg-orange-900/40"
-              >
+            <DialogTrigger className={cn(buttonVariants({variant: "outline", size: "sm"}),"text-foreground")}>
                 {ui.dashboard.alert.viewList}
-              </Button>
             </DialogTrigger>
 
             <DialogContent>
@@ -75,16 +63,15 @@ export function DashboardUnsavedAlert() {
 
               <div className="py-4 space-y-2 max-h-[60vh] overflow-y-auto">
                 {items.map((item) => (
-                  <Link
-                    key={`${item.collectionSlug}-${item.id}`}
-                    href={ROUTES.ADMIN.COLLECTION_ITEM(
-                      item.collectionSlug,
-                      item.id,
-                    )}
-                    className="flex justify-between items-center p-3 rounded-lg border hover:bg-muted transition-colors group"
-                    onClick={() => setOpen(false)}
-                  >
-                    <div className="flex items-center gap-3">
+                  <Card key={`${item.collectionSlug}-${item.id}`} className="p-0">
+                    <Link
+                      href={ROUTES.ADMIN.COLLECTION_ITEM(
+                        item.collectionSlug,
+                        item.id,
+                      )}
+                      className="flex items-center gap-3 p-3 rounded-xl hover:bg-muted transition-colors group"
+                      onClick={() => setOpen(false)}
+                    >
                       <IconFileText className="w-4 h-4 text-muted-foreground" />
 
                       <div>
@@ -105,23 +92,23 @@ export function DashboardUnsavedAlert() {
                             )}
                         </div>
                       </div>
-                    </div>
-                  </Link>
+                    </Link>
+                  </Card>
                 ))}
               </div>
             </DialogContent>
           </Dialog>
 
           <Button
-            variant="ghost"
+            variant="secondary"
             size="sm"
             onClick={dismissAlert}
-            className="text-orange-700 hover:text-orange-900 hover:bg-orange-100 dark:text-orange-300 dark:hover:bg-orange-900/40"
           >
             {ui.dashboard.alert.dismiss}
           </Button>
         </div>
+      </AlertDescription>
       </div>
-    </div>
+    </Alert>
   );
 }
