@@ -17,7 +17,11 @@ export function useMediaSearch({
   searchQuery = "",
   activeTab = "all",
 }: UseMediaSearchOptions = {}) {
-  const { data: images = [], isLoading: loading } = useMedia();
+  const { data, isLoading: loading, hasNextPage, isFetchingNextPage, fetchNextPage } = useMedia();
+  const images = useMemo(
+    () => data?.pages.flatMap((p) => p.items) ?? [],
+    [data],
+  );
 
   // Get available tabs based on collections and images
   const availableTabs = useMemo(() => {
@@ -113,5 +117,8 @@ export function useMediaSearch({
     filteredCount: filteredImages.length,
     availableTabs,
     allImages: images,
+    hasNextPage,
+    isFetchingNextPage,
+    fetchNextPage,
   };
 }

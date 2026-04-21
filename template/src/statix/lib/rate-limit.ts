@@ -1,28 +1,48 @@
 /**
- * Simple in-memory rate limiter for API routes
- * For production with multiple instances, consider using Redis
+ * Simple in-memory rate limiter for API routes.
+ *
+ * Characteristics:
+ * - **Single-instance**: memory-backed cache; for multi-instance / serverless
+ *   production use an external store (Redis, Upstash). See SECURITY.md.
+ * - **HMR-safe**: the cleanup interval is guarded by a globalThis flag so
+ *   Next.js hot-reload doesn't leak timers on every file edit.
+ * - **Serverless-safe**: in production we skip the background interval and
+ *   sweep lazily on every `checkRateLimit` call — because each serverless
+ *   instance spins up its own timer otherwise.
  */
+
+import { env } from "./env";
 
 interface RateLimitEntry {
   count: number;
   resetTime: number;
 }
 
-const cache = new Map<string, RateLimitEntry>();
+// Use globalThis so HMR module re-runs reuse the same Map (and the same timer below).
+const g = globalThis as typeof globalThis & {
+  __statix_rl_cache?: Map<string, RateLimitEntry>;
+  __statix_rl_interval?: NodeJS.Timeout;
+};
 
-// Clean up expired entries periodically
-setInterval(
-  () => {
-    const now = Date.now();
+const cache: Map<string, RateLimitEntry> = g.__statix_rl_cache ?? new Map();
 
-    cache.forEach((entry, key) => {
-      if (entry.resetTime < now) {
-        cache.delete(key);
-      }
-    });
-  },
-  60 * 1000, // Clean every minute
-);
+if (!g.__statix_rl_cache) {
+  g.__statix_rl_cache = cache;
+}
+
+function sweepExpired(now = Date.now()) {
+  cache.forEach((entry, key) => {
+    if (entry.resetTime < now) {
+      cache.delete(key);
+    }
+  });
+}
+
+// Only set the interval in dev/test — serverless production creates a new timer
+// per cold start, which leaks. In prod we rely on lazy sweep inside checkRateLimit.
+if (process.env.NODE_ENV !== "production" && !g.__statix_rl_interval) {
+  g.__statix_rl_interval = setInterval(() => sweepExpired(), 60 * 1000);
+}
 
 interface RateLimitConfig {
   /** Maximum number of requests allowed in the window */
@@ -38,10 +58,12 @@ interface RateLimitResult {
 }
 
 /**
- * Check if a request should be rate limited
- * @param identifier - Unique identifier for the client (e.g., IP address, user ID)
- * @param config - Rate limit configuration
- * @returns Rate limit result with remaining requests info
+ * Check if a request should be rate limited.
+ *
+ * @param identifier - Unique bucket key. For IP-based limits pass the result
+ *   of `getClientIp(headers)`. Prefix keys by purpose to separate buckets,
+ *   e.g. `media:${ip}` or `auth:${ip}`.
+ * @param config - Rate limit configuration.
  */
 export function checkRateLimit(
   identifier: string,
@@ -49,6 +71,13 @@ export function checkRateLimit(
 ): RateLimitResult {
   const now = Date.now();
   const windowMs = config.windowSeconds * 1000;
+
+  // Lazy sweep — cheap, bounded by cache size.
+  if (process.env.NODE_ENV === "production" && cache.size > 0) {
+    // Only sweep if cache grows past a small threshold, to avoid O(n) per hit.
+    if (cache.size > 256) sweepExpired(now);
+  }
+
   const entry = cache.get(identifier);
 
   // No existing entry or expired
@@ -85,22 +114,37 @@ export function checkRateLimit(
 }
 
 /**
- * Get client IP address from request headers
+ * Extract a trustworthy client IP from proxied request headers.
+ *
+ * Priority order:
+ * 1. `x-vercel-forwarded-for` — set by Vercel edge; closest to client.
+ * 2. `cf-connecting-ip` — set by Cloudflare.
+ * 3. `x-real-ip` — set by Nginx and similar.
+ * 4. `x-forwarded-for` — we use the **last-but-N** hop where `N =
+ *    TRUSTED_PROXY_COUNT`. This prevents spoofing by a client that sends its
+ *    own `X-Forwarded-For: <attacker-ip>, <real-ip>`.
+ * 5. `"unknown"` fallback.
  */
 export function getClientIp(headers: Headers): string {
-  // Check common headers for proxied requests
+  const vercel = headers.get("x-vercel-forwarded-for");
+  if (vercel) return vercel.split(",")[0].trim();
+
+  const cf = headers.get("cf-connecting-ip");
+  if (cf) return cf.trim();
+
+  const real = headers.get("x-real-ip");
+  if (real) return real.trim();
+
   const forwardedFor = headers.get("x-forwarded-for");
-
   if (forwardedFor) {
-    return forwardedFor.split(",")[0].trim();
+    const parts = forwardedFor.split(",").map((s) => s.trim()).filter(Boolean);
+    if (parts.length === 0) return "unknown";
+    // Pick the IP that was inserted by the most-trusted hop.
+    // For trust=1 (default Vercel): take the last entry (real client behind proxy).
+    const trust = env.TRUSTED_PROXY_COUNT;
+    const idx = Math.max(0, parts.length - trust);
+    return parts[idx] ?? parts[parts.length - 1] ?? "unknown";
   }
 
-  const realIp = headers.get("x-real-ip");
-
-  if (realIp) {
-    return realIp;
-  }
-
-  // Fallback
   return "unknown";
 }

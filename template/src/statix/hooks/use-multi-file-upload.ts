@@ -48,7 +48,8 @@ export function useMultiFileUpload(): MultiFileUploadState &
   const [progress, setProgress] = useState({ completed: 0, total: 0 });
 
   const { mutateAsync: uploadMedia } = useUploadMedia();
-  const { data: existingMedia } = useMedia();
+  const { data: mediaData } = useMedia();
+  const existingMedia = mediaData?.pages.flatMap((p) => p.items);
 
   const handleFilesChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {

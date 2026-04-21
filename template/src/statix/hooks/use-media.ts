@@ -1,4 +1,4 @@
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { type InfiniteData, useInfiniteQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 
 import ui from "@/statix/content/ui.json";
@@ -15,25 +15,38 @@ export interface MediaFile {
   lastModified?: string;
 }
 
+interface MediaPage {
+  items: MediaFile[];
+  nextCursor: string | null;
+}
+
 export function useMedia() {
-  return useQuery<MediaFile[]>({
+  return useInfiniteQuery<MediaPage, Error, InfiniteData<MediaPage>, typeof QUERY_KEYS.media, string | null>({
     queryKey: QUERY_KEYS.media,
-    queryFn: async () => {
-      const response = await fetch("/api/media/list");
+    queryFn: async ({ pageParam }) => {
+      const url = pageParam
+        ? `/api/media/list?cursor=${encodeURIComponent(pageParam)}`
+        : "/api/media/list";
+
+      const response = await fetch(url);
 
       if (!response.ok) {
         throw new Error("Failed to fetch media");
       }
 
-      const data = await response.json();
-      // R2'den gelen nesnelere sha ve type ekle (GitHubFile uyumluluğu için)
-      return data.map((f: MediaFile) => ({
-        ...f,
-        sha: f.sha ?? f.path,
-        type: f.type ?? "file",
-      }));
+      const data: MediaPage = await response.json();
+      return {
+        ...data,
+        items: data.items.map((f) => ({
+          ...f,
+          sha: (f.sha as string | undefined) ?? f.path,
+          type: (f.type as string | undefined) ?? "file",
+        })),
+      };
     },
-    staleTime: 1000 * 60, // 1 minute
+    initialPageParam: null,
+    getNextPageParam: (lastPage) => lastPage.nextCursor ?? undefined,
+    staleTime: 1000 * 60,
     refetchOnWindowFocus: false,
   });
 }
@@ -99,25 +112,23 @@ export function useDeleteMedia() {
       return response.json();
     },
     onMutate: async ({ path }) => {
-      // Cancel any outgoing refetches (so they don't overwrite our optimistic update)
       await queryClient.cancelQueries({ queryKey: QUERY_KEYS.media });
 
-      // Snapshot the previous value
-      const previousMedia = queryClient.getQueryData<MediaFile[]>(QUERY_KEYS.media);
+      const previousMedia = queryClient.getQueryData<InfiniteData<MediaPage>>(QUERY_KEYS.media);
 
-      // Optimistically update to the new value
       if (previousMedia) {
-        queryClient.setQueryData<MediaFile[]>(
-          QUERY_KEYS.media,
-          previousMedia.filter((file) => file.path !== path),
-        );
+        queryClient.setQueryData<InfiniteData<MediaPage>>(QUERY_KEYS.media, {
+          ...previousMedia,
+          pages: previousMedia.pages.map((page) => ({
+            ...page,
+            items: page.items.filter((file) => file.path !== path),
+          })),
+        });
       }
 
-      // Return a context object with the snapshotted value
       return { previousMedia };
     },
-    onError: (err, newTodo, context) => {
-      // If the mutation fails, use the context returned from onMutate to roll back
+    onError: (_err, _vars, context) => {
       if (context?.previousMedia) {
         queryClient.setQueryData(QUERY_KEYS.media, context.previousMedia);
       }

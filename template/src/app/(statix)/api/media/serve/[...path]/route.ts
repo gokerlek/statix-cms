@@ -1,30 +1,41 @@
 import { GetObjectCommand } from "@aws-sdk/client-s3";
 import { NextRequest, NextResponse } from "next/server";
 
+import {
+  PRIVATE_STORAGE_PREFIXES,
+  PUBLIC_STORAGE_PREFIXES,
+  safePath,
+} from "@/statix/lib/api-schemas";
+import { env } from "@/statix/lib/env";
 import { getR2Client } from "@/statix/lib/r2";
 import { getSession } from "@/statix/lib/session";
-import { env } from "@/statix/lib/env";
 
-// R2'den S3 API ile proxy — public URL engellendiğinde çalışır
+/**
+ * Proxy fetch an object out of R2 by its key. Public prefixes
+ * (`uploads/`, `avatars/`, `files/`) are served without auth; trashed
+ * items (`trash/`) require a valid session.
+ *
+ * Path traversal hardening lives in the shared `safePath` schema — this
+ * route just parses the joined path through it.
+ */
 export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ path: string[] }> },
 ) {
   const { path: pathArray } = await params;
-  const key = pathArray.join("/");
+  const rawKey = pathArray.join("/");
 
-  // Block path traversal and double slashes regardless of prefix
-  if (key.includes("..") || key.includes("//")) {
+  // Validate + normalize path. safePath rejects `..`, URL-encoded traversal,
+  // null bytes, backslashes, and strips `public/` legacy prefix / leading
+  // slashes.
+  const parsed = safePath.safeParse(rawKey);
+  if (!parsed.success) {
     return new NextResponse("Not Found", { status: 404 });
   }
+  const key = parsed.data;
 
-  // Public prefixes — no auth required
-  const PUBLIC_PREFIXES = ["uploads/", "avatars/"];
-  // Auth-gated prefixes — require a valid session
-  const PRIVATE_PREFIXES = ["trash/"];
-
-  const isPublic = PUBLIC_PREFIXES.some((p) => key.startsWith(p));
-  const isPrivate = PRIVATE_PREFIXES.some((p) => key.startsWith(p));
+  const isPublic = PUBLIC_STORAGE_PREFIXES.some((p) => key.startsWith(p));
+  const isPrivate = PRIVATE_STORAGE_PREFIXES.some((p) => key.startsWith(p));
 
   if (!isPublic && !isPrivate) {
     return new NextResponse("Not Found", { status: 404 });
@@ -48,7 +59,8 @@ export async function GET(
     );
 
     const contentType = obj.ContentType ?? "application/octet-stream";
-    const isInlineType = contentType.startsWith("image/") || contentType === "application/pdf";
+    const isInlineType =
+      contentType.startsWith("image/") || contentType === "application/pdf";
 
     const body = obj.Body as ReadableStream;
     return new NextResponse(body, {

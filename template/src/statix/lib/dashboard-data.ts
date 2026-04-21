@@ -222,13 +222,13 @@ export const getSystemStats = unstable_cache(
 
 export async function getMediaStats() {
   // R2'den dosya listesi ve trash
-  const [r2Files, r2Trash] = await Promise.all([
-    listR2Media("uploads/").catch(() => []),
+  const [r2Result, r2Trash] = await Promise.all([
+    listR2Media("uploads/").catch(() => ({ items: [], nextCursor: undefined })),
     listR2Trash().catch(() => []),
   ]);
 
   // Uzantısı olmayan dosyaları da dahil et (WhatsApp gibi)
-  const mediaFiles = r2Files.filter((f) => !f.key.endsWith("/"));
+  const mediaFiles = r2Result.items.filter((f) => !f.key.endsWith("/"));
 
   const totalSize = mediaFiles.reduce((acc, f) => acc + (f.size ?? 0), 0);
 

@@ -27,7 +27,13 @@
     "error": {
       "title": "Something went wrong",
       "description": "An unexpected error occurred. Please try again.",
-      "retry": "Try again"
+      "retry": "Try again",
+      "errorId": "Error ID"
+    },
+    "notFound": {
+      "title": "Page not found",
+      "description": "The page you're looking for doesn't exist or has moved.",
+      "backHome": "Back to dashboard"
     }
   },
   "sidebar": {
@@ -129,7 +135,8 @@
       "viewList": "View List",
       "dialogTitle": "Unsaved Local Changes",
       "lastUpdated": "Last updated:",
-      "dismiss": "Dismiss"
+      "dismiss": "Dismiss",
+      "clearAll": "Clear all"
     }
   },
   "mediaPage": {
@@ -508,5 +515,14 @@
       "media.permanent_delete": "Media Deleted",
       "media.move": "Media Moved"
     }
+  },
+  "search": {
+    "placeholder": "Search across all collections…",
+    "trigger": "Search",
+    "empty": "No results. Try a different query.",
+    "typing": "Type to search…",
+    "searching": "Searching…",
+    "truncatedHint": "Refine your query — not every collection could be scanned.",
+    "open": "Open"
   }
 }

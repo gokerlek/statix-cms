@@ -6,7 +6,7 @@ import { isMarkActive } from "prosekit/core";
 import { useEditor } from "prosekit/react";
 import { IconCheck, IconLink, IconTrash } from "@tabler/icons-react";
 
-import { Button } from "@/statix/components/ui/button";
+import { Button, buttonVariants } from "@/statix/components/ui/button";
 import { Input } from "@/statix/components/ui/input";
 import { Label } from "@/statix/components/ui/label";
 import {
@@ -15,6 +15,7 @@ import {
   PopoverTrigger,
 } from "@/statix/components/ui/popover";
 import ui from "@/statix/content/ui.json";
+import { cn } from "@/statix/lib/utils";
 
 interface LinkPopoverProps {
   btnSize?: "sm";
@@ -72,17 +73,18 @@ export function LinkPopover({
 
   return (
     <Popover open={isOpen} onOpenChange={setIsOpen}>
-      <PopoverTrigger>
-        <Button
-          type="button"
-          variant={btnVariant(isLinkActive)}
-          size={btnSize}
-          className={btnClass}
-          onClick={openPopover}
-          title={ui.richTextToolbar.link}
-        >
-          <IconLink size={iconSize} />
-        </Button>
+      <PopoverTrigger
+        className={cn(
+          buttonVariants({
+            variant: btnVariant(isLinkActive),
+            size: btnSize,
+          }),
+          btnClass,
+        )}
+        onClick={openPopover}
+        title={ui.richTextToolbar.link}
+      >
+        <IconLink size={iconSize} />
       </PopoverTrigger>
       <PopoverContent className="w-80">
         <div className="space-y-2">

@@ -7,7 +7,6 @@ export const statixConfig: StatixConfig = {
     repo: process.env.GITHUB_REPO || "",
     branch: process.env.GITHUB_BRANCH || "main",
   },
-  mediaFolder: "uploads",
   i18n: {
     locales: ["en", "tr"],
     defaultLocale: "en",
@@ -289,70 +288,16 @@ export const statixConfig: StatixConfig = {
         {
           name: "content",
           label: "Content",
-          type: "blocks",
+          type: "richtext",
           localized: true,
-          blocks: [
-            {
-              type: "markdown",
-              label: "Markdown",
-              fields: [
-                {
-                  name: "content",
-                  label: "Content",
-                  type: "textarea",
-                  rows: 10,
-                  placeholder: "# Write your content here...",
-                },
-              ],
-            },
-            {
-              type: "image",
-              label: "Image",
-              fields: [
-                {
-                  name: "image",
-                  label: "Image",
-                  type: "image",
-                  required: true,
-                },
-                {
-                  name: "caption",
-                  label: "Caption",
-                  type: "text",
-                },
-                {
-                  name: "alt",
-                  label: "Alt Text",
-                  type: "text",
-                  placeholder: "Describe the image...",
-                },
-              ],
-            },
-            {
-              type: "quote",
-              label: "Quote",
-              fields: [
-                {
-                  name: "text",
-                  label: "Quote",
-                  type: "textarea",
-                  rows: 3,
-                },
-                {
-                  name: "author",
-                  label: "Author",
-                  type: "text",
-                },
-              ],
-            },
-          ],
+          placeholder: "Write your post...",
         },
       ],
     },
     {
-      slug: "people",
-      label: "People",
-      path: "content/people",
+      slug: "team",
+      label: "Team",
+      path: "content/team",
       icon: "Users",
       titleField: "name",
       fields: [

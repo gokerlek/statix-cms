@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import { AreYouSureDialog } from "@/statix/components/ui/are-you-sure-dialog";
 import ui from "@/statix/content/ui.json";
@@ -24,6 +24,7 @@ export function MediaLibrary({ onSelect, selectedUrl }: MediaLibraryProps) {
   const [fileToDelete, setFileToDelete] = useState<GitHubFile | null>(null);
   const [fileToMove, setFileToMove] = useState<(GitHubFile & { isOrphaned?: boolean }) | null>(null);
   const [isBulkDeleting, setIsBulkDeleting] = useState(false);
+  const [bulkDeleteDialogOpen, setBulkDeleteDialogOpen] = useState(false);
 
   const {
     groupedImages,
@@ -32,7 +33,26 @@ export function MediaLibrary({ onSelect, selectedUrl }: MediaLibraryProps) {
     filteredCount,
     totalCount,
     images,
+    hasNextPage,
+    isFetchingNextPage,
+    fetchNextPage,
   } = useMediaSearch({ searchQuery, activeTab });
+
+  const sentinelRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!sentinelRef.current) return;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting && hasNextPage && !isFetchingNextPage) {
+          fetchNextPage();
+        }
+      },
+      { threshold: 0.1 },
+    );
+    observer.observe(sentinelRef.current);
+    return () => observer.disconnect();
+  }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
 
   const {
     isSelectMode,
@@ -69,17 +89,12 @@ export function MediaLibrary({ onSelect, selectedUrl }: MediaLibraryProps) {
     );
   };
 
-  const handleBulkDelete = async () => {
-    if (
-      !confirm(
-        ui.mediaLibrary.bulkDeleteConfirm.replace(
-          "{count}",
-          selectedForAction.size.toString(),
-        ),
-      )
-    )
-      return;
+  const handleBulkDelete = () => {
+    if (selectedForAction.size === 0) return;
+    setBulkDeleteDialogOpen(true);
+  };
 
+  const confirmBulkDelete = async () => {
     setIsBulkDeleting(true);
     const filesToDelete = images.filter((img) =>
       selectedForAction.has(img.path),
@@ -99,6 +114,7 @@ export function MediaLibrary({ onSelect, selectedUrl }: MediaLibraryProps) {
     }
 
     setIsBulkDeleting(false);
+    setBulkDeleteDialogOpen(false);
     clearSelection();
   };
 
@@ -162,6 +178,14 @@ export function MediaLibrary({ onSelect, selectedUrl }: MediaLibraryProps) {
             </>
           }
         />
+
+        {/* Infinite scroll sentinel */}
+        <div ref={sentinelRef} className="h-4" />
+        {isFetchingNextPage && (
+          <div className="flex justify-center py-4">
+            <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+          </div>
+        )}
       </div>
 
       <AreYouSureDialog
@@ -181,6 +205,24 @@ export function MediaLibrary({ onSelect, selectedUrl }: MediaLibraryProps) {
         onConfirm={confirmDelete}
         confirmText={ui.common.delete}
         isLoading={isDeleting}
+        loadingText={ui.common.loading}
+      />
+
+      <AreYouSureDialog
+        open={bulkDeleteDialogOpen}
+        onOpenChange={(open) => !isBulkDeleting && setBulkDeleteDialogOpen(open)}
+        title={ui.mediaLibrary.deleteDialogTitle}
+        description={
+          <span>
+            {ui.mediaLibrary.bulkDeleteConfirm.replace(
+              "{count}",
+              selectedForAction.size.toString(),
+            )}
+          </span>
+        }
+        onConfirm={confirmBulkDelete}
+        confirmText={ui.common.delete}
+        isLoading={isBulkDeleting}
         loadingText={ui.common.loading}
       />
 

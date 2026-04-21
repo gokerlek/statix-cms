@@ -4,7 +4,7 @@ import { IconAlertCircle, IconCircleCheck, IconFolderOpen, IconTrash } from "@ta
 
 import ui from "@/statix/content/ui.json";
 import type { MediaFile } from "@/statix/hooks/use-media";
-import { cn, getGitHubRawUrl } from "@/statix/lib/utils";
+import { cn } from "@/statix/lib/utils";
 
 interface MediaItemProps {
   file: MediaFile & { isOrphaned?: boolean };
@@ -29,9 +29,9 @@ export function MediaItem({
   isSelectedForAction,
   onToggleSelect,
 }: MediaItemProps) {
-  // R2 public URL veya fallback
-  const imageUrl = file.url || getGitHubRawUrl(file.path);
-  // onSelect'e R2 public URL gönder
+  // Serve route üzerinden proxy — NEXT_PUBLIC_MEDIA_BASE_URL'den bağımsız, her zaman çalışır
+  const imageUrl = `/api/media/serve/${file.path}`;
+  // onSelect'e R2 public URL gönder (content'te saklanacak değer)
   const selectUrl = file.url || `/${file.path.replace(/^public\//, "")}`;
 
   const handleClick = (e: React.MouseEvent) => {

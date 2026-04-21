@@ -184,26 +184,34 @@ export async function moveR2(
   return getPublicUrl(targetKey);
 }
 
-// uploads/ prefix'li tüm medyayı listele (trash hariç)
-export async function listR2Media(prefix = "uploads/"): Promise<
-  Array<{
-    key: string;
-    url: string;
-    size: number;
-    lastModified: Date | undefined;
-  }>
-> {
+// uploads/ prefix'li medyayı listele (cursor tabanlı, trash hariç)
+export async function listR2Media(
+  prefix = "uploads/",
+  options: { cursor?: string; limit?: number } = {},
+): Promise<{
+  items: Array<{ key: string; url: string; size: number; lastModified: Date | undefined }>;
+  nextCursor: string | undefined;
+}> {
   const r2 = getR2Client();
   const bucket = getBucket();
+  const { cursor, limit = 50 } = options;
 
   const list = await r2.send(
-    new ListObjectsV2Command({ Bucket: bucket, Prefix: prefix }),
+    new ListObjectsV2Command({
+      Bucket: bucket,
+      Prefix: prefix,
+      MaxKeys: limit,
+      ContinuationToken: cursor,
+    }),
   );
 
-  return (list.Contents ?? []).map((obj) => ({
-    key: obj.Key!,
-    url: getPublicUrl(obj.Key!),
-    size: obj.Size ?? 0,
-    lastModified: obj.LastModified,
-  }));
+  return {
+    items: (list.Contents ?? []).map((obj) => ({
+      key: obj.Key!,
+      url: getPublicUrl(obj.Key!),
+      size: obj.Size ?? 0,
+      lastModified: obj.LastModified,
+    })),
+    nextCursor: list.IsTruncated ? list.NextContinuationToken : undefined,
+  };
 }

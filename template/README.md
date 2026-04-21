@@ -242,7 +242,7 @@ export const statixConfig: StatixConfig = {
 Icons are from [Lucide](https://lucide.dev/icons/). Common examples:
 
 - `FileText` - Documents
-- `Users` - Team/People
+- `Users` - Team
 - `Settings` - Configuration
 - `Home` - Homepage
 - `Image` - Gallery

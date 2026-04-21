@@ -128,7 +128,7 @@ export interface StatixConfig {
     repo: string;
     branch: string;
   };
-  mediaFolder: string; // e.g., 'public/uploads'
+
   maxUploadSize?: number; // in bytes, default: 5MB (5 * 1024 * 1024)
   i18n?: {
     locales: string[];

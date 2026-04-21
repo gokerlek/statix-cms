@@ -8,7 +8,7 @@ import { db } from "@/statix/lib/db";
 import { userInvites, user } from "@/statix/db/schema";
 import { auth } from "@/statix/lib/auth";
 import { writeAudit } from "@/statix/lib/audit";
-import { checkRateLimit } from "@/statix/lib/rate-limit";
+import { checkRateLimit, getClientIp } from "@/statix/lib/rate-limit";
 import { AcceptInviteForm } from "./AcceptInviteForm";
 
 export const runtime = "nodejs";
@@ -57,12 +57,11 @@ export default async function AcceptInvitePage({
       redirect(`/auth/accept-invite?token=${token}&error=invalid`);
     }
 
-    // IP-based rate limit: 20/hour against brute-force
+    // IP-based rate limit: 20/hour against brute-force.
+    // Use the shared getClientIp() so it honours TRUSTED_PROXY_COUNT and
+    // rejects spoofed x-forwarded-for headers consistently with /proxy.ts.
     const reqHeaders = await headers();
-    const ip =
-      reqHeaders.get("x-forwarded-for")?.split(",")[0].trim() ??
-      reqHeaders.get("x-real-ip") ??
-      "unknown";
+    const ip = getClientIp(reqHeaders);
 
     const rl = checkRateLimit(`accept-invite:ip:${ip}`, {
       limit: 20,

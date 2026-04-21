@@ -9,8 +9,55 @@ import { writeAudit } from "./audit";
 
 const resend = new Resend(env.RESEND_API_KEY);
 
+// Build trustedOrigins from env: always include the configured BETTER_AUTH_URL,
+// and if we're running on Vercel, include the preview/production URL too so
+// OAuth callbacks from Vercel-generated hostnames aren't rejected.
+const trustedOrigins = [
+  env.BETTER_AUTH_URL,
+  ...(env.VERCEL_ENV === "preview" && env.VERCEL_BRANCH_URL
+    ? [`https://${env.VERCEL_BRANCH_URL}`]
+    : []),
+  ...(env.VERCEL_ENV === "production" && env.VERCEL_URL
+    ? [`https://${env.VERCEL_URL}`]
+    : []),
+];
+
 export const auth = betterAuth({
   database: drizzleAdapter(db, { provider: "sqlite", schema }),
+
+  trustedOrigins,
+
+  // Global rate-limit — applied to all /api/auth/* endpoints. Middleware
+  // delegates the whole /api/auth/* namespace here so poll endpoints
+  // (get-session, list-sessions) don't self-429.
+  //
+  // NOTE: default storage is in-memory. For multi-instance / serverless prod
+  // swap to Redis/Upstash (see SECURITY.md).
+  rateLimit: {
+    enabled: true,
+    window: 60,
+    max: 30,
+    customRules: {
+      // OTP flood protection — expensive for the user (email delivery) and
+      // for us (Resend quota). 3/minute is still friendly to typos.
+      "/email-otp/send-verification-otp": { window: 60, max: 3 },
+      // OTP verify — Better Auth's built-in allowedAttempts: 3 per OTP already
+      // handles brute force; this caps retries across OTP regenerations.
+      "/sign-in/email-otp": { window: 60, max: 10 },
+      // OAuth callbacks — legitimate traffic is low, but keep it loose for
+      // provider retries.
+      "/callback/*": { window: 60, max: 30 },
+      "/sign-up/*": { window: 60, max: 10 },
+      "/verify-email": { window: 60, max: 10 },
+      "/reset-password/*": { window: 60, max: 10 },
+      "/forget-password": { window: 60, max: 5 },
+      // Poll endpoints — generous to avoid self-DoS when multiple tabs are open
+      // with React Strict Mode double-render × TanStack refetch.
+      "/get-session": { window: 60, max: 300 },
+      "/error": { window: 60, max: 60 },
+      "/list-sessions": { window: 60, max: 300 },
+    },
+  },
 
   user: {
     additionalFields: {

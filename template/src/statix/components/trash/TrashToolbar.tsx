@@ -11,8 +11,9 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/statix/components/ui/alert-dialog";
-import { Button } from "@/statix/components/ui/button";
+import { Button, buttonVariants } from "@/statix/components/ui/button";
 import { useTranslation } from "@/statix/hooks/use-translation";
+import { cn } from "@/statix/lib/utils";
 
 interface TrashToolbarProps {
   selectedCount: number;
@@ -63,16 +64,15 @@ export function TrashToolbar({
             </Button>
 
             <AlertDialog>
-              <AlertDialogTrigger>
-                <Button
-                  variant="destructive"
-                  size="sm"
-                  disabled={isRestoring || isDeleting}
-                >
-                  <IconTrash className="mr-2 h-4 w-4" />
+              <AlertDialogTrigger
+                className={cn(
+                  buttonVariants({ variant: "destructive", size: "sm" }),
+                )}
+                disabled={isRestoring || isDeleting}
+              >
+                <IconTrash className="mr-2 h-4 w-4" />
 
-                  {t("trash.deleteSelected")}
-                </Button>
+                {t("trash.deleteSelected")}
               </AlertDialogTrigger>
 
               <AlertDialogContent>
@@ -99,16 +99,15 @@ export function TrashToolbar({
           </>
         ) : (
           <AlertDialog>
-            <AlertDialogTrigger>
-              <Button
-                variant="outline"
-                size="sm"
-                className="text-destructive hover:text-destructive"
-              >
-                <IconX className="mr-2 h-4 w-4" />
+            <AlertDialogTrigger
+              className={cn(
+                buttonVariants({ variant: "outline", size: "sm" }),
+                "text-destructive hover:text-destructive",
+              )}
+            >
+              <IconX className="mr-2 h-4 w-4" />
 
-                {t("trash.emptyTrash")}
-              </Button>
+              {t("trash.emptyTrash")}
             </AlertDialogTrigger>
 
             <AlertDialogContent>

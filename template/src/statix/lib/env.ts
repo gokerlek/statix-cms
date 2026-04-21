@@ -27,15 +27,30 @@ const envSchema = z.object({
   RESEND_API_KEY: z.string().min(1, "RESEND_API_KEY is required"),
   RESEND_FROM_EMAIL: z.string().email("RESEND_FROM_EMAIL must be a valid email"),
 
-  // Cloudflare R2 (medya depolama) — opsiyonel: drizzle-kit/seed scriptlerin çökmesini önler
+  // Cloudflare R2 (medya depolama) — server-side credentials opsiyonel (drizzle-kit/seed bunları istemez);
+  // ama public media URL build-time'da CSP/remotePatterns için gerekli — required.
   R2_ACCOUNT_ID: z.string().optional(),
   R2_ACCESS_KEY_ID: z.string().optional(),
   R2_SECRET_ACCESS_KEY: z.string().optional(),
   R2_BUCKET_NAME: z.string().optional(),
-  NEXT_PUBLIC_MEDIA_BASE_URL: z.string().url().optional(),
+  NEXT_PUBLIC_MEDIA_BASE_URL: z
+    .string()
+    .url("NEXT_PUBLIC_MEDIA_BASE_URL must be a valid URL (e.g. https://pub-xxx.r2.dev)"),
+
+  // CSP violation report-to endpoint (opsiyonel — Cloudflare, Report URI, Sentry CSP ingest, etc.)
+  CSP_REPORT_URI: z.string().url().optional(),
 
   // Bootstrap — ilk admin (kullanım sonrası silinir)
   INITIAL_ADMIN_EMAIL: z.string().email().optional(),
+
+  // Proxy / rate-limit hardening
+  /** Number of trusted proxies in front of the app (e.g. 1 for Vercel/Cloudflare). Used by getClientIp to pick the correct XFF hop. */
+  TRUSTED_PROXY_COUNT: z.coerce.number().int().min(0).default(1),
+
+  // Vercel auto-injected — used to build trustedOrigins for preview + production
+  VERCEL_URL: z.string().optional(),
+  VERCEL_BRANCH_URL: z.string().optional(),
+  VERCEL_ENV: z.enum(["development", "preview", "production"]).optional(),
 });
 
 function validateEnv() {

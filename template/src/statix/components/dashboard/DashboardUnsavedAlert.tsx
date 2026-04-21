@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 
 import { IconAlertSquareRoundedFilled, IconFileText } from "@tabler/icons-react";
@@ -25,7 +25,17 @@ export function DashboardUnsavedAlert() {
   const unsavedItems = useUnsavedStore((state) => state.unsavedItems);
   const isAlertDismissed = useUnsavedStore((state) => state.isAlertDismissed);
   const dismissAlert = useUnsavedStore((state) => state.dismissAlert);
+  const cleanupOrphans = useUnsavedStore((state) => state.cleanupOrphans);
+  const clearAll = useUnsavedStore((state) => state.clearAll);
   const [open, setOpen] = useState(false);
+
+  // Drop entries whose matching localStorage draft is gone (tab crashed
+  // mid-edit, OS reload, save succeeded but browser died before the store
+  // got the message, etc). Runs once on mount — after Zustand hydrates the
+  // persisted slice client-side — so we never show a phantom banner.
+  useEffect(() => {
+    cleanupOrphans();
+  }, [cleanupOrphans]);
 
   const items = Object.values(unsavedItems);
   const count = items.length;
@@ -98,6 +108,15 @@ export function DashboardUnsavedAlert() {
               </div>
             </DialogContent>
           </Dialog>
+
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={clearAll}
+            title={ui.dashboard.alert.clearAll}
+          >
+            {ui.dashboard.alert.clearAll}
+          </Button>
 
           <Button
             variant="secondary"
