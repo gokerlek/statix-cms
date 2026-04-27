@@ -2,7 +2,13 @@ import { useCallback, useState } from "react";
 
 import { toast } from "sonner";
 
+import ui from "@/statix/content/ui.json";
+import { isMimeAllowed } from "@/statix/lib/file-validation";
+
+import { useFiles, useUploadFile } from "./use-files";
 import { useMedia, useUploadMedia } from "./use-media";
+
+export type UploadTarget = "media" | "files";
 
 export interface MultiUploadOptions {
   folder?: string;
@@ -37,19 +43,71 @@ export interface MultiFileUploadActions {
   clearAll: () => void;
 }
 
+interface UseMultiFileUploadOptions {
+  target?: UploadTarget;
+}
+
 function generateId(): string {
   return Math.random().toString(36).substring(2, 9);
 }
 
-export function useMultiFileUpload(): MultiFileUploadState &
-  MultiFileUploadActions {
+function sanitizeFilename(name: string): string {
+  return name.replace(/[^a-zA-Z0-9.-]/g, "_").toLowerCase();
+}
+
+function getNameWithoutExtension(name: string): string {
+  const lastDotIndex = name.lastIndexOf(".");
+
+  return lastDotIndex > 0 ? name.substring(0, lastDotIndex) : name;
+}
+
+/**
+ * Multi-file upload hook shared by Media + Files flows. Handles per-file
+ * pending/uploading/done/error/duplicate state machine, duplicate
+ * detection against the library the user is targeting, and sequential
+ * upload with progress reporting.
+ */
+export function useMultiFileUpload(
+  options: UseMultiFileUploadOptions = {},
+): MultiFileUploadState & MultiFileUploadActions {
+  const { target = "media" } = options;
+
   const [files, setFiles] = useState<FileItem[]>([]);
   const [uploading, setUploading] = useState(false);
   const [progress, setProgress] = useState({ completed: 0, total: 0 });
 
+  // Pick the right mutation + existing-library query based on target.
+  // React's rules of hooks require both hooks to be called unconditionally
+  // even when only one is used — OK, both are cheap (suspended queries
+  // no-op until subscribed).
   const { mutateAsync: uploadMedia } = useUploadMedia();
+  const { mutateAsync: uploadFile } = useUploadFile();
   const { data: mediaData } = useMedia();
-  const existingMedia = mediaData?.pages.flatMap((p) => p.items);
+  const { data: filesData } = useFiles();
+
+  const existingNames = (() => {
+    if (target === "files") {
+      return new Set(
+        filesData?.pages
+          .flatMap((p) => p.items)
+          .map((m) => {
+            const filename = m.key.split("/").pop() || "";
+
+            return filename.toLowerCase();
+          }) || [],
+      );
+    }
+
+    return new Set(
+      mediaData?.pages
+        .flatMap((p) => p.items)
+        .map((m) => {
+          const filename = m.path.split("/").pop() || "";
+
+          return filename.toLowerCase();
+        }) || [],
+    );
+  })();
 
   const handleFilesChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -57,50 +115,36 @@ export function useMultiFileUpload(): MultiFileUploadState &
 
       if (!selectedFiles || selectedFiles.length === 0) return;
 
-      // Sanitize filename to match how files are stored (spaces -> underscores)
-      const sanitizeFilename = (name: string) =>
-        name.replace(/[^a-zA-Z0-9.-]/g, "_").toLowerCase();
-
-      // Create set of existing file names from current queue (sanitized)
       const existingQueueNames = new Set(
         files.map((f) => sanitizeFilename(f.file.name)),
       );
 
-      // Create set of existing file names from media library (already sanitized)
-      const existingMediaNames = new Set(
-        existingMedia?.map((m) => {
-          // Extract filename from path (e.g., "public/uploads/image.jpg" -> "image.jpg")
-          const filename = m.path.split("/").pop() || "";
-
-          return filename.toLowerCase();
-        }) || [],
-      );
-
       const newFiles: FileItem[] = [];
       const duplicateNames: string[] = [];
-      const existingNames: string[] = [];
+      const libraryDuplicateNames: string[] = [];
+      const unsupportedNames: string[] = [];
+
+      const kind = target === "files" ? "file" : "image";
 
       Array.from(selectedFiles).forEach((file) => {
+        // Drag-drop bypasses `<input accept>` — guard MIME on the
+        // client too so unsupported types never reach the queue.
+        if (!isMimeAllowed(file, kind)) {
+          unsupportedNames.push(file.name);
+
+          return;
+        }
+
         const sanitizedName = sanitizeFilename(file.name);
 
-        // Helper to get filename without extension (only removes last extension like .png, .jpg)
-        const getNameWithoutExtension = (name: string) => {
-          const lastDotIndex = name.lastIndexOf(".");
-
-          return lastDotIndex > 0 ? name.substring(0, lastDotIndex) : name;
-        };
-
-        // Check if already in queue
         if (existingQueueNames.has(sanitizedName)) {
           duplicateNames.push(file.name);
 
           return;
         }
 
-        // Check if already exists in media library
-        if (existingMediaNames.has(sanitizedName)) {
-          existingNames.push(file.name);
-          // Add with duplicate status so user can see it
+        if (existingNames.has(sanitizedName)) {
+          libraryDuplicateNames.push(file.name);
           newFiles.push({
             id: generateId(),
             file,
@@ -108,13 +152,12 @@ export function useMultiFileUpload(): MultiFileUploadState &
             filename: getNameWithoutExtension(file.name),
             folder: "default",
             status: "duplicate" as const,
-            error: "Bu dosya zaten mevcut",
+            error: ui.uploadSection.duplicateItem,
           });
 
           return;
         }
 
-        // Add as pending
         newFiles.push({
           id: generateId(),
           file,
@@ -125,38 +168,54 @@ export function useMultiFileUpload(): MultiFileUploadState &
         });
       });
 
+      if (unsupportedNames.length > 0) {
+        unsupportedNames.forEach((name) => {
+          toast.warning(
+            ui.uploadSection.unsupportedType.replace("{name}", name),
+          );
+        });
+      }
+
       if (duplicateNames.length > 0) {
         const names = duplicateNames.slice(0, 3).join(", ");
         const more =
-          duplicateNames.length > 3
-            ? ` +${duplicateNames.length - 3} daha`
-            : "";
+          duplicateNames.length > 3 ? ` +${duplicateNames.length - 3}` : "";
 
-        toast.warning(`Zaten listede: ${names}${more}`);
+        toast.warning(
+          ui.uploadSection.duplicateInQueue.replace(
+            "{names}",
+            `${names}${more}`,
+          ),
+        );
       }
 
-      if (existingNames.length > 0) {
-        const names = existingNames.slice(0, 3).join(", ");
+      if (libraryDuplicateNames.length > 0) {
+        const names = libraryDuplicateNames.slice(0, 3).join(", ");
         const more =
-          existingNames.length > 3 ? ` +${existingNames.length - 3} daha` : "";
+          libraryDuplicateNames.length > 3
+            ? ` +${libraryDuplicateNames.length - 3}`
+            : "";
 
-        toast.warning(`Zaten yüklenmiş: ${names}${more}`);
+        toast.warning(
+          ui.uploadSection.duplicateInLibrary.replace(
+            "{names}",
+            `${names}${more}`,
+          ),
+        );
       }
 
       if (newFiles.length > 0) {
         setFiles((prev) => [...prev, ...newFiles]);
       }
     },
-    [files, existingMedia],
+    [files, existingNames, target],
   );
 
   const removeFile = useCallback((id: string) => {
     setFiles((prev) => {
       const fileToRemove = prev.find((f) => f.id === id);
 
-      if (fileToRemove) {
-        URL.revokeObjectURL(fileToRemove.preview);
-      }
+      if (fileToRemove) URL.revokeObjectURL(fileToRemove.preview);
 
       return prev.filter((f) => f.id !== id);
     });
@@ -177,7 +236,7 @@ export function useMultiFileUpload(): MultiFileUploadState &
   }, [files]);
 
   const handleUploadAll = useCallback(
-    async (options: MultiUploadOptions = {}) => {
+    async (uploadOptions: MultiUploadOptions = {}) => {
       const pendingFiles = files.filter((f) => f.status === "pending");
 
       if (pendingFiles.length === 0) return;
@@ -189,7 +248,6 @@ export function useMultiFileUpload(): MultiFileUploadState &
       let completedCount = 0;
 
       for (const fileItem of pendingFiles) {
-        // Mark as uploading
         setFiles((prev) =>
           prev.map((f) =>
             f.id === fileItem.id ? { ...f, status: "uploading" as const } : f,
@@ -197,18 +255,29 @@ export function useMultiFileUpload(): MultiFileUploadState &
         );
 
         try {
-          const data = await uploadMedia({
-            file: fileItem.file,
-            folder:
-              fileItem.folder && fileItem.folder !== "default"
-                ? fileItem.folder
-                : undefined,
-            filename: fileItem.filename,
-          });
+          let data: { url: string };
+
+          const folderArg =
+            fileItem.folder && fileItem.folder !== "default"
+              ? fileItem.folder
+              : undefined;
+
+          if (target === "files") {
+            data = await uploadFile({
+              file: fileItem.file,
+              folder: folderArg,
+              filename: fileItem.filename,
+            });
+          } else {
+            data = await uploadMedia({
+              file: fileItem.file,
+              folder: folderArg,
+              filename: fileItem.filename,
+            });
+          }
 
           uploadedUrls.push(data.url);
 
-          // Mark as done
           setFiles((prev) =>
             prev.map((f) =>
               f.id === fileItem.id
@@ -222,12 +291,13 @@ export function useMultiFileUpload(): MultiFileUploadState &
             completed: completedCount,
             total: pendingFiles.length,
           });
-          options.onProgress?.(completedCount, pendingFiles.length);
+          uploadOptions.onProgress?.(completedCount, pendingFiles.length);
         } catch (error) {
           const errorMessage =
-            error instanceof Error ? error.message : "Upload failed";
+            error instanceof Error
+              ? error.message
+              : ui.uploadSection.uploadFailed;
 
-          // Mark as error
           setFiles((prev) =>
             prev.map((f) =>
               f.id === fileItem.id
@@ -248,18 +318,16 @@ export function useMultiFileUpload(): MultiFileUploadState &
       }, 2000);
 
       if (uploadedUrls.length > 0) {
-        options.onSuccess?.(uploadedUrls);
+        uploadOptions.onSuccess?.(uploadedUrls);
       }
     },
-    [files, uploadMedia],
+    [files, target, uploadMedia, uploadFile],
   );
 
   return {
-    // State
     files,
     uploading,
     progress,
-    // Actions
     handleFilesChange,
     handleUploadAll,
     removeFile,
