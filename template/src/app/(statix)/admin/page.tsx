@@ -5,6 +5,7 @@ import { Alert, AlertDescription } from "@/statix/components/ui/alert";
 import { DashboardCard } from "@/statix/components/dashboard/DashboardCard";
 import { DashboardUnsavedAlert } from "@/statix/components/dashboard/DashboardUnsavedAlert";
 import { LocalizationStats } from "@/statix/components/dashboard/LocalizationStats";
+import { FilesOverview } from "@/statix/components/files/FilesOverview";
 import { MediaOverview } from "@/statix/components/media/MediaOverview";
 import { MonitorSummaryCard } from "@/statix/components/monitor/MonitorSummaryCard";
 import { SingletonDashboardCard } from "@/statix/components/dashboard/SingletonDashboardCard";
@@ -96,6 +97,8 @@ export default async function AdminDashboard({ searchParams }: AdminDashboardPro
       </div>
 
       {hasGlobalPermission(permissions, P.MANAGE_MEDIA) && <MediaOverview />}
+
+      {hasGlobalPermission(permissions, P.MANAGE_MEDIA) && <FilesOverview />}
 
       {collectionStats.some((c) => hasCollectionPermission(permissions, c.slug, CP.VIEW)) && (
         <LocalizationStats stats={localizationStats} />

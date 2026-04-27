@@ -13,6 +13,7 @@ function buildCommitMessage(
   user?: StatixUser,
 ): string {
   if (!user) return `${action} ${path}`;
+
   return `${action} ${path}\n\nstatix-user: ${user.email}\nstatix-name: ${user.name}\nstatix-action: ${action.toLowerCase()}\nstatix-time: ${new Date().toISOString()}`;
 }
 
@@ -117,7 +118,11 @@ export class GitHubCMS {
   /**
    * Delete file from GitHub
    */
-  async deleteFile(path: string, sha: string, user?: StatixUser): Promise<void> {
+  async deleteFile(
+    path: string,
+    sha: string,
+    user?: StatixUser,
+  ): Promise<void> {
     await this.octokit.rest.repos.deleteFile({
       owner: this.owner,
       repo: this.repo,
@@ -369,13 +374,47 @@ export class GitHubCMS {
   }
 
   /**
-   * Update media URL references across all content JSON files
+   * Rewrite asset references across all collection JSON files in a
+   * single pass. Each `{ from, to }` pair becomes a literal substring
+   * replacement on the serialized content — used by media + file move
+   * flows to repoint URLs and R2 keys after a bucket relocation.
+   *
+   * Two-flavour signature for backward compatibility:
+   *  - `(oldUrl: string, newUrl: string, user?)` — original Media call;
+   *    promotes to a single-replacement array internally.
+   *  - `(replacements: Array<{from, to}>, user?)` — new Files call;
+   *    files store the R2 key in content (`FileField:109`), so a move
+   *    must rewrite both the key and the URL atomically — otherwise
+   *    `FieldField` reads a stale path and the link breaks.
+   *
+   * A content file is touched at most once per call: the first
+   * replacement that matches kicks off the save; any later pairs run
+   * against the already-mutated string. The save is skipped entirely
+   * when no pair matches, keeping the GitHub API write count tight.
    */
   async updateMediaReferences(
     oldUrl: string,
     newUrl: string,
     user?: StatixUser,
+  ): Promise<{ updatedFiles: string[] }>;
+  async updateMediaReferences(
+    replacements: Array<{ from: string; to: string }>,
+    user?: StatixUser,
+  ): Promise<{ updatedFiles: string[] }>;
+  async updateMediaReferences(
+    arg1: string | Array<{ from: string; to: string }>,
+    arg2?: string | StatixUser,
+    arg3?: StatixUser,
   ): Promise<{ updatedFiles: string[] }> {
+    const replacements: Array<{ from: string; to: string }> = Array.isArray(
+      arg1,
+    )
+      ? arg1
+      : [{ from: arg1, to: arg2 as string }];
+    const user: StatixUser | undefined = Array.isArray(arg1)
+      ? (arg2 as StatixUser | undefined)
+      : arg3;
+
     const updatedFiles: string[] = [];
     const { statixConfig } = await import("@/statix.config");
     const allContentFiles: Array<{ path: string; sha: string }> = [];
@@ -383,6 +422,7 @@ export class GitHubCMS {
     for (const collection of statixConfig.collections) {
       try {
         const files = await this.listFiles(collection.path, true);
+
         allContentFiles.push(
           ...files
             .filter((f) => f.name.endsWith(".json"))
@@ -396,11 +436,28 @@ export class GitHubCMS {
     for (const file of allContentFiles) {
       try {
         const fileData = await this.getFile(file.path);
+
         if (!fileData) continue;
-        const contentStr = JSON.stringify(fileData.content);
-        if (contentStr.includes(oldUrl)) {
-          const newContentStr = contentStr.split(oldUrl).join(newUrl);
-          await this.saveFile(file.path, JSON.parse(newContentStr), fileData.sha, user);
+
+        let contentStr = JSON.stringify(fileData.content);
+        let touched = false;
+
+        for (const { from, to } of replacements) {
+          if (!from || from === to) continue;
+
+          if (contentStr.includes(from)) {
+            contentStr = contentStr.split(from).join(to);
+            touched = true;
+          }
+        }
+
+        if (touched) {
+          await this.saveFile(
+            file.path,
+            JSON.parse(contentStr),
+            fileData.sha,
+            user,
+          );
           updatedFiles.push(file.path);
         }
       } catch (error) {
@@ -542,7 +599,11 @@ export class GitHubCMS {
         owner: this.owner,
         repo: this.repo,
         path: data.originalPath,
-        message: buildCommitMessage("Restore", filename ?? data.originalPath, user),
+        message: buildCommitMessage(
+          "Restore",
+          filename ?? data.originalPath,
+          user,
+        ),
         content: response.data.content,
         branch: this.branch,
       });

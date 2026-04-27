@@ -248,6 +248,159 @@ export const statixConfig: StatixConfig = {
       ],
     },
 
+    // ───────────────────────────────────────────────────────────
+    // Dev-only singleton: exercises every built-in field type so
+    // you can visually verify editor rendering, dirty indicators,
+    // image diff tooltips, localized blocks/lists, and save flow
+    // without touching real content. Safe to delete in production.
+    // ───────────────────────────────────────────────────────────
+    {
+      slug: "showcase",
+      label: "Field Showcase",
+      type: "singleton",
+      path: "content/showcase",
+      icon: "Flask",
+      fields: [
+        {
+          name: "title",
+          label: "Title (text)",
+          type: "text",
+          required: true,
+          placeholder: "A short headline",
+          localized: true,
+        },
+        {
+          name: "summary",
+          label: "Summary (textarea)",
+          type: "textarea",
+          rows: 3,
+          placeholder: "Multi-line summary…",
+          localized: true,
+        },
+        {
+          name: "body",
+          label: "Body (richtext)",
+          type: "richtext",
+          placeholder: "Rich editor — bold, italic, lists, links…",
+          localized: true,
+        },
+        {
+          name: "hero",
+          label: "Hero Image (image)",
+          type: "image",
+        },
+        {
+          name: "brochure",
+          label: "Brochure (file)",
+          type: "file",
+          accept: [".pdf", ".doc", ".docx"],
+        },
+        {
+          name: "rating",
+          label: "Rating (number)",
+          type: "number",
+          min: 0,
+          max: 10,
+        },
+        {
+          name: "status",
+          label: "Custom Status (select)",
+          type: "select",
+          options: [
+            { label: "Draft", value: "draft" },
+            { label: "In review", value: "review" },
+            { label: "Approved", value: "approved" },
+          ],
+        },
+        {
+          name: "publishedAt",
+          label: "Published At (date)",
+          type: "date",
+        },
+        {
+          name: "featured",
+          label: "Featured? (checkbox)",
+          type: "checkbox",
+          defaultChecked: false,
+        },
+        {
+          name: "showOnHome",
+          label: "Show on home (switch)",
+          type: "switch",
+          defaultChecked: true,
+        },
+        {
+          name: "tags",
+          label: "Tags (list)",
+          type: "list",
+          fields: [
+            {
+              name: "label",
+              label: "Label",
+              type: "text",
+              required: true,
+              placeholder: "javascript",
+            },
+            {
+              name: "color",
+              label: "Color",
+              type: "select",
+              options: [
+                { label: "Gray", value: "gray" },
+                { label: "Blue", value: "blue" },
+                { label: "Green", value: "green" },
+                { label: "Red", value: "red" },
+              ],
+            },
+          ],
+        },
+        {
+          name: "sections",
+          label: "Sections (blocks, localized)",
+          type: "blocks",
+          localized: true,
+          blocks: [
+            {
+              type: "heading",
+              label: "Heading",
+              fields: [
+                { name: "text", label: "Heading text", type: "text" },
+                {
+                  name: "level",
+                  label: "Level",
+                  type: "select",
+                  options: [
+                    { label: "H2", value: "h2" },
+                    { label: "H3", value: "h3" },
+                  ],
+                },
+              ],
+            },
+            {
+              type: "paragraph",
+              label: "Paragraph",
+              fields: [
+                {
+                  name: "text",
+                  label: "Paragraph text",
+                  type: "textarea",
+                  rows: 3,
+                },
+              ],
+            },
+            {
+              type: "media",
+              label: "Media",
+              fields: [
+                { name: "image", label: "Image", type: "image", required: true },
+                { name: "caption", label: "Caption", type: "text" },
+              ],
+            },
+          ],
+        },
+      ],
+    },
+
     // ═══════════════════════════════════════════════════════════
     // COLLECTIONS - Repeatable content items
     // ═══════════════════════════════════════════════════════════

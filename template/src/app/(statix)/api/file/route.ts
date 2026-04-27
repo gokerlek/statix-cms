@@ -2,11 +2,25 @@ import { NextRequest, NextResponse } from "next/server";
 
 import { fileDeleteSchema } from "@/statix/lib/api-schemas";
 import { handleApiError } from "@/statix/lib/api-response";
+import { writeAudit, getIp } from "@/statix/lib/audit";
 import { getMaxUploadSize, sanitizeFilename, validateFileUpload } from "@/statix/lib/file-validation";
-import { deleteFromR2, uploadToR2 } from "@/statix/lib/r2";
+import { softDeleteR2, uploadToR2 } from "@/statix/lib/r2";
 import { requirePermission } from "@/statix/lib/session";
 import { formatFileSize } from "@/statix/lib/utils";
 import { P } from "@/statix/types/permissions";
+
+/**
+ * Sanitize a folder slug used in `files/{folder}/...` keys. Same shape
+ * as the media upload route — alphanumeric + dashes/underscores only,
+ * leading/trailing slashes stripped, length-capped.
+ */
+function sanitizeFolder(value: string | null | undefined): string | null {
+  if (!value) return null;
+  const trimmed = value.trim().replace(/^\/+|\/+$/g, "").toLowerCase();
+  if (!trimmed || trimmed === "default") return null;
+  if (!/^[a-z0-9_-]{1,64}$/.test(trimmed)) return null;
+  return trimmed;
+}
 
 export async function POST(request: NextRequest) {
   try {
@@ -14,6 +28,8 @@ export async function POST(request: NextRequest) {
 
     const formData = await request.formData();
     const file = formData.get("file") as File;
+    const folderRaw = formData.get("folder");
+    const filenameOverride = formData.get("filename");
 
     if (!file) {
       return NextResponse.json({ error: "No file provided" }, { status: 400 });
@@ -28,15 +44,30 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const validation = validateFileUpload(file);
+    // `kind: "file"` widens the MIME allow list to documents + archives.
+    // `/api/upload` (images only) stays on the default `"image"` kind.
+    const validation = validateFileUpload(file, "file");
     if (!validation.valid) {
       return NextResponse.json({ error: validation.error }, { status: 400 });
     }
 
+    const folder = sanitizeFolder(
+      typeof folderRaw === "string" ? folderRaw : null,
+    );
+
+    // Optional filename override (user-typed). Keep the original
+    // extension; sanitize for R2 safety.
+    const sourceName =
+      typeof filenameOverride === "string" && filenameOverride.trim()
+        ? appendExt(filenameOverride.trim(), file.name)
+        : file.name;
+
     const timestamp = Date.now();
-    const sanitizedName = sanitizeFilename(file.name);
+    const sanitizedName = sanitizeFilename(sourceName);
     const filename = `${timestamp}-${sanitizedName}`;
-    const key = `files/${filename}`;
+    const key = folder
+      ? `files/${folder}/${filename}`
+      : `files/${filename}`;
 
     const buffer = Buffer.from(await file.arrayBuffer());
     const url = await uploadToR2(buffer, key, file.type);
@@ -47,9 +78,16 @@ export async function POST(request: NextRequest) {
   }
 }
 
+/** Reattach the original extension if the user-supplied name lacks one. */
+function appendExt(name: string, originalFilename: string): string {
+  const dot = originalFilename.lastIndexOf(".");
+  const ext = dot > 0 ? originalFilename.slice(dot) : "";
+  return name.endsWith(ext) ? name : `${name}${ext}`;
+}
+
 export async function DELETE(request: NextRequest) {
   try {
-    await requirePermission(P.MANAGE_MEDIA);
+    const { session } = await requirePermission(P.MANAGE_MEDIA);
 
     const body = await request.json();
     const parsed = fileDeleteSchema.safeParse(body);
@@ -62,9 +100,23 @@ export async function DELETE(request: NextRequest) {
 
     const { key } = parsed.data;
 
-    await deleteFromR2(key);
+    // Soft delete — moves the object to `trash/files/...` so the user
+    // can restore it from the Trash page (mirrors `/api/media/delete`).
+    // Permanent removal still flows through `/api/trash/delete` after
+    // the user confirms in the trash UI.
+    const trashKey = await softDeleteR2(key);
 
-    return NextResponse.json({ success: true });
+    await writeAudit({
+      userId: session.user.id,
+      userEmail: session.user.email,
+      action: "file.soft_delete",
+      entityType: "file",
+      entityId: key,
+      metadata: { trashKey },
+      ipAddress: getIp(request),
+    });
+
+    return NextResponse.json({ success: true, trashKey });
   } catch (error) {
     return handleApiError(error, "Failed to delete file");
   }

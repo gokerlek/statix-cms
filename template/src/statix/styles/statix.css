@@ -38,19 +38,11 @@
     --chart-4: oklch(0.6427 0.2153 28.8057);
     --chart-5: oklch(0.6582 0.1690 248.8135);
     --warning: oklch(0.86 0.125 76.957);
-    --warning-foreground: oklch(0.533 0.202 27.594 / 0.59);
+    --warning-foreground: oklch(1 0 89.876);
     --warning-border: oklch(0.533 0.202 27.594);
     --status-draft: oklch(0.8442 0.1722 84.9338);
     --status-published: oklch(0.6456 0.1131 213.3445);
     --status-archived: oklch(0.5510 0.0270 264.3640);
-    --sidebar: oklch(0.9702 0 0);
-    --sidebar-foreground: oklch(0.2178 0 0);
-    --sidebar-primary: oklch(0.6456 0.1131 213.3445);
-    --sidebar-primary-foreground: oklch(1.0000 0 0);
-    --sidebar-accent: oklch(0.9675 0.0128 202.9244);
-    --sidebar-accent-foreground: oklch(0.6456 0.1131 213.3445);
-    --sidebar-border: oklch(0.5510 0.0270 264.3640);
-    --sidebar-ring: oklch(0.6456 0.1131 213.3445);
     --font-sans: 'Inter', sans-serif;
     --font-serif: 'Playfair Display', serif;
     --font-mono: 'JetBrains Mono', monospace;
@@ -90,14 +82,6 @@
     --status-draft: oklch(0.8442 0.1722 84.9338);
     --status-published: oklch(0.6456 0.1131 213.3445);
     --status-archived: oklch(0.5510 0.0270 264.3640);
-    --sidebar: oklch(0.2178 0 0);
-    --sidebar-foreground: oklch(0.9067 0 0);
-    --sidebar-primary: oklch(0.6456 0.1131 213.3445);
-    --sidebar-primary-foreground: oklch(1.0000 0 0);
-    --sidebar-accent: oklch(0.3876 0.0641 213.4896);
-    --sidebar-accent-foreground: oklch(0.6456 0.1131 213.3445);
-    --sidebar-border: oklch(0.4276 0 0);
-    --sidebar-ring: oklch(0.6456 0.1131 213.3445);
   }
 
   /* Portal components (Sonner toaster) - rendered outside [data-statix] */

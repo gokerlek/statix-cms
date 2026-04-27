@@ -1,6 +1,14 @@
 import { useCallback, useState } from "react";
 
+import { toast } from "sonner";
+
+import ui from "@/statix/content/ui.json";
+import { isMimeAllowed } from "@/statix/lib/file-validation";
+
+import { useUploadFile } from "./use-files";
 import { useUploadMedia } from "./use-media";
+
+export type UploadTarget = "media" | "files";
 
 export interface UploadOptions {
   folder?: string;
@@ -23,32 +31,67 @@ export interface FileUploadActions {
   setFilename: (name: string) => void;
 }
 
-export function useFileUpload(): FileUploadState & FileUploadActions {
+interface UseFileUploadOptions {
+  /**
+   * Which R2 bucket prefix + API endpoint to target. Defaults to
+   * `"media"` so existing callers (MediaClientPage, MediaDrawer,
+   * compact image pickers) keep working unchanged.
+   */
+  target?: UploadTarget;
+}
+
+/**
+ * Single-file upload hook shared by Media + Files flows. Internally
+ * branches on `target` to pick the right mutation (`/api/upload` for
+ * media, `/api/file` for files). UI state (preview, filename editor,
+ * loading flag) is identical in both modes so `UploadSection` can be
+ * one component with a prop.
+ */
+export function useFileUpload(
+  options: UseFileUploadOptions = {},
+): FileUploadState & FileUploadActions {
+  const { target = "media" } = options;
+
   const [file, setFile] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
   const [filename, setFilename] = useState("");
 
-  const { mutateAsync: uploadMedia, isPending: uploading } = useUploadMedia();
+  const mediaMutation = useUploadMedia();
+  const filesMutation = useUploadFile();
+
+  const uploading =
+    target === "files" ? filesMutation.isPending : mediaMutation.isPending;
 
   const handleFileChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
       const selectedFile = e.target.files?.[0];
 
-      if (selectedFile) {
-        setFile(selectedFile);
-        setFilename(selectedFile.name.split(".")[0]); // Remove extension for initial name
-        const objectUrl = URL.createObjectURL(selectedFile);
+      if (!selectedFile) return;
 
-        setPreview(objectUrl);
+      // Drag-drop bypasses the native `<input accept>` filter, so an
+      // unsupported MIME would silently fall through to the API and
+      // 400. Reject early with a clear toast.
+      const kind = target === "files" ? "file" : "image";
+
+      if (!isMimeAllowed(selectedFile, kind)) {
+        toast.warning(
+          ui.uploadSection.unsupportedType.replace("{name}", selectedFile.name),
+        );
+
+        return;
       }
+
+      setFile(selectedFile);
+      setFilename(stripExtension(selectedFile.name));
+      const objectUrl = URL.createObjectURL(selectedFile);
+
+      setPreview(objectUrl);
     },
-    [],
+    [target],
   );
 
   const clearFile = useCallback(() => {
-    if (preview) {
-      URL.revokeObjectURL(preview);
-    }
+    if (preview) URL.revokeObjectURL(preview);
 
     setFile(null);
     setPreview(null);
@@ -56,43 +99,43 @@ export function useFileUpload(): FileUploadState & FileUploadActions {
   }, [preview]);
 
   const handleUpload = useCallback(
-    async (options: UploadOptions = {}) => {
+    async (uploadOptions: UploadOptions = {}) => {
       if (!file) return;
 
       try {
-        const uploadFilename = options.filename || filename;
+        const uploadFilename = uploadOptions.filename || filename;
+        let data: { url: string };
 
-        const data = await uploadMedia({
-          file,
-          folder:
-            options.folder && options.folder !== "default"
-              ? options.folder
-              : undefined,
-          filename: uploadFilename,
-        });
+        const folderArg =
+          uploadOptions.folder && uploadOptions.folder !== "default"
+            ? uploadOptions.folder
+            : undefined;
 
-        console.log(`Upload successful: ${data.url}`);
-
-        // Clear file state
-        clearFile();
-
-        // Call success callback if provided
-        if (options.onSuccess) {
-          options.onSuccess(data.url);
+        if (target === "files") {
+          data = await filesMutation.mutateAsync({
+            file,
+            folder: folderArg,
+            filename: uploadFilename,
+          });
+        } else {
+          data = await mediaMutation.mutateAsync({
+            file,
+            folder: folderArg,
+            filename: uploadFilename,
+          });
         }
+
+        clearFile();
+        uploadOptions.onSuccess?.(data.url);
       } catch (error) {
         const uploadError =
           error instanceof Error ? error : new Error("Upload failed");
 
         console.error("Upload error:", uploadError);
-
-        // Call error callback if provided
-        if (options.onError) {
-          options.onError(uploadError);
-        }
+        uploadOptions.onError?.(uploadError);
       }
     },
-    [file, filename, clearFile, uploadMedia],
+    [file, filename, target, clearFile, filesMutation, mediaMutation],
   );
 
   const setFilenameState = useCallback((name: string) => {
@@ -100,15 +143,19 @@ export function useFileUpload(): FileUploadState & FileUploadActions {
   }, []);
 
   return {
-    // State
     file,
     preview,
     uploading,
     filename,
-    // Actions
     handleFileChange,
     handleUpload,
     clearFile,
     setFilename: setFilenameState,
   };
+}
+
+function stripExtension(name: string): string {
+  const dot = name.lastIndexOf(".");
+
+  return dot > 0 ? name.substring(0, dot) : name;
 }

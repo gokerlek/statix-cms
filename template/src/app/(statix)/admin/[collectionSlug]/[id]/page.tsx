@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { FieldErrors } from "react-hook-form";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 
 import { toast } from "sonner";
 
@@ -26,8 +26,13 @@ interface EditorPageProps {
 
 export default function EditorPage({ params }: EditorPageProps) {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [collectionSlug, setCollectionSlug] = useState("");
   const [id, setId] = useState("");
+
+  // `?locale=tr` lets dashboard deep-links open directly on the right tab.
+  // Validated against the configured locale list inside `LocalizedFieldsSection`.
+  const activeLocaleParam = searchParams.get("locale") ?? undefined;
 
   // Unwrap params
   useEffect(() => {
@@ -62,6 +67,8 @@ export default function EditorPage({ params }: EditorPageProps) {
     locales,
     defaultLocale,
     clearLocalData,
+    serverSnapshot,
+    revertField,
   } = useEditorForm({
     collection,
     id,
@@ -134,13 +141,21 @@ export default function EditorPage({ params }: EditorPageProps) {
         isDirty={formState.isDirty}
       />
 
-      <SharedFieldsSection fields={sharedFields} control={control} />
+      <SharedFieldsSection
+        fields={sharedFields}
+        control={control}
+        snapshot={serverSnapshot}
+        onRevertField={revertField}
+      />
 
       <LocalizedFieldsSection
         fields={localizedFields}
         control={control}
         locales={locales}
         defaultLocale={defaultLocale}
+        activeLocale={activeLocaleParam}
+        snapshot={serverSnapshot}
+        onRevertField={revertField}
       />
     </form>
   );

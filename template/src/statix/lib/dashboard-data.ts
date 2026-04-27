@@ -1,6 +1,10 @@
 import { unstable_cache } from "next/cache";
 
-import { getContentIndex, isMediaOrphaned } from "@/statix/lib/content-index";
+import {
+  getContentIndex,
+  isFileOrphaned,
+  isMediaOrphaned,
+} from "@/statix/lib/content-index";
 import { formatStatus, resolveStatus } from "@/statix/lib/content-status";
 import type { Collection } from "@/statix/types/cms";
 import { getGitHubCMS } from "@/statix/lib/github-cms";
@@ -286,5 +290,90 @@ export async function getMediaStats() {
     latestUploads,
     orphanedCount,
     trashCount: r2Trash.length,
+  };
+}
+
+/**
+ * File stats — mirror of `getMediaStats` for the `files/` R2 prefix.
+ *
+ * Same shape so `FilesOverview` can reuse the MediaOverview rendering
+ * vocabulary (stat tiles, type distribution list, recent-activity grid
+ * with status badges). Orphan detection reads from the same
+ * `getContentIndex()` blob — File field values are stored as full
+ * `files/xxx` keys, so `isFileOrphaned` checks both the key and the
+ * trailing filename fragment to be resilient to either convention.
+ *
+ * Trash isn't wired for File uploads yet (no soft-delete flow) so the
+ * trash slice stays at 0 — `status` enum still supports `trash` so V2
+ * can light up without shape changes.
+ */
+export async function getFileStats() {
+  const r2Result = await listR2Media("files/").catch(() => ({
+    items: [],
+    nextCursor: undefined,
+  }));
+
+  const files = r2Result.items.filter((f) => !f.key.endsWith("/"));
+
+  const totalSize = files.reduce((acc, f) => acc + (f.size ?? 0), 0);
+
+  // Known document types — anything else bucketed as "other" so the type
+  // panel doesn't explode on rare exotic uploads.
+  const KNOWN_EXTS = new Set([
+    "pdf", "doc", "docx", "xls", "xlsx", "ppt", "pptx",
+    "zip", "rar", "7z", "tar", "gz",
+    "csv", "json", "xml",
+    "txt", "md",
+  ]);
+  const typeDistribution: Record<string, number> = {};
+  files.forEach((f) => {
+    const name = f.key.split("/").pop() ?? "";
+    const dotIdx = name.lastIndexOf(".");
+    const candidate = dotIdx > 0 ? name.slice(dotIdx + 1).toLowerCase() : "";
+    const ext = KNOWN_EXTS.has(candidate) ? candidate : "other";
+    typeDistribution[ext] = (typeDistribution[ext] ?? 0) + 1;
+  });
+
+  // Share the content index with media stats — one GitHub scan per cache
+  // window covers both orphan queries.
+  let orphanedKeys = new Set<string>();
+  let orphanedCount: number | null = null;
+  try {
+    const { index: contentIndex, ok } = await getContentIndex();
+    if (ok) {
+      orphanedKeys = new Set(
+        files
+          .filter((f) => isFileOrphaned(contentIndex, f.key))
+          .map((f) => f.key),
+      );
+      orphanedCount = orphanedKeys.size;
+    }
+  } catch {
+    orphanedCount = null;
+  }
+
+  const latestUploads = files
+    .map((f) => ({
+      sha: f.key,
+      key: f.key,
+      filename: f.key.split("/").pop() ?? f.key,
+      status: orphanedKeys.has(f.key)
+        ? ("orphaned" as const)
+        : ("live" as const),
+      url: `/api/media/serve/${f.key}`,
+      size: f.size,
+      _ts: new Date(f.lastModified ?? 0).getTime(),
+    }))
+    .sort((a, b) => b._ts - a._ts)
+    .slice(0, 6)
+    .map(({ _ts: _, ...rest }) => rest);
+
+  return {
+    count: files.length,
+    totalSize,
+    typeDistribution,
+    latestUploads,
+    orphanedCount,
+    trashCount: 0,
   };
 }

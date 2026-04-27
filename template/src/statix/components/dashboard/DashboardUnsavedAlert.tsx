@@ -72,39 +72,71 @@ export function DashboardUnsavedAlert() {
               </DialogHeader>
 
               <div className="py-4 space-y-2 max-h-[60vh] overflow-y-auto">
-                {items.map((item) => (
-                  <Card key={`${item.collectionSlug}-${item.id}`} className="p-0">
-                    <Link
-                      href={ROUTES.ADMIN.COLLECTION_ITEM(
-                        item.collectionSlug,
-                        item.id,
-                      )}
-                      className="flex items-center gap-3 p-3 rounded-xl hover:bg-muted transition-colors group"
-                      onClick={() => setOpen(false)}
+                {items.map((item) => {
+                  // Legacy entries persisted before the locales field was
+                  // added may not have it — treat as "no locale info".
+                  const locales = item.locales ?? [];
+                  // Deep-link to the first dirty locale so the editor opens
+                  // on the right tab; shared-only edits get no ?locale= param.
+                  const href =
+                    locales.length > 0
+                      ? `${ROUTES.ADMIN.COLLECTION_ITEM(
+                          item.collectionSlug,
+                          item.id,
+                        )}?locale=${locales[0]}`
+                      : ROUTES.ADMIN.COLLECTION_ITEM(
+                          item.collectionSlug,
+                          item.id,
+                        );
+
+                  return (
+                    <Card
+                      key={`${item.collectionSlug}-${item.id}`}
+                      className="p-0"
                     >
-                      <IconFileText className="w-4 h-4 text-muted-foreground" />
+                      <Link
+                        href={href}
+                        className="flex items-center gap-3 p-3 rounded-xl hover:bg-muted transition-colors group"
+                        onClick={() => setOpen(false)}
+                      >
+                        <IconFileText className="w-4 h-4 text-muted-foreground" />
 
-                      <div>
-                        <div className="font-medium text-sm group-hover:text-primary transition-colors">
-                          {item.title}
+                        <div className="flex-1 min-w-0">
+                          <div className="font-medium text-sm group-hover:text-primary transition-colors">
+                            {item.title}
+                          </div>
+
+                          <div className="text-xs text-muted-foreground">
+                            {collectionText
+                              .replace("collection", item.collectionSlug)
+                              .replace(
+                                "last_updated_at",
+                                ui.dashboard.alert.lastUpdated,
+                              )
+                              .replace(
+                                "last_updated_Time",
+                                new Date(item.lastUpdated).toLocaleTimeString(),
+                              )}
+                          </div>
                         </div>
 
-                        <div className="text-xs text-muted-foreground">
-                          {collectionText
-                            .replace("collection", item.collectionSlug)
-                            .replace(
-                              "last_updated_at",
-                              ui.dashboard.alert.lastUpdated,
-                            )
-                            .replace(
-                              "last_updated_Time",
-                              new Date(item.lastUpdated).toLocaleTimeString(),
-                            )}
-                        </div>
-                      </div>
-                    </Link>
-                  </Card>
-                ))}
+                        {locales.length > 0 && (
+                          <div className="flex items-center gap-1 shrink-0">
+                            {locales.map((locale) => (
+                              <Badge
+                                key={locale}
+                                variant="modified"
+                                className="uppercase text-[10px] h-5 px-1.5"
+                              >
+                                {locale}
+                              </Badge>
+                            ))}
+                          </div>
+                        )}
+                      </Link>
+                    </Card>
+                  );
+                })}
               </div>
             </DialogContent>
           </Dialog>

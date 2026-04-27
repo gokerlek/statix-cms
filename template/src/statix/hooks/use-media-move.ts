@@ -6,6 +6,8 @@ import { toast } from "sonner";
 import ui from "@/statix/content/ui.json";
 import { QUERY_KEYS } from "@/statix/lib/query-keys";
 
+export type MoveTarget = "media" | "files";
+
 interface MoveMediaParams {
   currentPath: string;
   newFolder: string;
@@ -14,15 +16,30 @@ interface MoveMediaParams {
 interface MoveMediaResponse {
   success: boolean;
   updatedFiles: number;
-  updatedFileList: string[];
+  updatedFileList?: string[];
+  newUrl?: string;
 }
 
-export function useMoveMedia() {
+interface UseMoveMediaOptions {
+  /**
+   * Bucket the move targets. `"media"` (default) hits `/api/media/move`
+   * — image uploads under `uploads/`. `"files"` hits `/api/files/move`
+   * for documents under `files/`. Same payload + response shape so the
+   * dialog can call either with one prop change.
+   */
+  target?: MoveTarget;
+}
+
+export function useMoveMedia(options: UseMoveMediaOptions = {}) {
+  const { target = "media" } = options;
   const queryClient = useQueryClient();
+
+  const endpoint = target === "files" ? "/api/files/move" : "/api/media/move";
+  const queryKey = target === "files" ? QUERY_KEYS.files : QUERY_KEYS.media;
 
   return useMutation({
     mutationFn: async (params: MoveMediaParams): Promise<MoveMediaResponse> => {
-      const response = await fetch("/api/media/move", {
+      const response = await fetch(endpoint, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(params),
@@ -37,7 +54,7 @@ export function useMoveMedia() {
       return response.json();
     },
     onSuccess: (data) => {
-      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.media });
+      queryClient.invalidateQueries({ queryKey });
 
       const message =
         data.updatedFiles > 0

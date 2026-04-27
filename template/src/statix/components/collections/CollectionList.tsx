@@ -2,10 +2,12 @@
 
 import Link from "next/link";
 
-import { IconEdit, IconPlus } from "@tabler/icons-react";
+import { IconPlus } from "@tabler/icons-react";
 
-import { resolveStatus } from "@/statix/lib/content-status";
-import { Badge } from "@/statix/components/ui/badge";
+import { CollectionTable } from "@/statix/components/collections/CollectionTable";
+import { CMSSearch } from "@/statix/components/shared/CMSSearch";
+import { CMSTabs } from "@/statix/components/shared/CMSTabs";
+import { EmptyState } from "@/statix/components/shared/EmptyState";
 import { buttonVariants } from "@/statix/components/ui/button";
 import { Card, CardContent } from "@/statix/components/ui/card";
 import ui from "@/statix/content/ui.json";
@@ -14,12 +16,6 @@ import { useCollectionItems } from "@/statix/hooks/use-collections";
 import { ROUTES } from "@/statix/lib/constants";
 import { GitHubFile } from "@/statix/lib/github-cms";
 import { cn } from "@/statix/lib/utils";
-import { useUnsavedStore } from "@/statix/stores/useUnsavedStore";
-
-import { DeleteCollectionButton } from "./DeleteCollectionButton";
-import { CMSSearch } from "@/statix/components/shared/CMSSearch";
-import { CMSTabs } from "@/statix/components/shared/CMSTabs";
-import { StatusBadge } from "./StatusBadge";
 
 interface CollectionListProps {
   initialData: GitHubFile[];
@@ -33,7 +29,6 @@ export function CollectionList({
   collectionLabel,
 }: CollectionListProps) {
   const { data: files = [] } = useCollectionItems(collectionSlug, initialData);
-  const hasChange = useUnsavedStore((state) => state.hasChange);
   const {
     searchQuery,
     setSearchQuery,
@@ -42,35 +37,30 @@ export function CollectionList({
     filteredFiles,
   } = useCollectionSearch(files);
 
+  // ── No items at all (not even a filter applied) — show the onboarding card ──
   if (files.length === 0 && searchQuery === "" && statusFilter === "all") {
     return (
-      <Card className="gap-0 py-0 border-2 border-dashed">
-        <CardContent className="text-center py-16">
-          <div className="max-w-md mx-auto">
-            <div className="w-16 h-16 bg-muted rounded-full flex items-center justify-center mx-auto mb-4">
-              <IconPlus className="w-8 h-8 text-muted-foreground" />
-            </div>
-
-            <h3 className="mb-2">{ui.collectionList.noEntriesTitle}</h3>
-
-            <p className="text-muted-foreground mb-6">
-              {ui.collectionList.noEntriesDescription.replace(
-                "{label}",
-                collectionLabel.toLowerCase(),
-              )}
-            </p>
-
-            <Link
-              href={ROUTES.ADMIN.COLLECTION_NEW(collectionSlug)}
-              className="inline-flex items-center gap-2 px-6 py-3 bg-primary hover:bg-primary/90 text-primary-foreground rounded-lg transition-colors"
-            >
-              <IconPlus className="w-5 h-5" />
-
-              {ui.collectionList.createFirstEntry}
-            </Link>
-          </div>
-        </CardContent>
-      </Card>
+      <EmptyState
+        framed
+        icon={<IconPlus className="w-8 h-8 text-muted-foreground" />}
+        title={ui.collectionList.noEntriesTitle}
+        description={ui.collectionList.noEntriesDescription.replace(
+          "{label}",
+          collectionLabel.toLowerCase(),
+        )}
+        action={
+          <Link
+            href={ROUTES.ADMIN.COLLECTION_NEW(collectionSlug)}
+            className={cn(
+              buttonVariants({ variant: "default", size: "lg" }),
+              "gap-2",
+            )}
+          >
+            <IconPlus className="w-5 h-5" />
+            {ui.collectionList.createFirstEntry}
+          </Link>
+        }
+      />
     );
   }
 
@@ -101,91 +91,10 @@ export function CollectionList({
 
       <Card className="gap-0 py-0 overflow-hidden">
         <CardContent className="p-0">
-        <table className="w-full">
-          <thead className="bg-muted/50 border-b border-border">
-            <tr>
-              <th className="text-left px-6 py-4 text-sm font-semibold text-muted-foreground w-full">
-                {ui.collectionList.tableHeaders.name}
-              </th>
-
-              <th className="text-left px-6 py-4 text-sm font-semibold text-muted-foreground">
-                {ui.collectionList.tableHeaders.status}
-              </th>
-
-              <th className="text-right px-6 py-4 text-sm font-semibold text-muted-foreground">
-                {ui.collectionList.tableHeaders.actions}
-              </th>
-            </tr>
-          </thead>
-
-          <tbody className="divide-y divide-border">
-            {filteredFiles.length === 0 ? (
-              <tr>
-                <td
-                  colSpan={3}
-                  className="px-6 py-8 text-center text-muted-foreground"
-                >
-                  {ui.collectionList.noEntriesTitle}
-                </td>
-              </tr>
-            ) : (
-              filteredFiles.map((file) => {
-                const id = file.name.replace(".json", "");
-                const hasLocalChange = hasChange(collectionSlug, id);
-
-                return (
-                  <tr
-                    key={file.sha}
-                    className="hover:bg-muted/50 transition-colors"
-                  >
-                    <td className="px-6 py-4">
-                      <div className="text-sm flex items-center gap-2">
-                        {file.title}
-
-                        {hasLocalChange && (
-                          <Badge
-                            variant="outline"
-                            className="text-orange-600 border-orange-300 dark:text-orange-400 dark:border-orange-800 bg-orange-50 dark:bg-orange-950/20 text-[10px] h-5 px-1.5"
-                          >
-                            Unsaved (Local)
-                          </Badge>
-                        )}
-                      </div>
-                    </td>
-
-                    <td className="px-6 py-4">
-                      <StatusBadge status={resolveStatus(file.status)} />
-                    </td>
-
-                    <td className="px-6 py-4">
-                      <div className="flex items-center justify-end gap-2">
-                        <Link
-                          href={ROUTES.ADMIN.COLLECTION_ITEM(
-                            collectionSlug,
-                            id,
-                          )}
-                          className={cn(
-                            buttonVariants({
-                              variant: "secondary",
-                              size: "icon",
-                            }),
-                          )}
-                        >
-                          <IconEdit className="w-4 h-4" />
-                        </Link>
-
-                        <DeleteCollectionButton
-                          collectionSlug={collectionSlug}
-                          id={id}
-                        />
-                      </div>
-                    </td>
-                  </tr>
-                );
-              })
-            )}
-          </tbody>
-        </table>
+          <CollectionTable
+            files={filteredFiles}
+            collectionSlug={collectionSlug}
+          />
         </CardContent>
       </Card>
     </div>

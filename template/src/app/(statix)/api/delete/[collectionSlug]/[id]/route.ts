@@ -1,4 +1,4 @@
-import { revalidatePath } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
 import { NextRequest, NextResponse } from "next/server";
 
 import { CONTENT_STATUSES } from "@/statix/lib/content-status";
@@ -75,6 +75,10 @@ export async function POST(request: NextRequest, context: RouteContext) {
 
     // Revalidate the collection page
     revalidatePath(ROUTES.ADMIN.COLLECTION(collectionSlug));
+    // Content removed → media/files that referenced this item may now be
+    // orphan. Drop the shared content-index cache so the next library
+    // list reflects the new orphan flags immediately.
+    revalidateTag("content-index", "max");
 
     return NextResponse.json({ success: true });
   } catch (error) {

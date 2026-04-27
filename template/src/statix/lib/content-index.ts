@@ -42,8 +42,11 @@ export const getContentIndex = unstable_cache(
     }
   },
   ["content-index"],
-  { revalidate: 120 },
+  { revalidate: 120, tags: ["content-index"] },
 );
+
+/** Public tag for callers that want to invalidate the cache. */
+export const CONTENT_INDEX_TAG = "content-index";
 
 /**
  * Check if a media file is orphaned (not referenced in any content).
@@ -54,4 +57,22 @@ export function isMediaOrphaned(
   filename: string,
 ): boolean {
   return !contentIndex.includes(filename);
+}
+
+/**
+ * Check if a non-image upload (FileField) is orphaned. Mirrors
+ * `isMediaOrphaned` but matches against the canonical R2 key (e.g.
+ * `files/1700-brochure.pdf`) because File fields store the full key in
+ * content JSON — filename-only substring match would false-positive on
+ * accidental text matches.
+ */
+export function isFileOrphaned(
+  contentIndex: string,
+  key: string,
+): boolean {
+  if (!key) return true;
+  // Match either the canonical key or the bare filename fragment — both
+  // are legitimate ways a caller might have persisted the reference.
+  const filename = key.split("/").pop() ?? key;
+  return !contentIndex.includes(key) && !contentIndex.includes(filename);
 }

@@ -4,6 +4,7 @@ export const ROUTES = {
   ADMIN: {
     ROOT: ADMIN_ROOT,
     MEDIA: `${ADMIN_ROOT}/media`,
+    FILES: `${ADMIN_ROOT}/files`,
     TRASH: `${ADMIN_ROOT}/trash`,
     ACTIVITY: `${ADMIN_ROOT}/activity`,
     USERS: `${ADMIN_ROOT}/users`,

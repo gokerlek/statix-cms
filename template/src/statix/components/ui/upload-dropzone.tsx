@@ -12,6 +12,12 @@ interface UploadDropzoneProps {
   size?: "sm" | "md" | "lg";
   multiple?: boolean;
   children?: React.ReactNode;
+  /**
+   * Helper text under the upload icon ("PNG, JPG, GIF up to 10MB" by
+   * default). Pass a custom node to swap in target-specific copy
+   * (e.g. "PDF, DOCX, ZIP up to 5MB" for the files bucket).
+   */
+  hint?: React.ReactNode;
 }
 
 export function UploadDropzone({
@@ -22,6 +28,7 @@ export function UploadDropzone({
   size = "md",
   multiple = false,
   children,
+  hint,
 }: UploadDropzoneProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isDragOver, setIsDragOver] = useState(false);
@@ -117,7 +124,7 @@ export function UploadDropzone({
               size === "sm" ? "text-xs" : "text-xs",
             )}
           >
-            PNG, JPG, GIF up to 10MB
+            {hint ?? "PNG, JPG, GIF up to 10MB"}
           </p>
         </div>
       )}

@@ -1,14 +1,14 @@
 "use client";
 
-import type { MediaFile as GitHubFile } from "@/statix/hooks/use-media";
-
 import { MediaGridSkeleton } from "../skeletons";
 import { MediaItem } from "./MediaItem";
+
+import type { MediaFile as GitHubFile } from "@/statix/hooks/use-media";
 
 interface MediaGridProps {
   groupedImages: Record<string, GitHubFile[]>;
   selectedUrl?: string;
-  onSelect?: (url: string) => void;
+  onSelect?: (url: string, file: GitHubFile) => void;
   onDelete: (file: GitHubFile) => void;
   onMove?: (file: GitHubFile & { isOrphaned?: boolean }) => void;
   loading: boolean;
@@ -17,6 +17,11 @@ interface MediaGridProps {
   isSelectMode?: boolean;
   selectedForAction?: Set<string>;
   onToggleSelect?: (file: GitHubFile) => void;
+  /**
+   * Forwards to `MediaItem.kind`. `"file"` swaps the thumbnail for an
+   * icon tile so the same grid renders document libraries.
+   */
+  kind?: "image" | "file";
 }
 
 export function MediaGrid({
@@ -31,6 +36,7 @@ export function MediaGrid({
   isSelectMode,
   selectedForAction,
   onToggleSelect,
+  kind = "image",
 }: MediaGridProps) {
   if (loading) {
     return <MediaGridSkeleton items={12} />;
@@ -57,6 +63,7 @@ export function MediaGrid({
               <MediaItem
                 key={file.path}
                 file={file}
+                kind={kind}
                 isSelected={
                   selectedUrl === `/${file.path.replace(/^public\//, "")}`
                 }

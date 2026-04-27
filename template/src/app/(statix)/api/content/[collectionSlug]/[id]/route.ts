@@ -285,6 +285,10 @@ export async function POST(request: NextRequest, context: RouteContext) {
     // Slug set cache is now stale — next check re-fetches from GitHub.
     // Next.js 16 requires a cache-life profile as the second argument.
     revalidateTag(`slugs-${collectionSlug}`, "max");
+    // Content changed → orphan flags for media + files might flip.
+    // Drop the shared content-index cache so the next /api/media/list
+    // and /api/files/list reflect this save immediately.
+    revalidateTag("content-index", "max");
 
     writeAudit({
       userId: session.user.id,

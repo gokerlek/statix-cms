@@ -1,10 +1,11 @@
-import { useCallback, useEffect, useMemo } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Path, useForm } from "react-hook-form";
 
 import { toast } from "sonner";
 
 import ui from "@/statix/content/ui.json";
 import { statixConfig } from "@/statix.config";
+import { getByPath } from "@/statix/lib/field-diff";
 import { useUnsavedStore } from "@/statix/stores/useUnsavedStore";
 import { Collection } from "@/statix/types/cms";
 import { ContentData, ContentFormValues } from "@/statix/types/content";
@@ -71,6 +72,16 @@ export function useEditorForm({
 
   const addChange = useUnsavedStore((state) => state.addChange);
   const removeChange = useUnsavedStore((state) => state.removeChange);
+
+  // The "last saved / loaded from server" snapshot. Consumers compare the
+  // current form value against this to draw per-field "modified" indicators.
+  // We expose it as state (not just a ref) so React re-renders downstream
+  // consumers when the snapshot is refreshed (e.g. after a successful save
+  // the parent resets the form with the new server values).
+  const [serverSnapshot, setServerSnapshot] = useState<ContentFormValues | null>(
+    null,
+  );
+  const lastSnapshotJsonRef = useRef<string | null>(null);
 
   // Separate fields into shared and localized
   const sharedFields = useMemo(
@@ -212,6 +223,15 @@ export function useEditorForm({
     // This sets the "clean" state of the form
     if (currentServerValues) {
       reset(currentServerValues);
+
+      // Publish a new snapshot only when the server data actually changed —
+      // avoids re-rendering every subscribed field on harmless re-runs of
+      // this effect.
+      const nextJson = JSON.stringify(currentServerValues);
+      if (nextJson !== lastSnapshotJsonRef.current) {
+        lastSnapshotJsonRef.current = nextJson;
+        setServerSnapshot(currentServerValues);
+      }
     }
 
     // Check for local unsaved changes
@@ -320,7 +340,12 @@ export function useEditorForm({
 
         if (!title) title = id;
 
-        addChange(collection.slug, id, String(title));
+        // Detect the locale from the mutation path so the store can show
+        // "EN / TR" pending-changes badges without guessing later.
+        const localeFromPath =
+          name.startsWith("translations.") ? name.split(".")[1] : undefined;
+
+        addChange(collection.slug, id, String(title), localeFromPath);
       }
 
       // ── Locale sync: replicate blocks/list structure from default locale ──
@@ -399,6 +424,32 @@ export function useEditorForm({
     }
   }, [getDefaultValues, reset, clearLocalData]);
 
+  /**
+   * Revert a single field back to its snapshot value. Used by the
+   * `DirtyFieldIndicator` "↶ Geri al" button so the user can undo just one
+   * change without losing the rest of their edits (unlike `discardChanges`
+   * which resets everything).
+   *
+   * `setValue` with `shouldDirty: true` forces react-hook-form to re-evaluate
+   * `formState.isDirty` and triggers the `watch` callback above — which
+   * diff-checks against the snapshot and clears localStorage + the unsaved
+   * store entry when everything is back to the clean state.
+   */
+  const revertField = useCallback(
+    (name: string) => {
+      const snapshot = getDefaultValues();
+      if (!snapshot) return;
+      const oldValue = getByPath(snapshot, name);
+      setValue(name as Path<ContentFormValues>, oldValue as never, {
+        shouldDirty: true,
+        shouldTouch: true,
+        shouldValidate: false,
+      });
+    },
+    [getDefaultValues, setValue],
+  );
+
+
   return {
     control,
     handleSubmit,
@@ -406,10 +457,16 @@ export function useEditorForm({
     formState,
     clearLocalData,
     discardChanges,
+    revertField,
 
     sharedFields,
     localizedFields,
     locales,
     defaultLocale,
+
+    /** Last known server-side / canonical form values — used by per-field
+     *  dirty indicators to render an "unsaved (was X)" badge without every
+     *  individual field having to fetch the original again. */
+    serverSnapshot,
   };
 }

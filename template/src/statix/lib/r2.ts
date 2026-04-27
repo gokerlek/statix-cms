@@ -64,6 +64,18 @@ export async function uploadToR2(
   return getPublicUrl(key);
 }
 
+/**
+ * Encode each path segment for the `x-amz-copy-source` HTTP header.
+ * AWS SDK v3 doesn't auto-encode this value, so any non-ASCII byte in
+ * the key (Turkish letters, spaces, parentheses, …) trips
+ * "Invalid character in header content". Slashes stay literal so the
+ * key structure is preserved.
+ */
+function encodeCopySource(bucket: string, key: string): string {
+  const encoded = key.split("/").map(encodeURIComponent).join("/");
+  return `${bucket}/${encoded}`;
+}
+
 // Soft delete: uploads/img.jpg → trash/uploads/img.jpg (metadata ile)
 export async function softDeleteR2(key: string): Promise<string> {
   const r2 = getR2Client();
@@ -73,7 +85,7 @@ export async function softDeleteR2(key: string): Promise<string> {
   await r2.send(
     new CopyObjectCommand({
       Bucket: bucket,
-      CopySource: `${bucket}/${key}`,
+      CopySource: encodeCopySource(bucket, key),
       Key: trashKey,
       Metadata: {
         "original-key": key,
@@ -97,7 +109,7 @@ export async function restoreR2(trashKey: string): Promise<string> {
   await r2.send(
     new CopyObjectCommand({
       Bucket: bucket,
-      CopySource: `${bucket}/${trashKey}`,
+      CopySource: encodeCopySource(bucket, trashKey),
       Key: originalKey,
     }),
   );
@@ -174,7 +186,7 @@ export async function moveR2(
   await r2.send(
     new CopyObjectCommand({
       Bucket: bucket,
-      CopySource: `${bucket}/${sourceKey}`,
+      CopySource: encodeCopySource(bucket, sourceKey),
       Key: targetKey,
     }),
   );

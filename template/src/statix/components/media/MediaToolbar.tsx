@@ -2,13 +2,14 @@
 
 import { Button } from "@/statix/components/ui/button";
 import ui from "@/statix/content/ui.json";
-import { MediaTab } from "@/statix/hooks/use-media-search";
 
 import { CMSSearch } from "../shared/CMSSearch";
 
+export type LibraryTarget = "media" | "files";
+
 interface MediaToolbarProps {
-  activeTab: MediaTab;
-  onTabChange: (val: MediaTab) => void;
+  activeTab: string;
+  onTabChange: (val: string) => void;
   availableTabs: { id: string; label: string; count: number }[];
   searchQuery: string;
   onSearchChange: (val: string) => void;
@@ -21,6 +22,12 @@ interface MediaToolbarProps {
   onDeleteSelected: () => void;
   isBulkDeleting: boolean;
   totalImagesCount: number;
+  /**
+   * Library bucket — drives the "Showing N of M images/files" copy and
+   * the search placeholder. Defaults to `"media"` so existing
+   * `MediaClientPage` callers keep working without prop changes.
+   */
+  target?: LibraryTarget;
 }
 
 export function MediaToolbar({
@@ -38,7 +45,15 @@ export function MediaToolbar({
   totalImagesCount,
   filteredCount,
   totalCount,
+  target = "media",
 }: MediaToolbarProps) {
+  const isFiles = target === "files";
+  const showingTpl = isFiles ? ui.filesPage.showing : ui.mediaLibrary.showing;
+  const totalTpl = isFiles ? ui.filesPage.total : ui.mediaLibrary.total;
+  const searchPlaceholder = isFiles
+    ? ui.filesPage.searchPlaceholder
+    : ui.mediaLibrary.searchPlaceholder;
+
   return (
     <div className="flex flex-col gap-4">
       {/* Filter Cloud */}
@@ -48,7 +63,7 @@ export function MediaToolbar({
             key={tab.id}
             variant={activeTab === tab.id ? "secondary" : "outline"}
             size="sm"
-            onClick={() => onTabChange(tab.id as MediaTab)}
+            onClick={() => onTabChange(tab.id)}
             className="rounded-full h-8"
           >
             {tab.label}
@@ -63,10 +78,14 @@ export function MediaToolbar({
         <div className="text-sm text-muted-foreground">
           {!!searchQuery || activeTab !== "all" ? (
             <span>
-              Showing {filteredCount} of {totalCount} images
+              {showingTpl
+                .replace("{filtered}", filteredCount.toString())
+                .replace("{total}", totalCount.toString())}
             </span>
           ) : (
-            <span>Total {totalImagesCount} images</span>
+            <span>
+              {totalTpl.replace("{count}", totalImagesCount.toString())}
+            </span>
           )}
         </div>
 
@@ -107,7 +126,7 @@ export function MediaToolbar({
           <CMSSearch
             value={searchQuery}
             onChange={onSearchChange}
-            placeholder={ui.mediaLibrary.searchPlaceholder}
+            placeholder={searchPlaceholder}
             className="w-[200px] lg:w-[300px]"
           />
         </div>

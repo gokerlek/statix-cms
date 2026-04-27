@@ -135,6 +135,7 @@ export function AdminBreadcrumb() {
               // Static admin route segments — never treated as item IDs
               const STATIC_SEGMENTS = new Set([
                 "media",
+                "files",
                 "monitor",
                 "users",
                 "trash",
@@ -153,6 +154,8 @@ export function AdminBreadcrumb() {
                 label = "Dashboard";
               } else if (path === "media") {
                 label = ui.mediaPage.title;
+              } else if (path === "files") {
+                label = ui.filesPage.title;
               } else if (path === "monitor") {
                 label = ui.monitor.title;
               } else if (path === "users") {

@@ -8,6 +8,12 @@ export interface UnsavedItem {
   id: string;
   title: string;
   lastUpdated: string;
+  /**
+   * Locales that have pending edits, de-duplicated. Populated when the
+   * change path starts with `translations.<locale>.`; empty array means
+   * the edit lives on a shared (non-localized) field.
+   */
+  locales: string[];
 }
 
 interface UnsavedStoreState {
@@ -17,7 +23,15 @@ interface UnsavedStoreState {
 }
 
 interface UnsavedStoreActions {
-  addChange: (collectionSlug: string, id: string, title: string) => void;
+  addChange: (
+    collectionSlug: string,
+    id: string,
+    title: string,
+    /** Optional locale the current mutation touched — accumulated into
+     *  `UnsavedItem.locales` so the dashboard/editor can show which tabs
+     *  have pending edits. */
+    locale?: string,
+  ) => void;
   removeChange: (collectionSlug: string, id: string) => void;
   hasChange: (collectionSlug: string, id: string) => boolean;
   getUnsavedByCollection: (collectionSlug: string) => UnsavedItem[];
@@ -44,15 +58,20 @@ const useUnsavedStoreBase = create<UnsavedStore>()(
       unsavedItems: {},
       isAlertDismissed: false,
       _hasHydrated: false,
-      addChange: (collectionSlug, id, title) => {
+      addChange: (collectionSlug, id, title, locale) => {
         const key = `${collectionSlug}-${id}`;
 
         set((state) => {
+          const prev = state.unsavedItems[key];
+          const locales = new Set(prev?.locales ?? []);
+          if (locale) locales.add(locale);
+
           state.unsavedItems[key] = {
             collectionSlug,
             id,
             title,
             lastUpdated: new Date().toISOString(),
+            locales: Array.from(locales).sort(),
           };
           state.isAlertDismissed = false;
         });

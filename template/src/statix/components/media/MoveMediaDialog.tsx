@@ -10,6 +10,7 @@ import {
   IconLoader2,
 } from "@tabler/icons-react";
 
+import { statixConfig } from "@/statix.config";
 import { Button } from "@/statix/components/ui/button";
 import {
   Dialog,
@@ -29,9 +30,9 @@ import {
 } from "@/statix/components/ui/select";
 import { Skeleton } from "@/statix/components/ui/skeleton";
 import ui from "@/statix/content/ui.json";
-import { useMoveMedia } from "@/statix/hooks/use-media-move";
+import { useFilesReferences } from "@/statix/hooks/use-files-references";
+import { type MoveTarget, useMoveMedia } from "@/statix/hooks/use-media-move";
 import { useMediaReferences } from "@/statix/hooks/use-media-references";
-import { statixConfig } from "@/statix.config";
 
 interface MoveMediaDialogProps {
   open: boolean;
@@ -42,6 +43,12 @@ interface MoveMediaDialogProps {
     isOrphaned?: boolean;
   };
   currentFolder: string;
+  /**
+   * Bucket — `"media"` (default) hits `/api/media/move` and looks up
+   * usages by filename; `"files"` hits `/api/files/move` and looks up
+   * usages by R2 key. Same UI / copy in both modes.
+   */
+  target?: MoveTarget;
 }
 
 export function MoveMediaDialog({
@@ -49,12 +56,20 @@ export function MoveMediaDialog({
   onOpenChange,
   media,
   currentFolder,
+  target = "media",
 }: MoveMediaDialogProps) {
   const [selectedFolder, setSelectedFolder] = useState(currentFolder);
-  const { mutate: moveMedia, isPending } = useMoveMedia();
-  const { data: references, isLoading: loadingRefs } = useMediaReferences(
-    open ? media.name : null,
+  const { mutate: moveMedia, isPending } = useMoveMedia({ target });
+
+  const mediaRefs = useMediaReferences(
+    open && target === "media" ? media.name : null,
   );
+  const fileRefs = useFilesReferences(
+    open && target === "files" ? media.path : null,
+  );
+  const references = target === "files" ? fileRefs.data : mediaRefs.data;
+  const loadingRefs =
+    target === "files" ? fileRefs.isLoading : mediaRefs.isLoading;
 
   const folders = [
     { value: "default", label: ui.uploadSection.defaultFolder },
@@ -169,10 +184,10 @@ export function MoveMediaDialog({
 
                   <div className="flex-1">
                     <p className="font-medium text-yellow-800 dark:text-yellow-200">
-                      {ui.mediaMove.usedInContent.replace(
-                        "{count}",
-                        String(references.length),
-                      )}
+                      {(target === "files"
+                        ? ui.mediaMove.usedInContentFile
+                        : ui.mediaMove.usedInContent
+                      ).replace("{count}", String(references.length))}
                     </p>
 
                     <ul className="mt-2 space-y-1">
