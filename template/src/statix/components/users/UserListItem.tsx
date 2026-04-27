@@ -4,8 +4,11 @@ import { UserAvatar } from "@/statix/components/shared/UserAvatar";
 import { Badge } from "@/statix/components/ui/badge";
 import { Card, CardContent } from "@/statix/components/ui/card";
 import ui from "@/statix/content/ui.json";
+import {
+  detectUserPreset,
+  getPresetLabel,
+} from "@/statix/lib/role-detection";
 import type { CMSUser } from "@/app/(statix)/admin/users/page";
-
 
 interface UserListItemProps {
   user: CMSUser;
@@ -14,7 +17,21 @@ interface UserListItemProps {
   onClick: () => void;
 }
 
-export function UserListItem({ user, lastLogin, isSelf, onClick }: UserListItemProps) {
+export function UserListItem({
+  user,
+  lastLogin,
+  isSelf,
+  onClick,
+}: UserListItemProps) {
+  // Effective preset (incl. "Custom" when stored permissions don't line
+  // up with any preset) — keeps the list badge in sync with the drawer
+  // chip instead of showing the legacy `role` column blindly.
+  const presetKey = detectUserPreset({
+    role: user.role,
+    permissions: user.permissions,
+  });
+  const isPrivileged = presetKey === "admin";
+
   return (
     <Card
       role="button"
@@ -39,7 +56,9 @@ export function UserListItem({ user, lastLogin, isSelf, onClick }: UserListItemP
           />
           <div className="flex-1 min-w-0">
             <p className="font-medium truncate">{user.name || "—"}</p>
-            <p className="text-xs text-muted-foreground truncate">{user.email}</p>
+            <p className="text-xs text-muted-foreground truncate">
+              {user.email}
+            </p>
           </div>
           {isSelf && (
             <span className="text-xs text-muted-foreground font-medium px-2 py-0.5 rounded bg-muted">
@@ -50,8 +69,8 @@ export function UserListItem({ user, lastLogin, isSelf, onClick }: UserListItemP
 
         {/* Role + status */}
         <div className="flex items-center gap-2">
-          <Badge variant={user.role === "owner" || user.role === "admin" ? "default" : "secondary"}>
-            {(user.role ?? "editor").charAt(0).toUpperCase() + (user.role ?? "editor").slice(1)}
+          <Badge variant={isPrivileged ? "default" : "secondary"}>
+            {getPresetLabel(presetKey)}
           </Badge>
           {user.banned ? (
             <span className="text-xs text-destructive font-medium">

@@ -13,6 +13,7 @@ export interface RolePermissions {
   canManageUsers: boolean;
   canViewMonitor: boolean;
   canManageMedia: boolean;
+  canManageFiles: boolean;
   canManageTrash: boolean;
 
   // Per-collection permissions
@@ -39,6 +40,7 @@ export const P = {
   MANAGE_USERS: "canManageUsers" as const,
   VIEW_MONITOR: "canViewMonitor" as const,
   MANAGE_MEDIA: "canManageMedia" as const,
+  MANAGE_FILES: "canManageFiles" as const,
   MANAGE_TRASH: "canManageTrash" as const,
 };
 
@@ -86,6 +88,7 @@ export const DEFAULT_ROLE_PERMISSIONS: Record<string, RolePermissions> = {
     canManageUsers: true,
     canViewMonitor: true,
     canManageMedia: true,
+    canManageFiles: true,
     canManageTrash: true,
     collections: { "*": ALL_COLLECTION_PERMISSIONS },
   },
@@ -93,6 +96,7 @@ export const DEFAULT_ROLE_PERMISSIONS: Record<string, RolePermissions> = {
     canManageUsers: true,
     canViewMonitor: true,
     canManageMedia: true,
+    canManageFiles: true,
     canManageTrash: true,
     collections: { "*": ALL_COLLECTION_PERMISSIONS },
   },
@@ -100,6 +104,7 @@ export const DEFAULT_ROLE_PERMISSIONS: Record<string, RolePermissions> = {
     canManageUsers: false,
     canViewMonitor: false,
     canManageMedia: true,
+    canManageFiles: true,
     canManageTrash: false,
     collections: { "*": EDITOR_COLLECTION_PERMISSIONS },
   },

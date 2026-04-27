@@ -12,7 +12,7 @@ import { P } from "@/statix/types/permissions";
  */
 export async function GET() {
   try {
-    await requirePermission(P.MANAGE_MEDIA);
+    await requirePermission(P.MANAGE_FILES);
 
     const stats = await getFileStats();
 

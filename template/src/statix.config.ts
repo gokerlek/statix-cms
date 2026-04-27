@@ -20,6 +20,7 @@ export const statixConfig: StatixConfig = {
         canManageUsers: false,
         canViewMonitor: false,
         canManageMedia: false,
+        canManageFiles: false,
         canManageTrash: false,
         collections: {
           "*": {

@@ -98,7 +98,7 @@ export default async function AdminDashboard({ searchParams }: AdminDashboardPro
 
       {hasGlobalPermission(permissions, P.MANAGE_MEDIA) && <MediaOverview />}
 
-      {hasGlobalPermission(permissions, P.MANAGE_MEDIA) && <FilesOverview />}
+      {hasGlobalPermission(permissions, P.MANAGE_FILES) && <FilesOverview />}
 
       {collectionStats.some((c) => hasCollectionPermission(permissions, c.slug, CP.VIEW)) && (
         <LocalizationStats stats={localizationStats} />

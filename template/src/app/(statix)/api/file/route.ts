@@ -24,7 +24,7 @@ function sanitizeFolder(value: string | null | undefined): string | null {
 
 export async function POST(request: NextRequest) {
   try {
-    await requirePermission(P.MANAGE_MEDIA);
+    await requirePermission(P.MANAGE_FILES);
 
     const formData = await request.formData();
     const file = formData.get("file") as File;
@@ -87,7 +87,7 @@ function appendExt(name: string, originalFilename: string): string {
 
 export async function DELETE(request: NextRequest) {
   try {
-    const { session } = await requirePermission(P.MANAGE_MEDIA);
+    const { session } = await requirePermission(P.MANAGE_FILES);
 
     const body = await request.json();
     const parsed = fileDeleteSchema.safeParse(body);

@@ -12,7 +12,7 @@ import { P } from "@/statix/types/permissions";
  */
 export async function GET(request: NextRequest) {
   try {
-    await requirePermission(P.MANAGE_MEDIA);
+    await requirePermission(P.MANAGE_FILES);
 
     const { searchParams } = request.nextUrl;
     const key = searchParams.get("key");

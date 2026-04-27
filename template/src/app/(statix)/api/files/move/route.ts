@@ -17,7 +17,7 @@ import { P } from "@/statix/types/permissions";
  */
 export async function POST(request: NextRequest) {
   try {
-    const { session } = await requirePermission(P.MANAGE_MEDIA);
+    const { session } = await requirePermission(P.MANAGE_FILES);
 
     const body = await request.json();
     const parsed = mediaMoveSchema.safeParse(body);
