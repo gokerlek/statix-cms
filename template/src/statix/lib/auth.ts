@@ -7,6 +7,7 @@ import { db } from "./db";
 import * as schema from "@/statix/db/schema";
 import { env } from "./env";
 import { writeAudit } from "./audit";
+import ui from "@/statix/content/ui.json";
 
 const resend = new Resend(env.RESEND_API_KEY);
 
@@ -106,8 +107,8 @@ export const auth = betterAuth({
         await resend.emails.send({
           from: env.RESEND_FROM_EMAIL,
           to: email,
-          subject: "Giriş kodunuz",
-          text: `Kodunuz: ${otp}\n\nBu kod 5 dakika geçerlidir.`,
+          subject: ui.email.otp.subject,
+          text: ui.email.otp.body.replace("{otp}", otp),
         });
       },
     }),
