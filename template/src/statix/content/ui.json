@@ -26,6 +26,7 @@
     "viewAll": "View All",
     "confirm": "Confirm",
     "changeFolder": "Change Folder",
+    "back": "Back",
     "error": {
       "title": "Something went wrong",
       "description": "An unexpected error occurred. Please try again.",
@@ -612,5 +613,43 @@
     "searching": "Searching…",
     "truncatedHint": "Refine your query — not every collection could be scanned.",
     "open": "Open"
+  },
+  "signin": {
+    "fields": {
+      "email": {
+        "label": "Email address",
+        "placeholder": "you@company.com"
+      }
+    },
+    "actions": {
+      "sendCode": "Send sign-in code",
+      "verify": "Sign in",
+      "github": "Continue with GitHub",
+      "google": "Continue with Google"
+    },
+    "dividers": {
+      "or": "or continue with"
+    },
+    "otp": {
+      "sentTo": "We sent a 6-digit code to <strong>{email}</strong>.",
+      "validity": "The code is valid for 5 minutes."
+    },
+    "toasts": {
+      "success": {
+        "codeSent": "Verification code sent to {email}.",
+        "signedIn": "Signed in successfully. Redirecting…"
+      },
+      "error": {
+        "codeSendFailed": "Could not send code. Please try again.",
+        "invalidCode": "Invalid or expired code.",
+        "socialFailed": "Social sign-in failed."
+      }
+    }
+  },
+  "email": {
+    "otp": {
+      "subject": "Your sign-in code",
+      "body": "Your code is: {otp}\n\nThis code is valid for 5 minutes."
+    }
   }
 }
