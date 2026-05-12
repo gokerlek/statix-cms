@@ -1,8 +1,6 @@
 import { ReactNode } from "react";
 import { redirect } from "next/navigation";
 
-import { Toaster } from "sonner";
-
 import { getSession } from "@/statix/lib/session";
 import { QueryProvider } from "@/statix/providers/query-provider";
 import { ErrorBoundary } from "@/statix/components/shared/ErrorBoundary";
@@ -49,7 +47,6 @@ export default async function AdminLayout({
           </BreadcrumbProvider>
 
           <MediaDrawer />
-          <Toaster richColors position="top-center" />
         </div>
       </TooltipProvider>
     </QueryProvider>
