@@ -1,5 +1,6 @@
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
+import { nextCookies } from "better-auth/next-js";
 import { emailOTP } from "better-auth/plugins";
 import { Resend } from "resend";
 import { db } from "./db";
@@ -110,6 +111,13 @@ export const auth = betterAuth({
         });
       },
     }),
+    // IMPORTANT: nextCookies() MUST remain the last plugin.
+    // It hooks into the response cycle to commit Set-Cookie headers from
+    // every other plugin into Next.js's cookies() store. Any plugin placed
+    // AFTER nextCookies() will set cookies that this plugin never sees,
+    // and they will fail to persist in Server Component contexts. See:
+    // https://www.better-auth.com/docs/integrations/next
+    nextCookies(),
   ],
 
   socialProviders: {
