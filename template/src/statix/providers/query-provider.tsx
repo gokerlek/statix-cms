@@ -17,6 +17,16 @@ import ui from "@/statix/content/ui.json";
  * - staleTime: Data considered fresh for 5 minutes (reduces API calls)
  * - gcTime: Keep unused data in cache for 30 minutes
  * - refetchOnWindowFocus: Disabled to prevent unnecessary refetches
+ *
+ * Error handling policy:
+ * - Queries: the global QueryCache.onError surfaces a generic toast because
+ *   most query errors are network-level and consumers don't always have a
+ *   place to render an inline error.
+ * - Mutations: the global handler ONLY logs. Each mutation hook is expected
+ *   to define its own `onError` with a domain-specific message (see
+ *   use-trash.ts, use-users.ts, use-media.ts). This avoids the double-toast
+ *   that happens when both local + global handlers fire (TanStack v5 does
+ *   not suppress the global handler when a local one is present).
  */
 export function QueryProvider({ children }: { children: React.ReactNode }) {
   const [queryClient] = useState(
@@ -44,8 +54,8 @@ export function QueryProvider({ children }: { children: React.ReactNode }) {
         }),
         mutationCache: new MutationCache({
           onError: (error) => {
-            console.error("Global Mutation Error:", error);
-            toast.error(`${ui.toasts.error.globalMutation}: ${error.message}`);
+            // Log only. Each mutation hook is responsible for its own toast.
+            console.error("Mutation error:", error);
           },
         }),
       }),
