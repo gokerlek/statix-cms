@@ -89,6 +89,9 @@ export function useUploadMedia() {
       toast.success(ui.toasts.success.upload);
       queryClient.invalidateQueries({ queryKey: QUERY_KEYS.media });
     },
+    onError: (error) => {
+      toast.error(error.message || ui.toasts.error.upload);
+    },
   });
 }
 
