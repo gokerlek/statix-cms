@@ -1,58 +1,56 @@
 "use client";
 
-import { useState, useRef, KeyboardEvent } from "react";
+import { useRef, useState, type KeyboardEvent } from "react";
 import Image from "next/image";
-import { useRouter } from "next/navigation";
-import { IconBrandGithub, IconMail, IconArrowLeft, IconLoader2 } from "@tabler/icons-react";
 
-import { authClient } from "@/statix/lib/auth-client";
-import { ROUTES } from "@/statix/lib/constants";
+import {
+  IconArrowLeft,
+  IconBrandGithub,
+  IconLoader2,
+  IconMail,
+} from "@tabler/icons-react";
+
+import { useSendOtp, useSocialSignIn, useVerifyOtp } from "@/statix/hooks/use-auth";
+import { useTranslation } from "@/statix/hooks/use-translation";
 import { Button } from "@/statix/components/ui/button";
 import { Input } from "@/statix/components/ui/input";
 
 type Step = "email" | "otp";
 
 export default function SignInPage() {
-  const router = useRouter();
+  const { t } = useTranslation();
   const [step, setStep] = useState<Step>("email");
   const [email, setEmail] = useState("");
   const [otp, setOtp] = useState(["", "", "", "", "", ""]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
   const otpRefs = useRef<(HTMLInputElement | null)[]>([]);
 
-  async function handleSendOtp(e: React.FormEvent) {
+  const sendOtp = useSendOtp();
+  const verifyOtp = useVerifyOtp();
+  const social = useSocialSignIn();
+
+  const loading = sendOtp.isPending || verifyOtp.isPending || social.isPending;
+  // Surface the most recent mutation's error inline. Toasts are handled
+  // by the hook's own onError; this inline copy is for screen-reader users
+  // and folks who dismissed the toast.
+  const error =
+    verifyOtp.error?.message ??
+    sendOtp.error?.message ??
+    social.error?.message ??
+    "";
+
+  function handleSendOtp(e: React.FormEvent) {
     e.preventDefault();
     if (!email) return;
-    setError("");
-    setLoading(true);
-    try {
-      await authClient.emailOtp.sendVerificationOtp({
-        email,
-        type: "sign-in",
-      });
-      setStep("otp");
-    } catch {
-      setError("Kod gönderilemedi. Lütfen tekrar deneyin.");
-    } finally {
-      setLoading(false);
-    }
+    sendOtp.mutate(email, {
+      onSuccess: () => setStep("otp"),
+    });
   }
 
-  async function handleVerifyOtp(e: React.FormEvent) {
+  function handleVerifyOtp(e: React.FormEvent) {
     e.preventDefault();
     const code = otp.join("");
     if (code.length !== 6) return;
-    setError("");
-    setLoading(true);
-    try {
-      await authClient.signIn.emailOtp({ email, otp: code });
-      router.push(ROUTES.ADMIN.ROOT);
-    } catch {
-      setError("Geçersiz veya süresi dolmuş kod.");
-    } finally {
-      setLoading(false);
-    }
+    verifyOtp.mutate({ email, otp: code });
   }
 
   function handleOtpChange(index: number, value: string) {
@@ -65,19 +63,12 @@ export default function SignInPage() {
     }
   }
 
-  function handleOtpKeyDown(index: number, e: KeyboardEvent<HTMLInputElement>) {
+  function handleOtpKeyDown(
+    index: number,
+    e: KeyboardEvent<HTMLInputElement>,
+  ) {
     if (e.key === "Backspace" && !otp[index] && index > 0) {
       otpRefs.current[index - 1]?.focus();
-    }
-  }
-
-  async function handleSocial(provider: "github" | "google") {
-    setLoading(true);
-    try {
-      await authClient.signIn.social({ provider, callbackURL: ROUTES.ADMIN.ROOT });
-    } catch {
-      setError("Sosyal giriş başarısız oldu.");
-      setLoading(false);
     }
   }
 
@@ -86,7 +77,13 @@ export default function SignInPage() {
       <div className="max-w-md w-full mx-4">
         <div className="bg-white/10 backdrop-blur-lg rounded-2xl shadow-2xl p-8 border border-white/20">
           <div className="flex flex-col items-center gap-5 mb-8">
-            <Image src="/logo-label.svg" alt="Logo" width={136} height={33} priority />
+            <Image
+              src="/logo-label.svg"
+              alt="Logo"
+              width={136}
+              height={33}
+              priority
+            />
           </div>
 
           {step === "email" ? (
@@ -94,30 +91,32 @@ export default function SignInPage() {
               <form onSubmit={handleSendOtp} className="space-y-4">
                 <div>
                   <label className="block text-sm text-primary-foreground/80 mb-1">
-                    Email adresi
+                    {t("signin.fields.email.label")}
                   </label>
                   <Input
                     type="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    placeholder="ornek@sirket.com"
+                    placeholder={t("signin.fields.email.placeholder")}
                     required
                     disabled={loading}
                     className="bg-white/10 border-white/20 text-white placeholder:text-white/40"
                   />
                 </div>
 
-                {error && (
-                  <p className="text-red-400 text-sm">{error}</p>
-                )}
+                {error && <p className="text-red-400 text-sm">{error}</p>}
 
-                <Button type="submit" className="w-full" disabled={loading || !email}>
+                <Button
+                  type="submit"
+                  className="w-full"
+                  disabled={loading || !email}
+                >
                   {loading ? (
                     <IconLoader2 className="w-4 h-4 animate-spin mr-2" />
                   ) : (
                     <IconMail className="w-4 h-4 mr-2" />
                   )}
-                  Giriş kodu gönder
+                  {t("signin.actions.sendCode")}
                 </Button>
               </form>
 
@@ -127,7 +126,7 @@ export default function SignInPage() {
                 </div>
                 <div className="relative flex justify-center text-xs">
                   <span className="bg-transparent px-2 text-primary-foreground/60">
-                    veya şununla devam et
+                    {t("signin.dividers.or")}
                   </span>
                 </div>
               </div>
@@ -137,18 +136,18 @@ export default function SignInPage() {
                   type="button"
                   variant="outline"
                   className="w-full bg-slate-800/50 border-white/20 text-white hover:bg-slate-700/50"
-                  onClick={() => handleSocial("github")}
+                  onClick={() => social.mutate("github")}
                   disabled={loading}
                 >
                   <IconBrandGithub className="w-4 h-4 mr-2" />
-                  GitHub ile giriş yap
+                  {t("signin.actions.github")}
                 </Button>
 
                 <Button
                   type="button"
                   variant="outline"
                   className="w-full bg-white/10 border-white/20 text-white hover:bg-white/20"
-                  onClick={() => handleSocial("google")}
+                  onClick={() => social.mutate("google")}
                   disabled={loading}
                 >
                   <svg className="w-4 h-4 mr-2" viewBox="0 0 24 24">
@@ -169,7 +168,7 @@ export default function SignInPage() {
                       d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
                     />
                   </svg>
-                  Google ile giriş yap
+                  {t("signin.actions.google")}
                 </Button>
               </div>
             </>
@@ -177,10 +176,12 @@ export default function SignInPage() {
             <form onSubmit={handleVerifyOtp} className="space-y-6">
               <div>
                 <p className="text-primary-foreground/80 text-sm text-center mb-1">
-                  <strong>{email}</strong> adresine 6 haneli kod gönderdik.
+                  {t("signin.otp.sentToPrefix")}
+                  <strong>{email}</strong>
+                  {t("signin.otp.sentToSuffix")}
                 </p>
                 <p className="text-primary-foreground/60 text-xs text-center">
-                  Kod 5 dakika geçerlidir.
+                  {t("signin.otp.validity")}
                 </p>
               </div>
 
@@ -188,7 +189,9 @@ export default function SignInPage() {
                 {otp.map((digit, i) => (
                   <input
                     key={i}
-                    ref={(el) => { otpRefs.current[i] = el; }}
+                    ref={(el) => {
+                      otpRefs.current[i] = el;
+                    }}
                     type="text"
                     inputMode="numeric"
                     maxLength={1}
@@ -213,16 +216,21 @@ export default function SignInPage() {
                 {loading ? (
                   <IconLoader2 className="w-4 h-4 animate-spin mr-2" />
                 ) : null}
-                Giriş yap
+                {t("signin.actions.verify")}
               </Button>
 
               <button
                 type="button"
-                onClick={() => { setStep("email"); setOtp(["", "", "", "", "", ""]); setError(""); }}
+                onClick={() => {
+                  setStep("email");
+                  setOtp(["", "", "", "", "", ""]);
+                  sendOtp.reset();
+                  verifyOtp.reset();
+                }}
                 className="w-full flex items-center justify-center gap-2 text-sm text-primary-foreground/60 hover:text-primary-foreground/80 transition-colors"
               >
                 <IconArrowLeft className="w-4 h-4" />
-                Geri dön
+                {t("common.back")}
               </button>
             </form>
           )}

@@ -631,7 +631,8 @@
       "or": "or continue with"
     },
     "otp": {
-      "sentTo": "We sent a 6-digit code to <strong>{email}</strong>.",
+      "sentToPrefix": "We sent a 6-digit code to ",
+      "sentToSuffix": ".",
       "validity": "The code is valid for 5 minutes."
     },
     "toasts": {
