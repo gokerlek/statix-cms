@@ -138,6 +138,63 @@ async function main() {
     fs.writeFileSync(packageJsonPath, JSON.stringify(packageJson, null, 2));
   }
 
+  // Generate a minimal per-project README. The upstream template README
+  // was Statix's own marketing/docs page and didn't match the env vars
+  // the scaffolded code actually reads — keeping it would mislead users.
+  const readmePath = path.join(targetDir, "README.md");
+  fs.writeFileSync(
+    readmePath,
+    `# ${projectName}
+
+A Statix CMS project — a Git-based headless CMS built on Next.js, Better Auth,
+and Cloudflare R2. Your content lives in a GitHub repo; this app is the
+admin panel.
+
+## Quick start
+
+1. Copy environment values into \`.env\` (already copied from \`.env.example\`):
+
+   - \`BETTER_AUTH_SECRET\` — generate with \`openssl rand -base64 32\`
+   - \`BETTER_AUTH_URL\` — e.g. \`http://localhost:3000\` locally
+   - \`GITHUB_TOKEN\`, \`GITHUB_OWNER\`, \`GITHUB_REPO\` — the repo holding your content
+   - \`RESEND_API_KEY\`, \`RESEND_FROM_EMAIL\` — used to send the OTP sign-in email
+   - \`INITIAL_ADMIN_EMAIL\` — the email of your first admin user
+
+   Cloudflare R2 (\`R2_*\`, \`NEXT_PUBLIC_MEDIA_BASE_URL\`) is required for media uploads.
+   Turso (\`TURSO_DATABASE_URL\`, \`TURSO_AUTH_TOKEN\`) is optional — leave empty for a
+   local \`./local.db\` file.
+
+2. Initialise the database (creates tables and promotes \`INITIAL_ADMIN_EMAIL\` to owner):
+
+   \`\`\`bash
+   npm run db:setup
+   \`\`\`
+
+3. Start the dev server:
+
+   \`\`\`bash
+   npm run dev
+   \`\`\`
+
+4. Open <http://localhost:3000/auth/signin> and sign in with the admin email.
+
+## Customisation
+
+- \`src/statix.config.ts\` — declare your content collections
+- \`src/statix/content/ui.json\` — every UI string (no hardcoded copy in components)
+- \`src/statix/components/\` — fully owned components, edit freely
+
+## CI
+
+This project ships a GitHub Actions workflow at \`.github/workflows/ci.yml\`. It will
+fail on first push until you configure the secrets it expects (or delete the file).
+
+## Upstream
+
+Statix CMS upstream: <https://github.com/gokerlek/statix-cms>
+`,
+  );
+
   // Optional: prompt for INITIAL_ADMIN_EMAIL when running interactively.
   // Skipped when stdin is not a TTY (CI provisioning, Docker, < /dev/null)
   // — `seed:admin` will exit 1 with a clear message in that case.
