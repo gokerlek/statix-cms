@@ -1,11 +1,16 @@
 import { NextRequest, NextResponse } from "next/server";
 
+import { mapErrorToResponse } from "@/statix/lib/api-errors";
 import { resolveStatus } from "@/statix/lib/content-status";
 import { resolveContentTitle } from "@/statix/lib/content-utils";
 import { getGitHubCMS } from "@/statix/lib/github-cms";
-import { requireAuthenticated } from "@/statix/lib/session";
+import {
+  requireCollectionPermission,
+  requireSession,
+} from "@/statix/lib/session";
 import { statixConfig } from "@/statix.config";
 import { ContentData } from "@/statix/types/content";
+import { CP } from "@/statix/types/permissions";
 
 export const dynamic = "force-dynamic";
 
@@ -14,17 +19,24 @@ export async function GET(
   { params }: { params: Promise<{ slug: string }> },
 ) {
   try {
-    await requireAuthenticated();
+    // 1. Auth — must come first so unauthenticated probes can't enumerate
+    //    collection existence via the 404 differential.
+    await requireSession();
 
+    // 2. Existence — 404 if the slug isn't a configured collection. Order:
+    //    BEFORE the permission check so legitimate users with a typo get
+    //    a clear 404 rather than a misleading 403.
     const { slug } = await params;
     const collection = statixConfig.collections.find((c) => c.slug === slug);
-
     if (!collection) {
       return NextResponse.json(
         { error: "Collection not found" },
         { status: 404 },
       );
     }
+
+    // 3. Permission — only after we know the collection exists.
+    await requireCollectionPermission(slug, CP.VIEW);
 
     const github = getGitHubCMS();
 
@@ -67,11 +79,6 @@ export async function GET(
 
     return NextResponse.json(filesWithStatus);
   } catch (error) {
-    console.error("Failed to list collection items:", error);
-
-    return NextResponse.json(
-      { error: "Failed to list collection items" },
-      { status: 500 },
-    );
+    return mapErrorToResponse(error);
   }
 }
