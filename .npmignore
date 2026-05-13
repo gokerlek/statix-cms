@@ -1,0 +1,30 @@
+# What ships in the published create-statix-cms tarball.
+#
+# package.json `files` already restricts top-level to `bin/`, `template/`,
+# `template/.env.example`, and `template/.gitignore`. This file removes
+# noise from inside `template/` that would bloat the tarball or leak
+# the maintainer's dev state into every scaffolded project.
+
+# Maintainer dev artifacts that should never reach end users
+template/local.db
+template/local.db-journal
+template/package-lock.json
+template/tsconfig.tsbuildinfo
+template/.next/
+template/coverage/
+template/node_modules/
+
+# Repo meta — belongs in the upstream repo, not in every scaffold
+template/CHANGELOG.md
+template/CONTRIBUTING.md
+template/SECURITY.md
+template/docs/
+
+# README is generated per-project by bin/index.js
+template/README.md
+
+# Dotfiles renamed to `_github` / `_husky` in the published template;
+# bin/index.js renames them back at scaffold time. Hide the rename
+# source from npm if it ever ends up in template/ by accident.
+template/.github/
+template/.husky/

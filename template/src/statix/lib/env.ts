@@ -19,9 +19,10 @@ const envSchema = z.object({
   GOOGLE_CLIENT_ID: z.string().optional(),
   GOOGLE_CLIENT_SECRET: z.string().optional(),
 
-  // Turso (kullanıcı veritabanı)
-  TURSO_DATABASE_URL: z.string().min(1, "TURSO_DATABASE_URL is required"),
-  TURSO_AUTH_TOKEN: z.string().min(1, "TURSO_AUTH_TOKEN is required"),
+  // Production: libsql/Turso remote. Local dev: leave both empty to fall
+  // back to a libsql file at ./local.db (see lib/db.ts and drizzle.config.ts).
+  TURSO_DATABASE_URL: z.string().optional(),
+  TURSO_AUTH_TOKEN: z.string().optional(),
 
   // Resend (OTP email)
   RESEND_API_KEY: z.string().min(1, "RESEND_API_KEY is required"),

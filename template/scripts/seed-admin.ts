@@ -10,8 +10,16 @@ async function seedAdmin() {
   const email = process.env.INITIAL_ADMIN_EMAIL;
 
   if (!email) {
-    console.log("INITIAL_ADMIN_EMAIL not set, skipping admin seed.");
-    return;
+    // Loud failure: silent skip used to mislead users into thinking the
+    // command succeeded — they would then find themselves locked out
+    // because no account had been promoted to Owner.
+    console.error(
+      "\n❌ INITIAL_ADMIN_EMAIL is not set in your .env — cannot seed admin.",
+    );
+    console.error(
+      "   Set INITIAL_ADMIN_EMAIL=your@email.com and re-run: npm run seed:admin\n",
+    );
+    process.exit(1);
   }
 
   const [targetUser] = await db

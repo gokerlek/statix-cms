@@ -12,6 +12,8 @@
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
     "seed:admin": "tsx scripts/seed-admin.ts",
+    "db:push": "drizzle-kit push",
+    "db:setup": "npm run db:push && npm run seed:admin",
     "prepare": "husky"
   },
   "dependencies": {
