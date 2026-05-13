@@ -198,3 +198,29 @@ export function sanitizeFilename(filename: string): string {
 
   return safe || "file";
 }
+
+/**
+ * Sanitize a folder slug used in R2 object keys like
+ * `files/{folder}/...` or `uploads/{folder}/...`.
+ *
+ * Returns `null` when the value is missing, empty, or doesn't match the
+ * lowercase-alphanumeric+dash+underscore shape we allow. Callers treat
+ * `null` as "no folder" (root prefix) and never as an error — so the UI
+ * silently drops bad values rather than rejecting an otherwise-valid
+ * upload.
+ *
+ * Why strict:
+ * - lowercase: keeps S3-style keys case-stable across clients
+ * - `[a-z0-9_-]`: prevents path traversal (`..`), slashes, encoded chars
+ * - 1-64 chars: capped so a hostile client can't push huge URLs
+ * - "default" rejected: legacy folder name reserved for "no folder"
+ */
+export function sanitizeFolder(
+  value: string | null | undefined,
+): string | null {
+  if (!value) return null;
+  const trimmed = value.trim().replace(/^\/+|\/+$/g, "").toLowerCase();
+  if (!trimmed || trimmed === "default") return null;
+  if (!/^[a-z0-9_-]{1,64}$/.test(trimmed)) return null;
+  return trimmed;
+}

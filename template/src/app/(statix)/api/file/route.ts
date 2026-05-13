@@ -3,24 +3,16 @@ import { NextRequest, NextResponse } from "next/server";
 import { fileDeleteSchema } from "@/statix/lib/api-schemas";
 import { handleApiError } from "@/statix/lib/api-response";
 import { writeAudit, getIp } from "@/statix/lib/audit";
-import { getMaxUploadSize, sanitizeFilename, validateFileUpload } from "@/statix/lib/file-validation";
+import {
+  getMaxUploadSize,
+  sanitizeFilename,
+  sanitizeFolder,
+  validateFileUpload,
+} from "@/statix/lib/file-validation";
 import { softDeleteR2, uploadToR2 } from "@/statix/lib/r2";
 import { requirePermission } from "@/statix/lib/session";
 import { formatFileSize } from "@/statix/lib/utils";
 import { P } from "@/statix/types/permissions";
-
-/**
- * Sanitize a folder slug used in `files/{folder}/...` keys. Same shape
- * as the media upload route — alphanumeric + dashes/underscores only,
- * leading/trailing slashes stripped, length-capped.
- */
-function sanitizeFolder(value: string | null | undefined): string | null {
-  if (!value) return null;
-  const trimmed = value.trim().replace(/^\/+|\/+$/g, "").toLowerCase();
-  if (!trimmed || trimmed === "default") return null;
-  if (!/^[a-z0-9_-]{1,64}$/.test(trimmed)) return null;
-  return trimmed;
-}
 
 export async function POST(request: NextRequest) {
   try {

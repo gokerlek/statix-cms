@@ -15,14 +15,13 @@ const colors = {
   red: "\x1b[31m",
 };
 
-// Dotfiles cannot live as `.github` / `.husky` inside the published npm
-// tarball without losing their leading dot or being treated as hidden by
-// some tooling; we ship them as `_github` / `_husky` and restore the dot
-// at scaffold time. Only top-level directories under template/ are
-// considered — nested files keep their names verbatim.
+// Dotfiles can lose their leading dot or be treated as hidden by some
+// tooling when shipped inside an npm tarball. We ship `.github` as
+// `_github` and restore the dot at scaffold time. Only top-level
+// directories under template/ are considered — nested files keep their
+// names verbatim.
 const TOP_LEVEL_RENAMES = {
   _github: ".github",
-  _husky: ".husky",
 };
 
 function log(message, color = colors.reset) {
@@ -72,9 +71,26 @@ function copyRecursive(src, dest, isRoot = false) {
     for (const file of files) {
       // Skip maintainer dev artifacts
       if (file === "node_modules" || file === ".next") continue;
+      // Maintainer's Claude / OMC workspaces — internal only, don't ship
+      if (isRoot && (file === ".claude" || file === ".omc")) continue;
       // Maintainer's local sqlite — scaffolded projects start with an
       // empty DB created by `npm run db:setup`.
       if (isRoot && (file === "local.db" || file === "local.db-journal")) {
+        continue;
+      }
+      // CRITICAL: never copy real env values out of the maintainer's
+      // template/. The `.npmignore` is the primary defense — this is a
+      // second line for when running bin/index.js out of a working tree
+      // (e.g. local dev/test). .env.example is allowed; everything else
+      // is treated as a real credential file.
+      if (
+        isRoot &&
+        (file === ".env" ||
+          file === ".env.local" ||
+          file.startsWith(".env.") ||
+          /^\.env\.[a-z]+$/.test(file)) &&
+        file !== ".env.example"
+      ) {
         continue;
       }
       // Restore dot-prefixed names at the top level (see TOP_LEVEL_RENAMES).

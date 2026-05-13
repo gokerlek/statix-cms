@@ -1,6 +1,7 @@
 import { revalidatePath, revalidateTag } from "next/cache";
 import { NextRequest, NextResponse } from "next/server";
 
+import { handleApiError } from "@/statix/lib/api-response";
 import { CONTENT_STATUSES } from "@/statix/lib/content-status";
 import { requireCollectionPermission } from "@/statix/lib/session";
 import { ROUTES } from "@/statix/lib/constants";
@@ -82,11 +83,6 @@ export async function POST(request: NextRequest, context: RouteContext) {
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error("DELETE error:", error);
-
-    return NextResponse.json(
-      { error: "Failed to delete content" },
-      { status: 500 },
-    );
+    return handleApiError(error, "Failed to delete content", request);
   }
 }

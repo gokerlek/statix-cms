@@ -29,7 +29,10 @@ import { env } from "@/statix/lib/env";
 
 export const runtime = "nodejs";
 
-const resend = new Resend(env.RESEND_API_KEY);
+// Resend is optional. If unset, invite links are logged to the server
+// console so a developer can still test the invite flow without
+// configuring an email provider first.
+const resend = env.RESEND_API_KEY ? new Resend(env.RESEND_API_KEY) : null;
 
 const banSchema = z.object({
   reason: z.string().max(500).optional(),
@@ -305,6 +308,24 @@ export async function POST(request: NextRequest) {
 
         const normalizedEmail = email.toLowerCase().trim();
 
+        // Rate limit: 50/day per sender. Caps an admin (or a compromised
+        // admin account) blasting invites to drain the email provider's
+        // quota or spam unwilling recipients. Checked first so the
+        // expensive DB lookups below are skipped when the limit hits.
+        const senderRl = checkRateLimit(`invite:sender:${session.user.id}`, {
+          limit: 50,
+          windowSeconds: 86400,
+        });
+        if (!senderRl.success) {
+          return NextResponse.json(
+            {
+              error:
+                "You have sent too many invites today. Please try again tomorrow.",
+            },
+            { status: 429 },
+          );
+        }
+
         // Rate limit: 3/day per recipient email
         const rlResult = checkRateLimit(`invite:email:${normalizedEmail}`, {
           limit: 3,
@@ -357,14 +378,22 @@ export async function POST(request: NextRequest) {
           createdAt: new Date(),
         });
 
-        // Send invite email
+        // Send invite email (or log it in dev when Resend isn't configured)
         const inviteUrl = `${env.BETTER_AUTH_URL}/auth/accept-invite?token=${rawToken}`;
-        await resend.emails.send({
-          from: env.RESEND_FROM_EMAIL,
-          to: normalizedEmail,
-          subject: "CMS'e davet edildiniz",
-          text: `Merhaba,\n\nSizi CMS'e davet ettik. Aşağıdaki bağlantıya tıklayarak hesabınızı oluşturabilirsiniz:\n\n${inviteUrl}\n\nBu bağlantı 72 saat geçerlidir.\n\nEğer bu daveti siz talep etmediyseniz, bu emaili görmezden gelebilirsiniz.`,
-        });
+        if (!resend || !env.RESEND_FROM_EMAIL) {
+          // eslint-disable-next-line no-console
+          console.log(
+            `\n[statix] Resend not configured — invite link for ${normalizedEmail}:\n${inviteUrl}\n` +
+              `         Set RESEND_API_KEY + RESEND_FROM_EMAIL in .env to send real emails.\n`,
+          );
+        } else {
+          await resend.emails.send({
+            from: env.RESEND_FROM_EMAIL,
+            to: normalizedEmail,
+            subject: "CMS'e davet edildiniz",
+            text: `Merhaba,\n\nSizi CMS'e davet ettik. Aşağıdaki bağlantıya tıklayarak hesabınızı oluşturabilirsiniz:\n\n${inviteUrl}\n\nBu bağlantı 72 saat geçerlidir.\n\nEğer bu daveti siz talep etmediyseniz, bu emaili görmezden gelebilirsiniz.`,
+          });
+        }
 
         writeAudit({
           userId: session.user.id,

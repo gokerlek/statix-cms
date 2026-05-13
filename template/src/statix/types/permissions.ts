@@ -147,7 +147,14 @@ export function hasCollectionPermission(
   return cp[action] === true;
 }
 
-/** Parse permissions JSON string safely, always ensuring collections exists */
+/**
+ * Parse permissions JSON string safely, always ensuring `collections` exists.
+ *
+ * Falls back to the Editor preset when the stored JSON is corrupt — but
+ * logs loudly so operators can spot DB corruption. Without this log, a
+ * user silently dropped from Admin to Editor would look like a bug to
+ * them and leave no breadcrumb in the server output.
+ */
 export function parsePermissions(json: string): RolePermissions {
   try {
     const parsed = JSON.parse(json) as RolePermissions;
@@ -156,7 +163,13 @@ export function parsePermissions(json: string): RolePermissions {
       parsed.collections = { "*": { canView: false, canCreate: false, canEdit: false, canDelete: false, canPublish: false } };
     }
     return parsed;
-  } catch {
+  } catch (error) {
+    // eslint-disable-next-line no-console
+    console.error(
+      "[statix] Failed to parse user.permissions JSON — downgrading to Editor default. " +
+        "This means a permission row in the user table is corrupt.",
+      { error, jsonPreview: json.slice(0, 200) },
+    );
     return DEFAULT_ROLE_PERMISSIONS[SYSTEM_ROLES.EDITOR];
   }
 }

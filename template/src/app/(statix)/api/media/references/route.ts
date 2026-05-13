@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 
+import { handleApiError } from "@/statix/lib/api-response";
 import { requirePermission } from "@/statix/lib/session";
 import { getMediaReferences } from "@/statix/lib/media-utils";
 import { P } from "@/statix/types/permissions";
@@ -22,11 +23,6 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json(references);
   } catch (error) {
-    console.error("Failed to get media references:", error);
-
-    return NextResponse.json(
-      { error: "Failed to get media references" },
-      { status: 500 },
-    );
+    return handleApiError(error, "Failed to get media references", request);
   }
 }

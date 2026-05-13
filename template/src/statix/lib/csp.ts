@@ -18,7 +18,7 @@
 
 export interface CSPEnv {
   NODE_ENV: "development" | "production" | "test" | string;
-  NEXT_PUBLIC_MEDIA_BASE_URL: string;
+  NEXT_PUBLIC_MEDIA_BASE_URL?: string | undefined;
   CSP_REPORT_URI?: string | undefined;
 }
 

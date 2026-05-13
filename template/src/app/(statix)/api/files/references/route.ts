@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 
+import { handleApiError } from "@/statix/lib/api-response";
+import { r2KeySchema } from "@/statix/lib/api-schemas";
 import { getFileReferences } from "@/statix/lib/media-utils";
 import { requirePermission } from "@/statix/lib/session";
 import { P } from "@/statix/types/permissions";
@@ -15,21 +17,26 @@ export async function GET(request: NextRequest) {
     await requirePermission(P.MANAGE_FILES);
 
     const { searchParams } = request.nextUrl;
-    const key = searchParams.get("key");
+    const rawKey = searchParams.get("key");
 
-    if (!key) {
+    if (!rawKey) {
       return NextResponse.json({ error: "key is required" }, { status: 400 });
     }
 
-    const references = await getFileReferences(key);
+    // Reject path-traversal / encoded-traversal / cross-prefix keys here so
+    // the index lookup downstream never sees raw user input.
+    const parsed = r2KeySchema.safeParse(rawKey);
+    if (!parsed.success) {
+      return NextResponse.json(
+        { error: "Invalid file key" },
+        { status: 400 },
+      );
+    }
+
+    const references = await getFileReferences(parsed.data);
 
     return NextResponse.json(references);
   } catch (error) {
-    console.error("Failed to get file references:", error);
-
-    return NextResponse.json(
-      { error: "Failed to get file references" },
-      { status: 500 },
-    );
+    return handleApiError(error, "Failed to get file references", request);
   }
 }

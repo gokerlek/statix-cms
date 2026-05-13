@@ -1,6 +1,6 @@
 {
   "version": "1.0.0",
-  "lastScanned": 1776176296809,
+  "lastScanned": 1778622443102,
   "projectRoot": "/Volumes/projects/statix-cms",
   "techStack": {
     "languages": [
@@ -47,7 +47,7 @@
       "path": "bin",
       "purpose": "Executable scripts",
       "fileCount": 1,
-      "lastAccessed": 1776176296798,
+      "lastAccessed": 1778622443050,
       "keyFiles": [
         "index.js"
       ]
@@ -55,22 +55,178 @@
     "template": {
       "path": "template",
       "purpose": null,
-      "fileCount": 16,
-      "lastAccessed": 1776176296798,
+      "fileCount": 22,
+      "lastAccessed": 1778622443070,
       "keyFiles": [
+        "CHANGELOG.md",
+        "CONTRIBUTING.md",
         "README.md",
-        "components.json",
-        "drizzle.config.ts",
-        "eslint.config.mjs",
-        "local.db"
+        "SECURITY.md",
+        "components.json"
       ]
     }
   },
   "hotPaths": [
     {
-      "path": "template/src/statix/components/ui/alert.tsx",
+      "path": "bin/index.js",
+      "accessCount": 7,
+      "lastAccessed": 1778699639342,
+      "type": "file"
+    },
+    {
+      "path": "README.md",
+      "accessCount": 7,
+      "lastAccessed": 1778704434217,
+      "type": "file"
+    },
+    {
+      "path": "template/package.json",
+      "accessCount": 6,
+      "lastAccessed": 1778699630339,
+      "type": "file"
+    },
+    {
+      "path": "template/src/statix/lib/auth.ts",
+      "accessCount": 5,
+      "lastAccessed": 1778626617544,
+      "type": "file"
+    },
+    {
+      "path": "template/src/app/layout.tsx",
+      "accessCount": 5,
+      "lastAccessed": 1778668869806,
+      "type": "file"
+    },
+    {
+      "path": "template/src/app/(statix)/admin/layout.tsx",
+      "accessCount": 4,
+      "lastAccessed": 1778668340814,
+      "type": "file"
+    },
+    {
+      "path": ".npmignore",
+      "accessCount": 4,
+      "lastAccessed": 1778699647681,
+      "type": "file"
+    },
+    {
+      "path": "template/src/statix/content/ui.json",
+      "accessCount": 3,
+      "lastAccessed": 1778626245262,
+      "type": "file"
+    },
+    {
+      "path": "template/src/app/(statix)/api/collections/[slug]/route.ts",
+      "accessCount": 3,
+      "lastAccessed": 1778665119117,
+      "type": "file"
+    },
+    {
+      "path": "template/src/statix/lib/session.ts",
+      "accessCount": 3,
+      "lastAccessed": 1778668457965,
+      "type": "file"
+    },
+    {
+      "path": ".claude/CLAUDE.md",
+      "accessCount": 3,
+      "lastAccessed": 1778699661699,
+      "type": "file"
+    },
+    {
+      "path": "template/src/statix/components/fields/richtext/RichTextToolbar.tsx",
+      "accessCount": 3,
+      "lastAccessed": 1778705906752,
+      "type": "file"
+    },
+    {
+      "path": "template/src/statix/lib/env.ts",
       "accessCount": 2,
-      "lastAccessed": 1776182799142,
+      "lastAccessed": 1778665217293,
+      "type": "file"
+    },
+    {
+      "path": "template/src/statix/db/env-migration.ts",
+      "accessCount": 2,
+      "lastAccessed": 1778665233480,
+      "type": "file"
+    },
+    {
+      "path": "template/drizzle.config.ts",
+      "accessCount": 2,
+      "lastAccessed": 1778665240075,
+      "type": "file"
+    },
+    {
+      "path": "template/src/statix/lib/db.ts",
+      "accessCount": 2,
+      "lastAccessed": 1778665247469,
+      "type": "file"
+    },
+    {
+      "path": "template/scripts/seed-admin.ts",
+      "accessCount": 2,
+      "lastAccessed": 1778665265748,
+      "type": "file"
+    },
+    {
+      "path": "template/src/app/(statix)/auth/signin/page.tsx",
+      "accessCount": 2,
+      "lastAccessed": 1778668408308,
+      "type": "file"
+    },
+    {
+      "path": "template/src/app/(statix)/layout.tsx",
+      "accessCount": 2,
+      "lastAccessed": 1778668877562,
+      "type": "file"
+    },
+    {
+      "path": "template/src/statix.config.ts",
+      "accessCount": 2,
+      "lastAccessed": 1778706092019,
+      "type": "file"
+    },
+    {
+      "path": "template/src/statix/components/fields/richtext/InlineMenu.tsx",
+      "accessCount": 2,
+      "lastAccessed": 1778706291506,
+      "type": "file"
+    },
+    {
+      "path": "template/next.config.ts",
+      "accessCount": 2,
+      "lastAccessed": 1778709442224,
+      "type": "file"
+    },
+    {
+      "path": "template/vitest.setup.ts",
+      "accessCount": 1,
+      "lastAccessed": 1778625753788,
+      "type": "file"
+    },
+    {
+      "path": "template/src/statix/lib/__tests__/auth-config.test.ts",
+      "accessCount": 1,
+      "lastAccessed": 1778626568926,
+      "type": "file"
+    },
+    {
+      "path": "template/src/statix/components/fields/richtext/toolbar-items.ts",
+      "accessCount": 1,
+      "lastAccessed": 1778705914877,
+      "type": "file"
+    },
+    {
+      "path": "template/src/statix/components/collections/CollectionIcon.tsx",
+      "accessCount": 1,
+      "lastAccessed": 1778706014625,
+      "type": "file"
+    },
+    {
+      "path": "template/src/statix/components/fields/richtext/editorConfig.ts",
+      "accessCount": 1,
+      "lastAccessed": 1778706234406,
       "type": "file"
     }
   ],

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 
-import { mapErrorToResponse } from "@/statix/lib/api-errors";
+import { handleApiError } from "@/statix/lib/api-response";
 import { resolveStatus } from "@/statix/lib/content-status";
 import { resolveContentTitle } from "@/statix/lib/content-utils";
 import { getGitHubCMS } from "@/statix/lib/github-cms";
@@ -79,6 +79,6 @@ export async function GET(
 
     return NextResponse.json(filesWithStatus);
   } catch (error) {
-    return mapErrorToResponse(error);
+    return handleApiError(error, "Failed to list collection items", request);
   }
 }

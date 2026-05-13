@@ -9,7 +9,10 @@ import { env } from "./env";
 import { writeAudit } from "./audit";
 import ui from "@/statix/content/ui.json";
 
-const resend = new Resend(env.RESEND_API_KEY);
+// Resend is optional in dev. When credentials are missing, sendVerificationOTP
+// logs the code to the server console so a developer can still sign in
+// without configuring an email provider first.
+const resend = env.RESEND_API_KEY ? new Resend(env.RESEND_API_KEY) : null;
 
 // Build trustedOrigins from env: always include the configured BETTER_AUTH_URL,
 // and if we're running on Vercel, include the preview/production URL too so
@@ -104,6 +107,17 @@ export const auth = betterAuth({
       allowedAttempts: 3,
       resendStrategy: "rotate",
       async sendVerificationOTP({ email, otp }) {
+        if (!resend || !env.RESEND_FROM_EMAIL) {
+          // Dev convenience: surface the OTP in the server log so the
+          // developer can copy-paste it into the sign-in form. The env
+          // validator already warned about the missing config at boot.
+          // eslint-disable-next-line no-console
+          console.log(
+            `\n[statix] Resend not configured — OTP for ${email}: ${otp}\n` +
+              `         Set RESEND_API_KEY + RESEND_FROM_EMAIL in .env to send real emails.\n`,
+          );
+          return;
+        }
         await resend.emails.send({
           from: env.RESEND_FROM_EMAIL,
           to: email,

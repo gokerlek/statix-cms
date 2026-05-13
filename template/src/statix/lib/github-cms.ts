@@ -43,7 +43,15 @@ export class GitHubCMS {
   private branch: string;
 
   constructor() {
-    // env is already validated at import time via env.ts
+    // GITHUB_* are optional at boot so a fresh scaffold can start `npm run
+    // dev` without configuring them. Throw a clear error here (deferred
+    // until something actually instantiates the CMS client) instead of
+    // crashing module load.
+    if (!env.GITHUB_TOKEN || !env.GITHUB_OWNER || !env.GITHUB_REPO) {
+      throw new Error(
+        "GitHub CMS is not configured. Set GITHUB_TOKEN, GITHUB_OWNER, and GITHUB_REPO in .env to enable content reads/writes.",
+      );
+    }
     this.octokit = new Octokit({ auth: env.GITHUB_TOKEN });
     this.owner = env.GITHUB_OWNER;
     this.repo = env.GITHUB_REPO;

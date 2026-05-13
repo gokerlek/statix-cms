@@ -3,7 +3,12 @@ import type { NextConfig } from "next";
 import { buildCSP, buildReportingEndpoints } from "@/statix/lib/csp";
 import { env } from "@/statix/lib/env";
 
-const mediaHost = new URL(env.NEXT_PUBLIC_MEDIA_BASE_URL).hostname;
+// next/image remotePatterns and CSP source allowlists need the media host
+// at build time. When R2 isn't configured (zero-config local dev) we just
+// skip the entry — the rest of the app still builds.
+const mediaHost = env.NEXT_PUBLIC_MEDIA_BASE_URL
+  ? new URL(env.NEXT_PUBLIC_MEDIA_BASE_URL).hostname
+  : null;
 
 const cspValue = buildCSP({
   NODE_ENV: process.env.NODE_ENV ?? "production",
@@ -23,7 +28,9 @@ const nextConfig: NextConfig = {
   images: {
     remotePatterns: [
       { protocol: "https", hostname: "avatars.githubusercontent.com" },
-      { protocol: "https", hostname: mediaHost },
+      ...(mediaHost
+        ? [{ protocol: "https" as const, hostname: mediaHost }]
+        : []),
     ],
   },
 

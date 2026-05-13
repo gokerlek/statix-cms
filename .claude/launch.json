@@ -7,6 +7,13 @@
       "runtimeArgs": ["run", "dev", "--prefix", "template"],
       "port": 3000,
       "autoPort": true
+    },
+    {
+      "name": "Statix CMS (Vitest Watch)",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "test:watch", "--prefix", "template"]
     }
   ]
 }
+</content>
+</invoke>

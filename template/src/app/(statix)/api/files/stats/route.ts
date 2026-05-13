@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 
+import { handleApiError } from "@/statix/lib/api-response";
 import { getFileStats } from "@/statix/lib/dashboard-data";
 import { requirePermission } from "@/statix/lib/session";
 import { P } from "@/statix/types/permissions";
@@ -18,11 +19,6 @@ export async function GET() {
 
     return NextResponse.json(stats);
   } catch (error) {
-    console.error("Failed to fetch file stats:", error);
-
-    return NextResponse.json(
-      { error: "Failed to fetch file stats" },
-      { status: 500 },
-    );
+    return handleApiError(error, "Failed to fetch file stats");
   }
 }

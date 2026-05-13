@@ -1,14 +1,15 @@
 import { NextRequest, NextResponse } from "next/server";
 
-import { sanitizeFilename, validateFileUpload } from "@/statix/lib/file-validation";
+import {
+  sanitizeFilename,
+  sanitizeFolder,
+  validateFileUpload,
+} from "@/statix/lib/file-validation";
 import { handleApiError } from "@/statix/lib/api-response";
 import { writeAudit, getIp } from "@/statix/lib/audit";
 import { uploadToR2 } from "@/statix/lib/r2";
 import { requirePermission } from "@/statix/lib/session";
 import { P } from "@/statix/types/permissions";
-
-// Only alphanumeric, hyphens, underscores — no path separators
-const VALID_FOLDER = /^[a-zA-Z0-9_-]+$/;
 
 export async function POST(request: NextRequest) {
   try {
@@ -16,13 +17,15 @@ export async function POST(request: NextRequest) {
 
     const formData = await request.formData();
     const file = formData.get("file") as File;
-    const folder = formData.get("folder") as string | null;
+    const folderRaw = formData.get("folder");
     const filename = formData.get("filename") as string;
 
-    // Validate folder name to prevent path traversal
-    if (folder && !VALID_FOLDER.test(folder)) {
-      return NextResponse.json({ error: "Invalid folder name" }, { status: 400 });
-    }
+    // Unified folder validator — same shape as /api/file. Bad values
+    // return null so we silently fall back to the bucket root rather
+    // than failing the upload.
+    const folder = sanitizeFolder(
+      typeof folderRaw === "string" ? folderRaw : null,
+    );
 
     const validation = validateFileUpload(file);
 

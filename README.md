@@ -175,21 +175,24 @@ Optional services:
 
 ### 3. Configure environment
 
-Fill in `.env` with your credentials (created automatically from `.env.example`):
+Fill in `.env` with your credentials (created automatically from `.env.example`). For a first local run you can leave most values empty — the app boots with safe defaults and prints warnings about what's missing. To exercise GitHub, Resend, R2, Turso end-to-end you'll need real values:
 
 ```env
 GITHUB_TOKEN=ghp_xxxxxxxxxxxx
 GITHUB_OWNER=your-username
 GITHUB_REPO=my-cms-content
-BETTER_AUTH_SECRET=your-secret-here
+BETTER_AUTH_SECRET=your-secret-here     # openssl rand -base64 32
 BETTER_AUTH_URL=http://localhost:3000
-TURSO_DATABASE_URL=libsql://your-db.turso.io
+TURSO_DATABASE_URL=libsql://your-db.turso.io    # optional; falls back to ./local.db
 TURSO_AUTH_TOKEN=your-turso-token
-RESEND_API_KEY=re_xxxxxxxxxxxx
+RESEND_API_KEY=re_xxxxxxxxxxxx                  # optional; OTP codes log to console when empty
 RESEND_FROM_EMAIL=cms@yourdomain.com
+INITIAL_ADMIN_EMAIL=your@email.com              # first user to promote to Owner
 ```
 
 ### 4. Start the dev server
+
+The CLI ran `npm install` and `npm run db:push` for you already. Just start the dev server:
 
 ```bash
 npm run dev
@@ -200,18 +203,14 @@ bun run dev
 ### 5. Create your admin account
 
 1. Open `http://localhost:3000/auth/signin`
-2. Enter your email and sign in with OTP
-3. Add your email to `.env`:
-   ```env
-   INITIAL_ADMIN_EMAIL=your@email.com
-   ```
-4. Run the seed script:
+2. Enter the email you set as `INITIAL_ADMIN_EMAIL` and sign in with the OTP (when Resend isn't configured, the code is printed to the dev server's terminal)
+3. Promote that user to Owner:
    ```bash
    npm run seed:admin
    ```
-5. Open `http://localhost:3000/admin` — you're now the Owner
+4. Open `http://localhost:3000/admin` — you're now the Owner
 
-> **Important:** The seed script promotes an **existing** user to Owner. You must create an account first (step 2), then run the script.
+> **Important:** The seed script promotes an **existing** user to Owner. You must sign in at least once first (step 2), then run the script. The CLI scaffolder prompts for `INITIAL_ADMIN_EMAIL` when running interactively, so this is usually already in your `.env`.
 
 ### 6. Configure your content
 
@@ -287,30 +286,30 @@ Create a **separate repository** for your content (can be public or private):
 
 ## Environment Variables
 
-All variables are validated at startup using Zod. The app will not start if required variables are missing.
+Variables are validated at startup with Zod. In **development**, missing values fall back to sensible defaults or get a printed warning — the app boots so you can explore the UI before configuring anything. In **production** the same variables are required and the app refuses to start without them.
 
-| Variable | Required | Description |
-|----------|----------|-------------|
-| `GITHUB_TOKEN` | **Yes** | GitHub Personal Access Token with `repo` scope |
-| `GITHUB_OWNER` | **Yes** | GitHub username or organization |
-| `GITHUB_REPO` | **Yes** | Repository name for content storage |
-| `GITHUB_BRANCH` | No | Branch to use (default: `main`) |
-| `BETTER_AUTH_SECRET` | **Yes** | Auth secret — generate with `openssl rand -base64 32` |
-| `BETTER_AUTH_URL` | **Yes** | Full site URL (e.g., `http://localhost:3000`) |
-| `TURSO_DATABASE_URL` | **Yes** | Turso connection URL (`libsql://...turso.io`) |
-| `TURSO_AUTH_TOKEN` | **Yes** | Turso authentication token |
-| `RESEND_API_KEY` | **Yes** | Resend API key for sending OTP emails |
-| `RESEND_FROM_EMAIL` | **Yes** | Sender email address (must be verified in Resend) |
-| `GITHUB_CLIENT_ID` | No | GitHub OAuth app Client ID |
-| `GITHUB_CLIENT_SECRET` | No | GitHub OAuth app Client Secret |
-| `GOOGLE_CLIENT_ID` | No | Google OAuth Client ID |
-| `GOOGLE_CLIENT_SECRET` | No | Google OAuth Client Secret |
-| `R2_ACCOUNT_ID` | No | Cloudflare account ID |
-| `R2_ACCESS_KEY_ID` | No | R2 API token access key |
-| `R2_SECRET_ACCESS_KEY` | No | R2 API token secret key |
-| `R2_BUCKET_NAME` | No | R2 bucket name |
-| `NEXT_PUBLIC_MEDIA_BASE_URL` | No | Public URL for R2 bucket (e.g., `https://pub-xxx.r2.dev`) |
-| `INITIAL_ADMIN_EMAIL` | No | Email to promote to Owner via `npm run seed:admin` |
+| Variable | Dev | Production | Description |
+|----------|-----|------------|-------------|
+| `GITHUB_TOKEN` | Optional | **Required** | GitHub Personal Access Token with `repo` scope. Without it, content reads/writes return a clear error. |
+| `GITHUB_OWNER` | Optional | **Required** | GitHub username or organization |
+| `GITHUB_REPO` | Optional | **Required** | Repository name for content storage |
+| `GITHUB_BRANCH` | Optional | Optional | Branch to use (default: `main`) |
+| `BETTER_AUTH_SECRET` | Auto (unsafe) | **Required** | Auth secret — generate with `openssl rand -base64 32`. Dev uses an unsafe placeholder; the production guard refuses it. |
+| `BETTER_AUTH_URL` | `http://localhost:3000` | **Required** | Full site URL |
+| `TURSO_DATABASE_URL` | Optional | **Required** | Turso URL (`libsql://...turso.io`). When unset locally, drizzle uses `file:./local.db`. |
+| `TURSO_AUTH_TOKEN` | Optional | **Required** | Turso authentication token |
+| `RESEND_API_KEY` | Optional | **Required** | Resend API key. Without it, OTP codes are printed to the server console. |
+| `RESEND_FROM_EMAIL` | Optional | **Required** | Sender email address (must be verified in Resend) |
+| `GITHUB_CLIENT_ID` | Optional | Optional | GitHub OAuth app Client ID — button hidden when unset |
+| `GITHUB_CLIENT_SECRET` | Optional | Optional | GitHub OAuth app Client Secret |
+| `GOOGLE_CLIENT_ID` | Optional | Optional | Google OAuth Client ID — button hidden when unset |
+| `GOOGLE_CLIENT_SECRET` | Optional | Optional | Google OAuth Client Secret |
+| `R2_ACCOUNT_ID` | Optional | Optional | Cloudflare account ID |
+| `R2_ACCESS_KEY_ID` | Optional | Optional | R2 API token access key |
+| `R2_SECRET_ACCESS_KEY` | Optional | Optional | R2 API token secret key |
+| `R2_BUCKET_NAME` | Optional | Optional | R2 bucket name |
+| `NEXT_PUBLIC_MEDIA_BASE_URL` | Optional | **Required** | Public URL for R2 bucket (e.g., `https://pub-xxx.r2.dev`). Required in production for `next/image` + CSP. |
+| `INITIAL_ADMIN_EMAIL` | Optional | Optional | Email to promote to Owner via `npm run seed:admin` |
 
 ---
 
@@ -648,17 +647,28 @@ src/
 | `DELETE` | `/api/delete/[collectionSlug]/[id]` | Soft-delete content |
 | `GET` | `/api/collections/[slug]` | Get collection items list |
 
-### Media
+### Media (images)
 
 | Method | Endpoint | Description |
 |--------|----------|-------------|
-| `POST` | `/api/upload` | Upload a file |
+| `POST` | `/api/upload` | Upload an image |
 | `GET` | `/api/media/list` | List media files |
 | `POST` | `/api/media/delete` | Soft-delete media |
 | `POST` | `/api/media/move` | Move media between folders |
 | `GET` | `/api/media/references` | Find content using a media file |
 | `GET` | `/api/media/stats` | Storage statistics |
 | `GET` | `/api/media/serve/[...path]` | Serve media files (public) |
+
+### Files (documents)
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| `POST` | `/api/file` | Upload a non-image file (PDF, DOCX, ZIP, …) |
+| `DELETE` | `/api/file` | Soft-delete a file by R2 key |
+| `GET` | `/api/files/list` | Cursor-paginated list of files |
+| `POST` | `/api/files/move` | Move a file between folders |
+| `GET` | `/api/files/references` | Find content using a file |
+| `GET` | `/api/files/stats` | File storage statistics |
 
 ### Trash
 
@@ -674,10 +684,11 @@ src/
 | Method | Endpoint | Description |
 |--------|----------|-------------|
 | `GET` | `/api/admin/users` | List users |
-| `POST` | `/api/admin/users` | Create or update user |
+| `POST` | `/api/admin/users` | Create or update user (ban, role change, invite) |
 | `POST` | `/api/admin/users/[id]/avatar` | Upload user avatar |
 | `GET` | `/api/admin/activity` | Activity feed |
 | `GET` | `/api/admin/audit` | Audit logs |
+| `GET` | `/api/admin/search` | Cross-collection content search |
 
 All API routes (except `/api/auth` and `/api/media/serve`) require authentication. Mutation requests are protected by CSRF validation and rate limiting (100 req/min per IP).
 
@@ -755,6 +766,12 @@ Statix CMS works on any platform that supports Next.js:
 | `npm run build` | Create a production build |
 | `npm start` | Start the production server |
 | `npm run lint` | Run ESLint |
+| `npm run typecheck` | Run `tsc --noEmit` |
+| `npm run test` | Run the vitest suite once |
+| `npm run test:watch` | Watch mode for tests |
+| `npm run test:coverage` | Generate coverage report |
+| `npm run db:push` | Push the drizzle schema to the database (libsql/Turso) |
+| `npm run db:setup` | Run `db:push` then `seed:admin` — first-run database bootstrap |
 | `npm run seed:admin` | Promote `INITIAL_ADMIN_EMAIL` to Owner role |
 
 ---

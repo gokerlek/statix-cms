@@ -24,8 +24,16 @@ export async function GET(request: NextRequest) {
     await requirePermission(P.MANAGE_FILES);
 
     const { searchParams } = request.nextUrl;
-    const cursor = searchParams.get("cursor") ?? undefined;
-    const limit = Math.min(Number(searchParams.get("limit") ?? 50), 200);
+    // R2 treats `cursor` as an opaque continuation token. We don't decode
+    // it, but cap the length so a hostile client can't push pages of junk
+    // into the SDK request URL.
+    const rawCursor = searchParams.get("cursor");
+    const cursor =
+      rawCursor && rawCursor.length <= 2048 ? rawCursor : undefined;
+    const rawLimit = Number(searchParams.get("limit") ?? 50);
+    const limit = Number.isFinite(rawLimit)
+      ? Math.min(Math.max(1, Math.trunc(rawLimit)), 200)
+      : 50;
 
     const [{ items: files, nextCursor }, { index: contentIndex, ok: indexOk }] =
       await Promise.all([
