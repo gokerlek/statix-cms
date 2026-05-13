@@ -29,29 +29,75 @@ export async function requireSession() {
   return session;
 }
 
-// ─── Permission Resolution ───────────────────────────────────────────────────
+// ─── User Context (single-query resolution) ──────────────────────────────────
 
-/** Fetch the resolved permissions for a user by their ID */
-export async function getUserPermissions(
-  userId: string
-): Promise<RolePermissions> {
+export interface UserContext {
+  permissions: RolePermissions;
+  role: string | null;
+  banned: boolean;
+  banReason: string | null;
+}
+
+/**
+ * Resolve a user's permissions + role + ban status with a SINGLE DB query.
+ *
+ * Why one query: every API request used to call getUserPermissions, and now
+ * also needs a ban check — doing both as separate SELECTs was an obvious
+ * N+1 in the hot path. This consolidates them.
+ *
+ * Banning policy: `banned = true` AND (`banExpires` is null OR in the
+ * future) means the ban is active. An expired ban is treated as inactive
+ * — the banned flag itself is not auto-cleared in the DB (audit-friendly).
+ */
+export async function getUserContext(userId: string): Promise<UserContext> {
   const [row] = await db
-    .select({ permissions: userTable.permissions, role: userTable.role })
+    .select({
+      permissions: userTable.permissions,
+      role: userTable.role,
+      banned: userTable.banned,
+      banReason: userTable.banReason,
+      banExpires: userTable.banExpires,
+    })
     .from(userTable)
     .where(eq(userTable.id, userId))
     .limit(1);
 
-  if (row?.permissions) {
-    return parsePermissions(row.permissions);
-  }
+  const permissions: RolePermissions = row?.permissions
+    ? parsePermissions(row.permissions)
+    : row?.role === "admin" || row?.role === "owner"
+      ? DEFAULT_ROLE_PERMISSIONS[SYSTEM_ROLES.ADMIN]
+      : DEFAULT_ROLE_PERMISSIONS[SYSTEM_ROLES.EDITOR];
 
-  // Legacy fallback: old "admin" or "owner" role gets admin preset
-  if (row?.role === "admin" || row?.role === "owner") {
-    return DEFAULT_ROLE_PERMISSIONS[SYSTEM_ROLES.ADMIN];
-  }
+  const banActive =
+    !!row?.banned && (!row.banExpires || row.banExpires > new Date());
 
-  // Default to editor
-  return DEFAULT_ROLE_PERMISSIONS[SYSTEM_ROLES.EDITOR];
+  return {
+    permissions,
+    role: row?.role ?? null,
+    banned: banActive,
+    banReason: banActive ? (row?.banReason ?? null) : null,
+  };
+}
+
+/** Internal: reject with a `Forbidden:` error so api-errors maps it to 403. */
+function assertNotBanned(ctx: UserContext) {
+  if (ctx.banned) {
+    throw new Error("Forbidden: account banned");
+  }
+}
+
+// ─── Permission Resolution ───────────────────────────────────────────────────
+
+/**
+ * Fetch a user's resolved permissions.
+ * @deprecated Prefer `getUserContext` if you need any other user metadata;
+ * a second call to this would re-query the DB unnecessarily.
+ */
+export async function getUserPermissions(
+  userId: string,
+): Promise<RolePermissions> {
+  const ctx = await getUserContext(userId);
+  return ctx.permissions;
 }
 
 // ─── Permission Guards ───────────────────────────────────────────────────────
@@ -59,33 +105,40 @@ export async function getUserPermissions(
 /** Require a specific global permission (API routes) */
 export async function requirePermission(permission: GlobalPermissionKey) {
   const session = await requireSession();
-  const permissions = await getUserPermissions(session.user.id);
+  const ctx = await getUserContext(session.user.id);
+  assertNotBanned(ctx);
 
-  if (!hasGlobalPermission(permissions, permission)) {
+  if (!hasGlobalPermission(ctx.permissions, permission)) {
     throw new Error(`Forbidden: missing permission ${permission}`);
   }
 
-  return { session, permissions };
+  return { session, permissions: ctx.permissions };
 }
 
 /** Require a specific collection permission (API routes) */
 export async function requireCollectionPermission(
   collectionSlug: string,
-  action: keyof CollectionPermissions
+  action: keyof CollectionPermissions,
 ) {
   const session = await requireSession();
-  const permissions = await getUserPermissions(session.user.id);
+  const ctx = await getUserContext(session.user.id);
+  assertNotBanned(ctx);
 
-  if (!hasCollectionPermission(permissions, collectionSlug, action)) {
-    throw new Error(`Forbidden: missing ${action} permission on ${collectionSlug}`);
+  if (!hasCollectionPermission(ctx.permissions, collectionSlug, action)) {
+    throw new Error(
+      `Forbidden: missing ${action} permission on ${collectionSlug}`,
+    );
   }
 
-  return { session, permissions };
+  return { session, permissions: ctx.permissions };
 }
 
-/** Require any authenticated user (minimum access) */
+/** Require any authenticated, non-banned user (minimum access) */
 export async function requireAuthenticated() {
-  return requireSession();
+  const session = await requireSession();
+  const ctx = await getUserContext(session.user.id);
+  assertNotBanned(ctx);
+  return session;
 }
 
 // ─── Legacy Compat ───────────────────────────────────────────────────────────
@@ -93,10 +146,11 @@ export async function requireAuthenticated() {
 /** @deprecated Use requirePermission instead */
 export async function requireAdmin() {
   const session = await requireSession();
-  const permissions = await getUserPermissions(session.user.id);
+  const ctx = await getUserContext(session.user.id);
+  assertNotBanned(ctx);
 
   // Check if user has admin-level permissions
-  if (permissions.canManageUsers) {
+  if (ctx.permissions.canManageUsers) {
     return session;
   }
 
@@ -112,42 +166,48 @@ export async function requireAdmin() {
 
 /** RSC: Require permission or redirect */
 export async function requirePermissionOrRedirect(
-  permission: GlobalPermissionKey
+  permission: GlobalPermissionKey,
 ) {
   const session = await getSession();
   if (!session) redirect("/auth/signin");
 
-  const permissions = await getUserPermissions(session.user.id);
-  if (!hasGlobalPermission(permissions, permission)) {
+  const ctx = await getUserContext(session.user.id);
+  if (ctx.banned) redirect("/admin/access-denied");
+
+  if (!hasGlobalPermission(ctx.permissions, permission)) {
     redirect("/admin/access-denied");
   }
 
-  return { session, permissions };
+  return { session, permissions: ctx.permissions };
 }
 
 /** RSC: Require collection permission or redirect */
 export async function requireCollectionPermissionOrRedirect(
   collectionSlug: string,
-  action: keyof CollectionPermissions
+  action: keyof CollectionPermissions,
 ) {
   const session = await getSession();
   if (!session) redirect("/auth/signin");
 
-  const permissions = await getUserPermissions(session.user.id);
-  if (!hasCollectionPermission(permissions, collectionSlug, action)) {
+  const ctx = await getUserContext(session.user.id);
+  if (ctx.banned) redirect("/admin/access-denied");
+
+  if (!hasCollectionPermission(ctx.permissions, collectionSlug, action)) {
     redirect("/admin/access-denied");
   }
 
-  return { session, permissions };
+  return { session, permissions: ctx.permissions };
 }
 
-/** RSC: Require any authenticated session or redirect */
+/** RSC: Require any authenticated, non-banned session or redirect */
 export async function requireSessionOrRedirect() {
   const session = await getSession();
   if (!session) redirect("/auth/signin");
 
-  const permissions = await getUserPermissions(session.user.id);
-  return { session, permissions };
+  const ctx = await getUserContext(session.user.id);
+  if (ctx.banned) redirect("/admin/access-denied");
+
+  return { session, permissions: ctx.permissions };
 }
 
 /** @deprecated Use requirePermissionOrRedirect instead */
@@ -155,9 +215,11 @@ export async function requireAdminOrRedirect() {
   const session = await getSession();
   if (!session) redirect("/auth/signin");
 
-  const permissions = await getUserPermissions(session.user.id);
+  const ctx = await getUserContext(session.user.id);
+  if (ctx.banned) redirect("/admin/access-denied");
+
   if (
-    !permissions.canManageUsers &&
+    !ctx.permissions.canManageUsers &&
     (session.user as Record<string, unknown>)["role"] !== "admin" // legacy fallback
   ) {
     redirect("/admin/access-denied");
@@ -170,10 +232,12 @@ export async function requireAdminOrRedirect() {
 
 export async function requireSelfOrAdmin(targetUserId: string) {
   const session = await requireSession();
+  const ctx = await getUserContext(session.user.id);
+  assertNotBanned(ctx);
+
   if (session.user.id === targetUserId) return session;
 
-  const permissions = await getUserPermissions(session.user.id);
-  if (!hasGlobalPermission(permissions, "canManageUsers")) {
+  if (!hasGlobalPermission(ctx.permissions, "canManageUsers")) {
     throw new Error("Forbidden");
   }
   return session;
