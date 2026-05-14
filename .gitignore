@@ -2,4 +2,12 @@ node_modules/
 .DS_Store
 *.tgz
 *.mc
+
+# Maintainer workspace — Claude Code + OMC + IDE. Local only, never push.
+.claude/
 .omc/
+.idea/
+
+# Maintainer-only internal docs. Public docs live in README.md, CHANGELOG.md,
+# CONTRIBUTING.md, SECURITY.md — everything else is local notes.
+template/docs/
