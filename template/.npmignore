@@ -1,0 +1,40 @@
+# Template-scoped npm publish ignore.
+# Root .npmignore also exists; both are checked but having one here
+# ensures patterns resolve unambiguously when the package is packed.
+
+# Build / dev artifacts
+package-lock.json
+tsconfig.tsbuildinfo
+.next/
+coverage/
+node_modules/
+
+# Maintainer dev state
+local.db
+local.db-journal
+
+# Real env values (only .env.example may ship)
+.env
+.env.local
+.env.*.local
+.env.development
+.env.production
+
+# Repo meta — public docs are kept; internal notes excluded
+docs/
+
+# IDE / editor / Claude / OMC workspaces — never ship
+.claude/
+.omc/
+.idea/
+.vscode/
+
+# README is generated per-project by bin/index.js, not shipped
+README.md
+
+# `.github` ships as `_github`, renamed by bin/index.js
+.github/
+
+# Husky was removed from the template — guard against accidental reintro
+.husky/
+.lintstagedrc.json
