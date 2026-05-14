@@ -1,8 +1,8 @@
 import {
-  ChevronLeftIcon,
-  ChevronRightIcon,
-  MoreHorizontalIcon,
-} from "lucide-react";
+  IconChevronLeft,
+  IconChevronRight,
+  IconDots,
+} from "@tabler/icons-react";
 
 import { type Button, buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -80,7 +80,7 @@ function PaginationPrevious({
       size="default"
       {...props}
     >
-      <ChevronLeftIcon size={16} />
+      <IconChevronLeft size={16} />
 
       <span>Previous</span>
     </PaginationLink>
@@ -100,7 +100,7 @@ function PaginationNext({
     >
       <span>Next</span>
 
-      <ChevronRightIcon size={16} />
+      <IconChevronRight size={16} />
     </PaginationLink>
   );
 }
@@ -116,7 +116,7 @@ function PaginationEllipsis({
       data-slot="pagination-ellipsis"
       {...props}
     >
-      <MoreHorizontalIcon size={16} />
+      <IconDots size={16} />
 
       <span className="sr-only">More pages</span>
     </span>

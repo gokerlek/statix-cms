@@ -1,0 +1,51 @@
+# What ships in the published create-statix-cms tarball.
+#
+# package.json `files` already restricts top-level to `bin/`, `template/`,
+# `template/.env.example`, and `template/.gitignore`. This file removes
+# noise from inside `template/` that would bloat the tarball or leak
+# the maintainer's dev state into every scaffolded project.
+
+# Maintainer dev artifacts that should never reach end users
+template/local.db
+template/local.db-journal
+template/package-lock.json
+template/tsconfig.tsbuildinfo
+template/.next/
+template/coverage/
+template/node_modules/
+
+# Maintainer's real env values. CRITICAL: never ship these.
+# .env.local is gitignored (so not in repo history) but `npm pack` reads
+# the working directory, so it would otherwise end up in the tarball.
+template/.env
+template/.env.local
+template/.env.*.local
+template/.env.development
+template/.env.production
+.env
+.env.local
+.env.*.local
+
+# Repo meta — belongs in the upstream repo, not in every scaffold
+template/CHANGELOG.md
+template/CONTRIBUTING.md
+template/SECURITY.md
+template/docs/
+
+# README is generated per-project by bin/index.js
+template/README.md
+
+# `.github` is shipped as `_github` and renamed by bin/index.js at scaffold
+# time. Hide accidental `.github` leftovers from the tarball.
+template/.github/
+# Husky / lint-staged was removed from the template entirely — git hooks
+# are the user's choice, not Statix's. If a maintainer ever reintroduces
+# them locally, keep them out of the published tarball.
+template/.husky/
+template/.lintstagedrc.json
+
+# Maintainer's Claude Code + OMC workspace — internal only.
+.claude/
+.omc/
+template/.claude/
+template/.omc/

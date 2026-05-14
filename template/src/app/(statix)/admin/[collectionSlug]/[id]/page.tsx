@@ -1,0 +1,162 @@
+"use client";
+
+import { useEffect, useMemo, useState } from "react";
+import { FieldErrors } from "react-hook-form";
+import { useRouter, useSearchParams } from "next/navigation";
+
+import { toast } from "sonner";
+
+import { EditorHeader } from "@/statix/components/editor/EditorHeader";
+import { LocalizedFieldsSection } from "@/statix/components/editor/LocalizedFieldsSection";
+import { SharedFieldsSection } from "@/statix/components/editor/SharedFieldsSection";
+import { PageTitleUpdater } from "@/statix/components/layout/PageTitleUpdater";
+import { Card, CardContent } from "@/statix/components/ui/card";
+import { PageLoading } from "@/statix/components/ui/loading";
+import ui from "@/statix/content/ui.json";
+import { useContent } from "@/statix/hooks/use-content";
+import { useEditorForm } from "@/statix/hooks/use-editor-form";
+import { ROUTES } from "@/statix/lib/constants";
+import { resolveContentTitle } from "@/statix/lib/content-utils";
+import { statixConfig } from "@/statix.config";
+import { ContentFormValues } from "@/statix/types/content";
+
+interface EditorPageProps {
+  params: Promise<{ collectionSlug: string; id: string }>;
+}
+
+export default function EditorPage({ params }: EditorPageProps) {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const [collectionSlug, setCollectionSlug] = useState("");
+  const [id, setId] = useState("");
+
+  // `?locale=tr` lets dashboard deep-links open directly on the right tab.
+  // Validated against the configured locale list inside `LocalizedFieldsSection`.
+  const activeLocaleParam = searchParams.get("locale") ?? undefined;
+
+  // Unwrap params
+  useEffect(() => {
+    params.then((p) => {
+      setCollectionSlug(p.collectionSlug);
+      setId(p.id);
+    });
+  }, [params]);
+
+  const collection = useMemo(
+    () => statixConfig.collections.find((c) => c.slug === collectionSlug),
+    [collectionSlug],
+  );
+
+  const isNew = id === "new";
+
+  // React Query Hook
+  const { content, isLoading, saveContent, isSaving } = useContent({
+    collectionSlug,
+    id: id || undefined,
+  });
+
+  // Form Logic Hook
+
+  const {
+    control,
+    handleSubmit,
+    formState,
+    discardChanges,
+    sharedFields,
+    localizedFields,
+    locales,
+    defaultLocale,
+    clearLocalData,
+    serverSnapshot,
+    revertField,
+  } = useEditorForm({
+    collection,
+    id,
+    content,
+    isNew,
+  });
+
+  const onSubmit = async (data: ContentFormValues) => {
+    try {
+      await saveContent(data);
+
+      clearLocalData();
+
+      if (isNew) {
+        // After creating new item, go back to collection list
+        router.push(ROUTES.ADMIN.COLLECTION(collectionSlug));
+        toast.success(ui.toasts.success.created);
+      } else {
+        toast.success(ui.toasts.success.saved);
+      }
+    } catch {
+      // Error handling is done in the hook
+    }
+  };
+
+  const onInvalid = (errors: FieldErrors<ContentFormValues>) => {
+    console.error("Form validation errors:", errors);
+    toast.error(
+      "Form submission blocked by validation errors. Check console details.",
+    );
+  };
+
+  // Show loading while params are being resolved or content is loading
+  if (!collectionSlug || (isLoading && !isNew)) {
+    return (
+      <div className="container mx-auto py-10">
+        <PageLoading />
+      </div>
+    );
+  }
+
+  if (!collection) {
+    return (
+      <div className="container mx-auto py-10">
+        <Card>
+          <CardContent className="py-10 text-center">
+            <h1 className="text-2xl font-bold">
+              {ui.common.collectionNotFound}
+            </h1>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  return (
+    <form className="space-y-8">
+      <PageTitleUpdater title={resolveContentTitle(collection, content)} />
+
+      <EditorHeader
+        collectionSlug={collectionSlug}
+        collectionLabel={collection.label}
+        isNew={isNew}
+        isSaving={isSaving}
+        onSave={handleSubmit(onSubmit, onInvalid)}
+        onDiscard={discardChanges}
+        control={control}
+        isSingleton={collection.type === "singleton"}
+        id={id}
+        isDirty={formState.isDirty}
+      />
+
+      <SharedFieldsSection
+        fields={sharedFields}
+        control={control}
+        snapshot={serverSnapshot}
+        onRevertField={revertField}
+      />
+
+      <LocalizedFieldsSection
+        fields={localizedFields}
+        control={control}
+        locales={locales}
+        defaultLocale={defaultLocale}
+        activeLocale={activeLocaleParam}
+        snapshot={serverSnapshot}
+        onRevertField={revertField}
+      />
+    </form>
+  );
+}

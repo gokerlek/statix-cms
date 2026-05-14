@@ -1,396 +1,131 @@
-import { StatixConfig } from "@/types";
+import { StatixConfig } from "@/statix/types";
+import type { RolePermissions } from "@/statix/types/permissions";
 
+/**
+ * Statix CMS configuration.
+ *
+ * - `github`: where your content JSON lives (a separate repo of your choice)
+ * - `i18n`: which locales you ship content in
+ * - `roles`: custom permission presets shown next to the built-in
+ *   Admin/Editor in the user drawer
+ * - `collections`: the heart of the CMS — every entry defines a content type
+ *
+ * Two collection examples are included to show both patterns. Delete or
+ * extend them as you build your own content model.
+ */
 export const statixConfig: StatixConfig = {
   github: {
     owner: process.env.GITHUB_OWNER || "",
     repo: process.env.GITHUB_REPO || "",
     branch: process.env.GITHUB_BRANCH || "main",
   },
-  mediaFolder: "public/uploads",
+
   i18n: {
-    locales: ["en", "tr"],
+    locales: ["en"],
     defaultLocale: "en",
   },
-  collections: [
-    // ═══════════════════════════════════════════════════════════
-    // SINGLETONS - Single pages with unique content
-    // ═══════════════════════════════════════════════════════════
-    {
-      slug: "home",
-      label: "Home Page",
-      type: "singleton",
-      path: "content/home",
-      icon: "Home",
-      fields: [
-        {
-          name: "title",
-          label: "Page Title",
-          type: "textarea",
-          required: true,
-          placeholder: "Welcome to our website",
-          localized: true,
-        },
-        {
-          name: "subtitle",
-          label: "Subtitle",
-          type: "text",
-          placeholder: "Your tagline here",
-          localized: true,
-        },
-        {
-          name: "heroImage",
-          label: "Hero Image",
-          type: "image",
-        },
-        {
-          name: "ctaText",
-          label: "Button Text",
-          type: "text",
-          placeholder: "Get Started",
-        },
-        {
-          name: "ctaLink",
-          label: "Button Link",
-          type: "text",
-          placeholder: "/about",
-        },
-        {
-          name: "metaTitle",
-          label: "Meta Title",
-          type: "text",
-          placeholder: "Title for search engines",
-        },
-        {
-          name: "metaDescription",
-          label: "Meta Description",
-          type: "textarea",
-          rows: 2,
-          placeholder: "Description for search results",
-        },
-        {
-          name: "content",
-          label: "Content Blocks",
-          type: "blocks",
-          localized: true,
-          blocks: [
-            {
-              type: "text",
-              label: "Text Section",
-              fields: [
-                {
-                  name: "heading",
-                  label: "Heading",
-                  type: "text",
-                },
-                {
-                  name: "content",
-                  label: "Content",
-                  type: "textarea",
-                  rows: 5,
-                },
-              ],
-            },
-            {
-              type: "image",
-              label: "Image",
-              fields: [
-                {
-                  name: "image",
-                  label: "Image",
-                  type: "image",
-                  required: true,
-                },
-                {
-                  name: "caption",
-                  label: "Caption",
-                  type: "text",
-                },
-              ],
-            },
-          ],
-        },
-      ],
-    },
-    {
-      slug: "about",
-      label: "About Page",
-      type: "singleton",
-      path: "content/about",
-      icon: "Info",
-      fields: [
-        {
-          name: "title",
-          label: "Page Title",
-          type: "text",
-          required: true,
-          placeholder: "About Us",
-          localized: true,
-        },
-        {
-          name: "description",
-          label: "Description",
-          type: "textarea",
-          rows: 4,
-          placeholder: "Tell your story...",
-          localized: true,
-        },
-        {
-          name: "image",
-          label: "Featured Image",
-          type: "image",
-        },
-        {
-          name: "mission",
-          label: "Our Mission",
-          type: "textarea",
-          rows: 3,
-          localized: true,
-        },
-        {
-          name: "vision",
-          label: "Our Vision",
-          type: "textarea",
-          rows: 3,
-          localized: true,
-        },
-      ],
-    },
-    {
-      slug: "contact",
-      label: "Contact Page",
-      type: "singleton",
-      path: "content/contact",
-      icon: "Mail",
-      fields: [
-        {
-          name: "title",
-          label: "Page Title",
-          type: "text",
-          required: true,
-          placeholder: "Contact Us",
-          localized: true,
-        },
-        {
-          name: "description",
-          label: "Description",
-          type: "textarea",
-          rows: 3,
-          localized: true,
-        },
-        {
-          name: "email",
-          label: "Email Address",
-          type: "text",
-          placeholder: "hello@example.com",
-        },
-        {
-          name: "phone",
-          label: "Phone Number",
-          type: "text",
-          placeholder: "+1 (555) 123-4567",
-        },
-        {
-          name: "address",
-          label: "Address",
-          type: "textarea",
-          rows: 3,
-          placeholder: "123 Main Street\nCity, State 12345",
-        },
-        {
-          name: "socialLinks",
-          label: "Social Links",
-          type: "list",
-          fields: [
-            {
-              name: "platform",
-              label: "Platform",
-              type: "select",
-              required: true,
-              options: [
-                { label: "Twitter / X", value: "twitter" },
-                { label: "Instagram", value: "instagram" },
-                { label: "LinkedIn", value: "linkedin" },
-                { label: "Facebook", value: "facebook" },
-                { label: "YouTube", value: "youtube" },
-                { label: "GitHub", value: "github" },
-              ],
-            },
-            {
-              name: "url",
-              label: "URL",
-              type: "text",
-              required: true,
-              placeholder: "https://...",
-            },
-          ],
-        },
-      ],
-    },
 
-    // ═══════════════════════════════════════════════════════════
-    // COLLECTIONS - Repeatable content items
-    // ═══════════════════════════════════════════════════════════
+  // Custom role presets shown alongside Admin/Editor in the user drawer.
+  // Delete this array (or set `roles: []`) if you don't need extra roles.
+  roles: [
     {
-      slug: "blog",
-      label: "Blog Posts",
-      path: "content/blog",
-      icon: "FileText",
-      titleField: "title",
+      name: "Translator",
+      description: "Can view and edit content for translation purposes",
+      permissions: {
+        canManageUsers: false,
+        canViewMonitor: false,
+        canManageMedia: false,
+        canManageFiles: false,
+        canManageTrash: false,
+        collections: {
+          "*": {
+            canView: true,
+            canCreate: false,
+            canEdit: true,
+            canDelete: false,
+            canPublish: false,
+          },
+        },
+      } satisfies RolePermissions,
+    },
+  ],
+
+  collections: [
+    // ─────────────────────────────────────────────────────────────────────
+    // Collection example — many entries with the same shape (blog posts,
+    // products, recipes, etc.). Each entry is a JSON file in your GitHub
+    // repo at `{path}/{id}.json`.
+    // ─────────────────────────────────────────────────────────────────────
+    {
+      slug: "posts",
+      label: "Posts",
+      type: "collection",
+      path: "content/posts",
       fields: [
         {
           name: "title",
           label: "Title",
           type: "text",
           required: true,
-          placeholder: "Post title...",
+          placeholder: "A short, descriptive title",
           localized: true,
         },
         {
-          name: "excerpt",
-          label: "Excerpt",
+          name: "summary",
+          label: "Summary",
           type: "textarea",
-          rows: 2,
-          placeholder: "A brief summary of this post...",
+          rows: 3,
+          placeholder: "One or two sentences shown in lists and previews",
           localized: true,
         },
         {
-          name: "featuredImage",
-          label: "Featured Image",
+          name: "body",
+          label: "Body",
+          type: "richtext",
+          placeholder: "Write the full post here",
+          localized: true,
+        },
+        {
+          name: "cover",
+          label: "Cover image",
           type: "image",
         },
         {
-          name: "date",
-          label: "Publish Date",
+          name: "publishedAt",
+          label: "Published at",
           type: "date",
-          required: true,
-        },
-        {
-          name: "content",
-          label: "Content",
-          type: "blocks",
-          localized: true,
-          blocks: [
-            {
-              type: "markdown",
-              label: "Markdown",
-              fields: [
-                {
-                  name: "content",
-                  label: "Content",
-                  type: "textarea",
-                  rows: 10,
-                  placeholder: "# Write your content here...",
-                },
-              ],
-            },
-            {
-              type: "image",
-              label: "Image",
-              fields: [
-                {
-                  name: "image",
-                  label: "Image",
-                  type: "image",
-                  required: true,
-                },
-                {
-                  name: "caption",
-                  label: "Caption",
-                  type: "text",
-                },
-                {
-                  name: "alt",
-                  label: "Alt Text",
-                  type: "text",
-                  placeholder: "Describe the image...",
-                },
-              ],
-            },
-            {
-              type: "quote",
-              label: "Quote",
-              fields: [
-                {
-                  name: "text",
-                  label: "Quote",
-                  type: "textarea",
-                  rows: 3,
-                },
-                {
-                  name: "author",
-                  label: "Author",
-                  type: "text",
-                },
-              ],
-            },
-          ],
         },
       ],
     },
+
+    // ─────────────────────────────────────────────────────────────────────
+    // Singleton example — a single page with a fixed shape (about page,
+    // homepage hero, contact info, etc.). Lives at `{path}/index.json`.
+    // ─────────────────────────────────────────────────────────────────────
     {
-      slug: "people",
-      label: "People",
-      path: "content/people",
-      icon: "Users",
-      titleField: "name",
+      slug: "homepage",
+      label: "Homepage",
+      type: "singleton",
+      path: "content/homepage",
       fields: [
         {
-          name: "name",
-          label: "Full Name",
+          name: "headline",
+          label: "Headline",
           type: "text",
           required: true,
-          placeholder: "John Doe",
-        },
-        {
-          name: "role",
-          label: "Role / Position",
-          type: "text",
-          required: true,
-          placeholder: "Software Engineer",
-        },
-        {
-          name: "photo",
-          label: "Photo",
-          type: "image",
-        },
-        {
-          name: "bio",
-          label: "Bio",
-          type: "textarea",
-          rows: 4,
-          placeholder: "A short bio...",
           localized: true,
         },
         {
-          name: "email",
-          label: "Email",
-          type: "text",
-          placeholder: "john@example.com",
+          name: "subheadline",
+          label: "Subheadline",
+          type: "textarea",
+          rows: 2,
+          localized: true,
         },
         {
-          name: "socialLinks",
-          label: "Social Links",
-          type: "list",
-          fields: [
-            {
-              name: "platform",
-              label: "Platform",
-              type: "select",
-              required: true,
-              options: [
-                { label: "LinkedIn", value: "linkedin" },
-                { label: "Twitter / X", value: "twitter" },
-                { label: "GitHub", value: "github" },
-                { label: "Website", value: "website" },
-              ],
-            },
-            {
-              name: "url",
-              label: "URL",
-              type: "text",
-              required: true,
-            },
-          ],
+          name: "hero",
+          label: "Hero image",
+          type: "image",
         },
       ],
     },

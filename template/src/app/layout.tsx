@@ -1,10 +1,5 @@
 import { Geist, Geist_Mono } from "next/font/google";
 
-import { Toaster } from "sonner";
-
-import { ErrorBoundary } from "@/components/ErrorBoundary";
-import { QueryProvider } from "@/components/providers/query-provider";
-
 import type { Metadata } from "next";
 
 import "./globals.css";
@@ -37,11 +32,7 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <QueryProvider>
-          <ErrorBoundary>{children}</ErrorBoundary>
-
-          <Toaster richColors position="top-center" />
-        </QueryProvider>
+        {children}
       </body>
     </html>
   );

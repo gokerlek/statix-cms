@@ -1,0 +1,93 @@
+/*
+ * Statix CMS Admin Theme
+ *
+ * This CSS file provides isolated theming for the Statix admin panel.
+ * All variables are scoped under [data-statix] so they don't conflict
+ * with the user's site theme in globals.css.
+ *
+ * The user can freely modify globals.css without affecting the admin panel.
+ */
+
+@layer statix;
+
+@layer statix {
+  [data-statix] {
+    --radius: 0.5rem;
+    --background: oklch(0.9702 0 0);
+    --foreground: oklch(0.2178 0 0);
+    --card: oklch(0.9702 0 0);
+    --card-foreground: oklch(0.2178 0 0);
+    --popover: oklch(0.9702 0 0);
+    --popover-foreground: oklch(0.2178 0 0);
+    --primary: oklch(0.6456 0.1131 213.3445);
+    --primary-foreground: oklch(1.0000 0 0);
+    --secondary: oklch(0.9067 0 0);
+    --secondary-foreground: oklch(0.2178 0 0);
+    --muted: oklch(0.9551 0 0);
+    --muted-foreground: oklch(0.5510 0.0234 264.3637);
+    --accent: oklch(0.9675 0.0128 202.9244);
+    --accent-foreground: oklch(0.6456 0.1131 213.3445);
+    --destructive: oklch(0.5449 0.2091 27.8466);
+    --destructive-foreground: oklch(1.0000 0 0);
+    --border: oklch(0.5510 0.0270 264.3640);
+    --input: oklch(0.5510 0.0270 264.3640);
+    --ring: oklch(0.6456 0.1131 213.3445);
+    --chart-1: oklch(0.6456 0.1131 213.3445);
+    --chart-2: oklch(0.8442 0.1722 84.9338);
+    --chart-3: oklch(0.6731 0.1624 144.2083);
+    --chart-4: oklch(0.6427 0.2153 28.8057);
+    --chart-5: oklch(0.6582 0.1690 248.8135);
+    --warning: oklch(0.86 0.125 76.957);
+    --warning-foreground: oklch(1 0 89.876);
+    --warning-border: oklch(0.533 0.202 27.594);
+    --status-draft: oklch(0.8442 0.1722 84.9338);
+    --status-published: oklch(0.6456 0.1131 213.3445);
+    --status-archived: oklch(0.5510 0.0270 264.3640);
+    --font-sans: 'Inter', sans-serif;
+    --font-serif: 'Playfair Display', serif;
+    --font-mono: 'JetBrains Mono', monospace;
+    --spacing: 0.25rem;
+    --tracking-normal: 0em;
+  }
+
+  [data-statix].dark,
+  .dark [data-statix] {
+    --background: oklch(0.2178 0 0);
+    --foreground: oklch(0.9067 0 0);
+    --card: oklch(0.2768 0 0);
+    --card-foreground: oklch(0.9067 0 0);
+    --popover: oklch(0.2768 0 0);
+    --popover-foreground: oklch(0.9067 0 0);
+    --primary: oklch(0.6456 0.1131 213.3445);
+    --primary-foreground: oklch(1.0000 0 0);
+    --secondary: oklch(0.3677 0 0);
+    --secondary-foreground: oklch(0.9067 0 0);
+    --muted: oklch(0.3211 0 0);
+    --muted-foreground: oklch(0.7137 0.0192 261.3246);
+    --accent: oklch(0.3876 0.0641 213.4896);
+    --accent-foreground: oklch(0.6456 0.1131 213.3445);
+    --destructive: oklch(0.6368 0.2078 25.3313);
+    --destructive-foreground: oklch(1.0000 0 0);
+    --border: oklch(0.4276 0 0);
+    --input: oklch(0.3407 0 0);
+    --ring: oklch(0.6456 0.1131 213.3445);
+    --chart-1: oklch(0.6456 0.1131 213.3445);
+    --chart-2: oklch(0.8868 0.1822 95.3305);
+    --chart-3: oklch(0.7185 0.1417 144.8887);
+    --chart-4: oklch(0.7124 0.1848 37.7682);
+    --chart-5: oklch(0.7482 0.1235 244.7492);
+    --warning: oklch(0.3000 0.0600 55.0000);
+    --warning-foreground: oklch(0.8500 0.1000 70.0000);
+    --warning-border: oklch(0.4000 0.0800 55.0000);
+    --status-draft: oklch(0.8442 0.1722 84.9338);
+    --status-published: oklch(0.6456 0.1131 213.3445);
+    --status-archived: oklch(0.5510 0.0270 264.3640);
+  }
+
+  /* Portal components (Sonner toaster) - rendered outside [data-statix] */
+  [data-sonner-toaster] {
+    --normal-bg: var(--popover, oklch(0.9702 0 0));
+    --normal-text: var(--popover-foreground, oklch(0.2178 0 0));
+    --normal-border: var(--border, oklch(0.5510 0.0270 264.3640));
+  }
+}

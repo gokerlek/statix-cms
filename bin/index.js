@@ -15,6 +15,15 @@ const colors = {
   red: "\x1b[31m",
 };
 
+// Dotfiles can lose their leading dot or be treated as hidden by some
+// tooling when shipped inside an npm tarball. We ship `.github` as
+// `_github` and restore the dot at scaffold time. Only top-level
+// directories under template/ are considered — nested files keep their
+// names verbatim.
+const TOP_LEVEL_RENAMES = {
+  _github: ".github",
+};
+
 function log(message, color = colors.reset) {
   console.log(`${color}${message}${colors.reset}`);
 }
@@ -53,16 +62,43 @@ async function getProjectName() {
   return projectName;
 }
 
-function copyRecursive(src, dest) {
+function copyRecursive(src, dest, isRoot = false) {
   const stat = fs.statSync(src);
 
   if (stat.isDirectory()) {
     fs.mkdirSync(dest, { recursive: true });
     const files = fs.readdirSync(src);
     for (const file of files) {
-      // Skip node_modules and .next
+      // Skip maintainer dev artifacts
       if (file === "node_modules" || file === ".next") continue;
-      copyRecursive(path.join(src, file), path.join(dest, file));
+      // Maintainer's Claude / OMC workspaces — internal only, don't ship
+      if (isRoot && (file === ".claude" || file === ".omc")) continue;
+      // Maintainer's local sqlite — scaffolded projects start with an
+      // empty DB created by `npm run db:setup`.
+      if (isRoot && (file === "local.db" || file === "local.db-journal")) {
+        continue;
+      }
+      // CRITICAL: never copy real env values out of the maintainer's
+      // template/. The `.npmignore` is the primary defense — this is a
+      // second line for when running bin/index.js out of a working tree
+      // (e.g. local dev/test). .env.example is allowed; everything else
+      // is treated as a real credential file.
+      if (
+        isRoot &&
+        (file === ".env" ||
+          file === ".env.local" ||
+          file.startsWith(".env.") ||
+          /^\.env\.[a-z]+$/.test(file)) &&
+        file !== ".env.example"
+      ) {
+        continue;
+      }
+      // Restore dot-prefixed names at the top level (see TOP_LEVEL_RENAMES).
+      const destName =
+        isRoot && TOP_LEVEL_RENAMES[file]
+          ? TOP_LEVEL_RENAMES[file]
+          : file;
+      copyRecursive(path.join(src, file), path.join(dest, destName), false);
     }
   } else {
     fs.copyFileSync(src, dest);
@@ -95,13 +131,13 @@ async function main() {
   logStep("1/5", "Creating project directory...");
   fs.mkdirSync(targetDir, { recursive: true });
 
-  // Copy template files
-  logStep("2/5", "Copying template files...");
+  // Copy template files (with top-level _github/_husky rename and local.db skip)
+  logStep("2/6", "Copying template files...");
   const templateDir = path.join(__dirname, "..", "template");
-  copyRecursive(templateDir, targetDir);
+  copyRecursive(templateDir, targetDir, true);
 
   // Create .env from .env.example
-  logStep("3/5", "Creating .env file...");
+  logStep("3/6", "Creating .env file...");
   const envExamplePath = path.join(targetDir, ".env.example");
   const envPath = path.join(targetDir, ".env");
 
@@ -110,7 +146,7 @@ async function main() {
   }
 
   // Update package.json with project name
-  logStep("4/5", "Updating package.json...");
+  logStep("4/6", "Updating package.json...");
   const packageJsonPath = path.join(targetDir, "package.json");
   if (fs.existsSync(packageJsonPath)) {
     const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, "utf-8"));
@@ -118,8 +154,84 @@ async function main() {
     fs.writeFileSync(packageJsonPath, JSON.stringify(packageJson, null, 2));
   }
 
+  // Generate a minimal per-project README. The upstream template README
+  // was Statix's own marketing/docs page and didn't match the env vars
+  // the scaffolded code actually reads — keeping it would mislead users.
+  const readmePath = path.join(targetDir, "README.md");
+  fs.writeFileSync(
+    readmePath,
+    `# ${projectName}
+
+A Statix CMS project — a Git-based headless CMS built on Next.js, Better Auth,
+and Cloudflare R2. Your content lives in a GitHub repo; this app is the
+admin panel.
+
+## Quick start
+
+1. Copy environment values into \`.env\` (already copied from \`.env.example\`):
+
+   - \`BETTER_AUTH_SECRET\` — generate with \`openssl rand -base64 32\`
+   - \`BETTER_AUTH_URL\` — e.g. \`http://localhost:3000\` locally
+   - \`GITHUB_TOKEN\`, \`GITHUB_OWNER\`, \`GITHUB_REPO\` — the repo holding your content
+   - \`RESEND_API_KEY\`, \`RESEND_FROM_EMAIL\` — used to send the OTP sign-in email
+   - \`INITIAL_ADMIN_EMAIL\` — the email of your first admin user
+
+   Cloudflare R2 (\`R2_*\`, \`NEXT_PUBLIC_MEDIA_BASE_URL\`) is required for media uploads.
+   Turso (\`TURSO_DATABASE_URL\`, \`TURSO_AUTH_TOKEN\`) is optional — leave empty for a
+   local \`./local.db\` file.
+
+2. Initialise the database (creates tables and promotes \`INITIAL_ADMIN_EMAIL\` to owner):
+
+   \`\`\`bash
+   npm run db:setup
+   \`\`\`
+
+3. Start the dev server:
+
+   \`\`\`bash
+   npm run dev
+   \`\`\`
+
+4. Open <http://localhost:3000/auth/signin> and sign in with the admin email.
+
+## Customisation
+
+- \`src/statix.config.ts\` — declare your content collections
+- \`src/statix/content/ui.json\` — every UI string (no hardcoded copy in components)
+- \`src/statix/components/\` — fully owned components, edit freely
+
+## CI
+
+This project ships a GitHub Actions workflow at \`.github/workflows/ci.yml\`. It will
+fail on first push until you configure the secrets it expects (or delete the file).
+
+## Upstream
+
+Statix CMS upstream: <https://github.com/gokerlek/statix-cms>
+`,
+  );
+
+  // Optional: prompt for INITIAL_ADMIN_EMAIL when running interactively.
+  // Skipped when stdin is not a TTY (CI provisioning, Docker, < /dev/null)
+  // — `seed:admin` will exit 1 with a clear message in that case.
+  if (process.stdin.isTTY && fs.existsSync(envPath)) {
+    const envContent = fs.readFileSync(envPath, "utf-8");
+    if (!/^INITIAL_ADMIN_EMAIL=.+$/m.test(envContent)) {
+      const adminEmail = await prompt(
+        `${colors.cyan}?${colors.reset} First admin email (optional, for npm run seed:admin): `,
+      );
+      if (adminEmail) {
+        const trimmed = envContent.replace(/\n*$/, "");
+        fs.writeFileSync(
+          envPath,
+          `${trimmed}\nINITIAL_ADMIN_EMAIL=${adminEmail}\n`,
+        );
+      }
+    }
+  }
+
   // Install dependencies
-  logStep("5/5", "Installing dependencies... (this may take a moment)");
+  logStep("5/6", "Installing dependencies... (this may take a moment)");
   try {
     // Check if bun is available
     try {
@@ -136,17 +248,36 @@ async function main() {
     );
   }
 
+  // Initialise the database. With TURSO_DATABASE_URL empty (default after
+  // scaffold) drizzle.config.ts falls back to file:./local.db so this works
+  // out of the box. Non-fatal: the user may want to configure Turso first
+  // and run db:setup themselves.
+  logStep("6/6", "Setting up database...");
+  try {
+    execSync("npm run db:push", { cwd: targetDir, stdio: "inherit" });
+  } catch {
+    log(
+      "\n⚠️  db:push failed. Configure DB credentials in .env then run: npm run db:setup",
+      colors.yellow,
+    );
+  }
+
   // Success message
   log("\n✅ Statix CMS project created successfully!\n", colors.green);
   log("Next steps:", colors.bright);
   console.log(`
   1. cd ${projectName}
-  2. Edit ${colors.cyan}src/statix.config.ts${colors.reset} to configure your collections
-  3. Fill in ${colors.cyan}.env${colors.reset} with your GitHub credentials
-  4. Run ${colors.cyan}npm run dev${colors.reset} or ${colors.cyan}bun run dev${colors.reset}
+  2. Open ${colors.cyan}.env${colors.reset} and fill in:
+       BETTER_AUTH_SECRET  (openssl rand -base64 32)
+       BETTER_AUTH_URL     (e.g. http://localhost:3000)
+       GITHUB_TOKEN, GITHUB_OWNER, GITHUB_REPO  (content storage)
+       RESEND_API_KEY, RESEND_FROM_EMAIL        (OTP email)
+       INITIAL_ADMIN_EMAIL                      (first admin)
+  3. ${colors.cyan}npm run db:setup${colors.reset}      # tables + promote admin
+  4. ${colors.cyan}npm run dev${colors.reset}           # http://localhost:3000
+  5. Visit /auth/signin and sign in with INITIAL_ADMIN_EMAIL
 
-For more information, visit:
-  ${colors.cyan}https://github.com/gokerlek/statix-cms${colors.reset}
+Docs: ${colors.cyan}https://github.com/gokerlek/statix-cms${colors.reset}
 `);
 }
 

@@ -1,6 +1,6 @@
 import React, { useRef, useState } from "react";
 
-import { Upload } from "lucide-react";
+import { IconUpload } from "@tabler/icons-react";
 
 import { cn } from "@/lib/utils";
 
@@ -90,7 +90,7 @@ export function UploadDropzone({
     >
       {children || (
         <div className="flex flex-col items-center justify-center text-center">
-          <Upload
+          <IconUpload
             className={cn(
               "mb-4 text-muted-foreground",
               size === "sm"
