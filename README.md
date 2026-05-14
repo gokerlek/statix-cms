@@ -1,9 +1,19 @@
 # Statix CMS
 
-A modern, Git-based headless CMS built with Next.js, React 19, and Tailwind CSS 4.
+A modern, Git-based headless CMS built with Next.js 16, React 19, and Tailwind CSS 4.
 
-[![npm version](https://badge.fury.io/js/create-statix-cms.svg)](https://www.npmjs.com/package/create-statix-cms)
+[![npm version](https://img.shields.io/npm/v/create-statix-cms.svg)](https://www.npmjs.com/package/create-statix-cms)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
+## Get started
+
+```bash
+npx create-statix-cms my-cms
+cd my-cms
+npm run dev
+```
+
+> ⚠️ **Don't** run `npm install create-statix-cms`. This is a **scaffolder**, not a runtime dependency — `npm install` would add it to your project's dependencies and do nothing. Use `npx` (or `npm init statix-cms my-cms`, or `bun create statix-cms my-cms`).
 
 ---
 
