@@ -2,12 +2,18 @@ import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { nextCookies } from "better-auth/next-js";
 import { emailOTP } from "better-auth/plugins";
+import { eq } from "drizzle-orm";
 import { Resend } from "resend";
 import { db } from "./db";
 import * as schema from "@/statix/db/schema";
+import { user as userTable } from "@/statix/db/schema";
 import { env } from "./env";
 import { writeAudit } from "./audit";
 import ui from "@/statix/content/ui.json";
+import {
+  DEFAULT_ROLE_PERMISSIONS,
+  SYSTEM_ROLES,
+} from "@/statix/types/permissions";
 
 // Resend is optional in dev. When credentials are missing, sendVerificationOTP
 // logs the code to the server console so a developer can still sign in
@@ -75,6 +81,47 @@ export const auth = betterAuth({
   },
 
   databaseHooks: {
+    user: {
+      create: {
+        after: async (newUser) => {
+          // First-user bootstrap: the very first account to sign up becomes
+          // Owner automatically. Standard CMS pattern — saves users from
+          // having to know about `npm run seed:admin` on day one. The
+          // seed:admin script still exists for recovery / explicit promotion.
+          //
+          // Race: in the unlikely event two users sign up in the same
+          // millisecond, both could pass the "no owner yet" check and both
+          // get promoted. Acceptable: an Owner can always demote the other.
+          const [existingOwner] = await db
+            .select({ id: userTable.id })
+            .from(userTable)
+            .where(eq(userTable.role, SYSTEM_ROLES.OWNER))
+            .limit(1);
+
+          if (!existingOwner) {
+            await db
+              .update(userTable)
+              .set({
+                role: SYSTEM_ROLES.OWNER,
+                permissions: JSON.stringify(
+                  DEFAULT_ROLE_PERMISSIONS[SYSTEM_ROLES.OWNER],
+                ),
+                updatedAt: new Date(),
+              })
+              .where(eq(userTable.id, newUser.id));
+
+            await writeAudit({
+              userId: newUser.id,
+              userEmail: newUser.email,
+              action: "user.bootstrap_owner",
+              entityType: "user",
+              entityId: newUser.id,
+              metadata: { reason: "first user — auto-promoted to Owner" },
+            }).catch(console.error);
+          }
+        },
+      },
+    },
     session: {
       create: {
         after: async (session) => {
